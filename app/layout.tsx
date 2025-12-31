@@ -5,7 +5,6 @@ import { JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { ClerkProvider } from "@clerk/nextjs"
-import { ptBR } from "@clerk/localizations"
 import "./globals.css"
 
 const inter = Inter({
@@ -40,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider localization={ptBR} appearance={{
+    <ClerkProvider appearance={{
       variables: { colorPrimary: '#000' },
       elements: {
         formButtonPrimary: 'bg-black hover:bg-gray-800',
