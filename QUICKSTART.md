@@ -27,13 +27,19 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXX
 CLERK_SECRET_KEY=sk_test_XXXXXXXX
 \`\`\`
 
-### 4️⃣ Habilite Google/Microsoft
+### 4️⃣ Configure os métodos de login
 
 No Clerk Dashboard:
+
+**A) Desabilite autenticação por telefone:**
+- **User & Authentication** → **Email, Phone, Username**
+- ❌ Desabilite **Phone number** (não suporta Brasil)
+- ✅ Mantenha **Email address** habilitado
+
+**B) Habilite Google/Microsoft:**
 - **User & Authentication** → **Social Connections**
-- Ative **Google** ✅
-- Ative **Microsoft** ✅
-- (Clerk fornece credenciais de dev automaticamente)
+- ✅ Ative **Google**
+- ✅ Ative **Microsoft**
 
 ### 5️⃣ Rode o projeto
 

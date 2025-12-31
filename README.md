@@ -50,8 +50,11 @@ npm install
 ### **2. Configure o Clerk**
 1. Acesse [dashboard.clerk.com](https://dashboard.clerk.com)
 2. Crie um projeto
-3. Habilite **Google** e **Microsoft** em "Social Connections"
-4. Copie as chaves em "API Keys"
+3. **Desabilite** autenticação por telefone (não suporta Brasil):
+   - Vá em **User & Authentication** → **Email, Phone, Username**
+   - Desmarque **Phone number**
+4. **Habilite** Google e Microsoft em "Social Connections"
+5. Copie as chaves em "API Keys"
 
 ### **3. Configure variáveis de ambiente**
 \`\`\`bash

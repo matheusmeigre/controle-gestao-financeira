@@ -17,7 +17,14 @@
 2. Clique em **"Sign up"** e crie sua conta
 3. Crie um novo projeto com o nome `Minha Gestão Financeira`
 
-#### 1.2. Habilitar provedores sociais
+#### 1.2. Configurar métodos de autenticação
+1. No menu lateral, vá em **"User & Authentication" → "Email, Phone, Username"**
+2. **DESABILITE** as seguintes opções:
+   - ❌ **Phone number** (não suporta números brasileiros)
+   - ❌ **Username** (opcional, pode desabilitar se quiser apenas email)
+3. Certifique-se que **Email address** está HABILITADO ✅
+
+#### 1.3. Habilitar provedores sociais
 1. No menu lateral, vá em **"User & Authentication" → "Social Connections"**
 2. Ative os provedores:
    - ✅ **Google** (Clerk fornece credenciais de desenvolvimento automáticas)
