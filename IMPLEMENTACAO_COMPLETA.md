@@ -18,7 +18,7 @@
 #### **Estrutura de Dados Atualizada**
 Todos os tipos agora incluem `userId`:
 
-```typescript
+\`\`\`typescript
 interface Expense {
   id: string
   userId: string // ✅ NOVO - Segregação por usuário
@@ -29,7 +29,7 @@ interface Expense {
 }
 
 // Mesma lógica para CardBill e Income
-```
+\`\`\`
 
 #### **Estratégia de Armazenamento**
 - **Chave única por usuário:** `expenses_user_xxx`, `cardBills_user_xxx`, etc.
@@ -75,7 +75,7 @@ interface Expense {
 ## 📁 Arquivos Criados/Modificados
 
 ### **Novos Arquivos**
-```
+\`\`\`
 middleware.ts                          # Proteção de rotas
 app/sign-in/[[...sign-in]]/page.tsx   # Página de login
 app/sign-up/[[...sign-up]]/page.tsx   # Página de cadastro
@@ -84,15 +84,15 @@ components/welcome-modal.tsx           # Modal de boas-vindas
 lib/user-data.ts                       # Helpers de segregação
 .env.local.example                     # Template de configuração
 SETUP_AUTH.md                          # Guia de configuração
-```
+\`\`\`
 
 ### **Arquivos Modificados**
-```
+\`\`\`
 app/layout.tsx         # ✅ Adicionado ClerkProvider
 app/page.tsx           # ✅ Integração com useUser() + segregação
 types/expense.ts       # ✅ Adicionado campo userId
 package.json           # ✅ Dependência @clerk/nextjs
-```
+\`\`\`
 
 ---
 
@@ -157,7 +157,7 @@ package.json           # ✅ Dependência @clerk/nextjs
 ## 📊 Comparação: Antes vs Depois
 
 ### **ANTES (Sem Autenticação)**
-```typescript
+\`\`\`typescript
 // ❌ Qualquer pessoa com acesso ao navegador vê os dados
 localStorage.getItem("expenses") // Dados globais
 
@@ -165,10 +165,10 @@ localStorage.getItem("expenses") // Dados globais
 // Acesso direto ao dashboard sem login
 
 // ❌ Dados compartilhados entre todos
-```
+\`\`\`
 
 ### **DEPOIS (Com Multi-Tenant)**
-```typescript
+\`\`\`typescript
 // ✅ Dados isolados por usuário
 localStorage.getItem("expenses_user_xxx") // Dados privados
 
@@ -180,7 +180,7 @@ interface Expense {
   userId: string // Campo obrigatório
   // ...
 }
-```
+\`\`\`
 
 ---
 
@@ -206,13 +206,13 @@ Código que executa **antes** de cada requisição, permitindo:
 
 ### **4. JWT (JSON Web Token)**
 Token criptografado que contém informações do usuário:
-```json
+\`\`\`json
 {
   "userId": "user_xxx",
   "email": "user@example.com",
   "exp": 1735689600 // Expiração
 }
-```
+\`\`\`
 Clerk gerencia automaticamente a criação, validação e renovação.
 
 ---

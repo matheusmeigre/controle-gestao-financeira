@@ -27,22 +27,22 @@
 #### 1.3. Copiar as chaves de API
 1. No menu lateral, clique em **"API Keys"**
 2. Você verá duas chaves:
-   ```
+   \`\`\`
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
    CLERK_SECRET_KEY=sk_test_...
-   ```
+   \`\`\`
 
 ---
 
 ### **2. Configurar Variáveis de Ambiente**
 
 1. Na raiz do projeto, copie o arquivo de exemplo:
-   ```bash
+   \`\`\`bash
    cp .env.local.example .env.local
-   ```
+   \`\`\`
 
 2. Edite `.env.local` e cole suas chaves:
-   ```env
+   \`\`\`env
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_SUA_CHAVE_AQUI
    CLERK_SECRET_KEY=sk_test_SUA_CHAVE_SECRETA_AQUI
    
@@ -50,19 +50,19 @@
    NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
    NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
    NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-   ```
+   \`\`\`
 
 ---
 
 ### **3. Instalar Dependências e Rodar**
 
-```bash
+\`\`\`bash
 # Instale as dependências (se ainda não fez)
 npm install
 
 # Rode o servidor de desenvolvimento
 npm run dev
-```
+\`\`\`
 
 Acesse: **http://localhost:3000**
 
@@ -113,17 +113,17 @@ Acesse: **http://localhost:3000**
 ## 📦 Estrutura de Dados (Multi-Tenant)
 
 ### **Antes (sem autenticação)**
-```typescript
+\`\`\`typescript
 interface Expense {
   id: string
   description: string
   amount: number
   // ...
 }
-```
+\`\`\`
 
 ### **Depois (com segregação)**
-```typescript
+\`\`\`typescript
 interface Expense {
   id: string
   userId: string // ✅ Campo obrigatório
@@ -131,7 +131,7 @@ interface Expense {
   amount: number
   // ...
 }
-```
+\`\`\`
 
 **Todos os novos registros** recebem automaticamente o `userId` do usuário logado.
 
@@ -141,7 +141,7 @@ interface Expense {
 
 Se você já tinha dados no localStorage antes da autenticação:
 
-```javascript
+\`\`\`javascript
 // Execute no console do navegador (apenas uma vez)
 const userId = "SEU_USER_ID_AQUI"; // Pegue do Clerk Dashboard
 
@@ -151,7 +151,7 @@ const migratedExpenses = oldExpenses.map(e => ({ ...e, userId }));
 localStorage.setItem(`expenses_${userId}`, JSON.stringify(migratedExpenses));
 
 // Repetir para cardBills e incomes
-```
+\`\`\`
 
 ---
 
@@ -159,14 +159,14 @@ localStorage.setItem(`expenses_${userId}`, JSON.stringify(migratedExpenses));
 
 ### **Alterar cores do Clerk**
 Edite o [app/layout.tsx](app/layout.tsx#L44):
-```tsx
+\`\`\`tsx
 <ClerkProvider appearance={{
   variables: { 
     colorPrimary: '#3b82f6', // Azul
     borderRadius: '0.5rem'
   }
 }}>
-```
+\`\`\`
 
 ### **Adicionar mais provedores**
 No Clerk Dashboard:

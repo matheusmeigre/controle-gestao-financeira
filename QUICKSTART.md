@@ -3,9 +3,9 @@
 ## 🎯 Configuração Rápida
 
 ### 1️⃣ Instale as dependências (se ainda não fez)
-```bash
+\`\`\`bash
 npm install
-```
+\`\`\`
 
 ### 2️⃣ Configure o Clerk (3 minutos)
 
@@ -16,16 +16,16 @@ npm install
 
 ### 3️⃣ Configure as variáveis de ambiente
 
-```bash
+\`\`\`bash
 # Copie o arquivo de exemplo
 cp .env.local.example .env.local
-```
+\`\`\`
 
 Edite `.env.local` e cole suas chaves:
-```env
+\`\`\`env
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXX
 CLERK_SECRET_KEY=sk_test_XXXXXXXX
-```
+\`\`\`
 
 ### 4️⃣ Habilite Google/Microsoft
 
@@ -37,9 +37,9 @@ No Clerk Dashboard:
 
 ### 5️⃣ Rode o projeto
 
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 Acesse: **http://localhost:3000**
 

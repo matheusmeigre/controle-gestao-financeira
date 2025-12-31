@@ -63,7 +63,7 @@
 
 ## 📊 Métricas de Segurança
 
-```
+\`\`\`
 ╔══════════════════════════════════════════════╗
 ║          SCORE DE SEGURANÇA FINAL            ║
 ╠══════════════════════════════════════════════╣
@@ -79,36 +79,36 @@
 ║  Status: BOM para ambiente inicial           ║
 ║  Meta Fase 2: 90/100 (Excelente)             ║
 ╚══════════════════════════════════════════════╝
-```
+\`\`\`
 
 ---
 
 ## 🚀 Próximos Passos (Para o Usuário)
 
 ### **1️⃣ Configure o Clerk (3 minutos)**
-```bash
+\`\`\`bash
 # Acesse: https://dashboard.clerk.com
 # Crie conta → Novo projeto → Copie as chaves
-```
+\`\`\`
 
 ### **2️⃣ Configure as variáveis de ambiente**
-```bash
+\`\`\`bash
 cp .env.local.example .env.local
 # Edite .env.local e cole suas chaves
-```
+\`\`\`
 
 ### **3️⃣ Habilite provedores sociais**
-```
+\`\`\`
 Clerk Dashboard → User & Authentication → Social Connections
 ✅ Google
 ✅ Microsoft
-```
+\`\`\`
 
 ### **4️⃣ Rode o projeto**
-```bash
+\`\`\`bash
 npm run dev
 # Acesse: http://localhost:3000
-```
+\`\`\`
 
 ---
 
@@ -150,57 +150,57 @@ npm run dev
 ## 🧪 Testes Sugeridos
 
 ### **Teste 1: Autenticação**
-```
+\`\`\`
 ✅ Acesse http://localhost:3000
 ✅ Redirecionado para /sign-in
 ✅ Login com Google funciona
 ✅ Redirecionado para dashboard após login
-```
+\`\`\`
 
 ### **Teste 2: Segregação**
-```
+\`\`\`
 ✅ Login com Usuário A → Adicione 3 despesas
 ✅ Logout → Login com Usuário B
 ✅ Dashboard do Usuário B está vazio
 ✅ Dados do Usuário A não aparecem
-```
+\`\`\`
 
 ### **Teste 3: Proteção de Rotas**
-```
+\`\`\`
 ✅ Logout → Tente acessar /
 ✅ Redirecionado automaticamente para /sign-in
 ✅ Sem acesso ao dashboard sem autenticação
-```
+\`\`\`
 
 ### **Teste 4: Persistência**
-```
+\`\`\`
 ✅ Faça login
 ✅ Feche o navegador completamente
 ✅ Abra novamente e acesse o site
 ✅ Ainda estará logado (sessão ativa)
-```
+\`\`\`
 
 ---
 
 ## 🎯 Resultado Final
 
 ### **Antes (Aplicação Sem Autenticação)**
-```
+\`\`\`
 ❌ Qualquer pessoa acessa os dados
 ❌ Informações financeiras expostas
 ❌ Nenhum controle de acesso
 ❌ Dados compartilhados globalmente
-```
+\`\`\`
 
 ### **Depois (Sistema Multi-Tenant)**
-```
+\`\`\`
 ✅ Login obrigatório (Google/Microsoft)
 ✅ Dados privados por usuário
 ✅ Rotas protegidas automaticamente
 ✅ Segregação total (userId obrigatório)
 ✅ Sessão segura com JWT
 ✅ Pronto para uso em produção (amigos/família)
-```
+\`\`\`
 
 ---
 

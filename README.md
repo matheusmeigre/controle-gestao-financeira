@@ -41,11 +41,11 @@ Aplicação web moderna para controle de gastos pessoais, rendas e faturas de ca
 - Conta gratuita no [Clerk](https://clerk.com)
 
 ### **1. Clone e instale**
-```bash
+\`\`\`bash
 git clone <seu-repo>
 cd controle-de-gastos
 npm install
-```
+\`\`\`
 
 ### **2. Configure o Clerk**
 1. Acesse [dashboard.clerk.com](https://dashboard.clerk.com)
@@ -54,20 +54,20 @@ npm install
 4. Copie as chaves em "API Keys"
 
 ### **3. Configure variáveis de ambiente**
-```bash
+\`\`\`bash
 cp .env.local.example .env.local
-```
+\`\`\`
 
 Edite `.env.local`:
-```env
+\`\`\`env
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXX
 CLERK_SECRET_KEY=sk_test_XXXXXXXX
-```
+\`\`\`
 
 ### **4. Rode o projeto**
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 Acesse: **http://localhost:3000** 🎉
 
@@ -85,7 +85,7 @@ Acesse: **http://localhost:3000** 🎉
 
 ## 🏗️ Arquitetura
 
-```
+\`\`\`
 ┌─────────────┐
 │   Browser   │
 └──────┬──────┘
@@ -109,7 +109,7 @@ Acesse: **http://localhost:3000** 🎉
 ┌─────────────────────────┐
 │  localStorage (userId)  │ ✅ Chaves únicas
 └─────────────────────────┘
-```
+\`\`\`
 
 **Leia mais:** [ARQUITETURA.md](./ARQUITETURA.md)
 
@@ -126,7 +126,7 @@ Acesse: **http://localhost:3000** 🎉
 - ✅ Chaves de localStorage isoladas por usuário
 
 ### **Score de Segurança**
-```
+\`\`\`
 Autenticação (AuthN):     ✅ 95/100
 Autorização (AuthZ):      ✅ 90/100
 Proteção de Rotas:        ✅ 100/100
@@ -134,7 +134,7 @@ Segregação de Dados:      ✅ 95/100
 Compliance (LGPD/GDPR):   ⚠️ 70/100
 ────────────────────────────────────
 TOTAL:                    ✅ 78/100 (BOM)
-```
+\`\`\`
 
 **Leia mais:** [lib/security-checklist.ts](./lib/security-checklist.ts)
 
@@ -158,7 +158,7 @@ TOTAL:                    ✅ 78/100 (BOM)
 
 ## 📦 Estrutura do Projeto
 
-```
+\`\`\`
 controle-de-gastos/
 ├── app/
 │   ├── layout.tsx              # ClerkProvider global
@@ -179,7 +179,7 @@ controle-de-gastos/
 ├── middleware.ts               # Proteção de rotas
 ├── .env.local.example          # Template de config
 └── [DOCS]                      # Documentação
-```
+\`\`\`
 
 ---
 
