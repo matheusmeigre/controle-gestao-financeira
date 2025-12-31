@@ -18,11 +18,11 @@ O Clerk não suporta autenticação via SMS com números de telefone brasileiros
 1. Vá em **"User & Authentication"**
 2. Clique em **"Email, Phone, Username"**
 3. Você verá três opções:
-   ```
+   \`\`\`
    ✅ Email address (MANTENHA HABILITADO)
    ❌ Phone number (DESABILITE ESTA)
    ⚪ Username (OPCIONAL)
-   ```
+   \`\`\`
 4. **Desmarque a opção "Phone number"**
 5. Clique em **"Save"**
 
@@ -42,18 +42,18 @@ O Clerk não suporta autenticação via SMS com números de telefone brasileiros
 Após fazer essas configurações, a tela de cadastro vai mostrar:
 
 ### **Antes (com erro):**
-```
+\`\`\`
 ❌ Username
 ❌ Phone number (Brazil not supported)
-```
+\`\`\`
 
 ### **Depois (funcionando):**
-```
+\`\`\`
 ✅ Continue with Google
 ✅ Continue with Microsoft
 ━━━━━━━━━━ OR ━━━━━━━━━━
 ✅ Email address
-```
+\`\`\`
 
 ---
 
@@ -88,11 +88,11 @@ Após fazer essas configurações, a tela de cadastro vai mostrar:
 Se você **realmente precisar** de autenticação por SMS no Brasil, considere:
 
 ### **Opção 1: Twilio + Custom Auth**
-```typescript
+\`\`\`typescript
 // Integração customizada com Twilio
 // Custo: ~$0.0075 por SMS
 import twilio from 'twilio'
-```
+\`\`\`
 **Prós:** Funciona no Brasil  
 **Contras:** Precisa implementar do zero, tem custo
 
