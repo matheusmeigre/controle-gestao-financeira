@@ -260,7 +260,7 @@ Este projeto é de código fechado (privado) para uso pessoal.
 
 **Matheus Meigre**  
 📧 Email: [matheusmeigre@gmail.com]  
-🔗 GitHub: [@matheusmeigre]
+🔗 GitHub: [@matheusmeigre](https://github.com/matheusmeigre)
 
 ---
 
