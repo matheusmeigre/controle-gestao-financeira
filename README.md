@@ -259,8 +259,8 @@ Este projeto é de código fechado (privado) para uso pessoal.
 ## 👤 Autor
 
 **Matheus Meigre**  
-📧 Email: [seu-email]  
-🔗 GitHub: [@seu-usuario]
+📧 Email: [matheusmeigre@gmail.com]  
+🔗 GitHub: [@matheusmeigre]
 
 ---
 
