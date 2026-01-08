@@ -22,6 +22,20 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
   const termsScrollRef = useRef<HTMLDivElement>(null)
   const privacyScrollRef = useRef<HTMLDivElement>(null)
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    // Save original body overflow
+    const originalOverflow = document.body.style.overflow
+    
+    // Lock body scroll
+    document.body.style.overflow = 'hidden'
+    
+    // Restore on unmount
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
+
   // Detect scroll to bottom for Terms
   useEffect(() => {
     const scrollElement = termsScrollRef.current
