@@ -279,7 +279,7 @@ Encontrou um bug? Tem uma sugestão?
 
 1. **Documentação:** Leia [SETUP_AUTH.md](./SETUP_AUTH.md)
 2. **Issues:** Abra uma issue neste repositório
-3. **Contato direto:** [seu-email]
+3. **Contato direto:** [matheusmeigre@gmail.com]
 
 ---
 
