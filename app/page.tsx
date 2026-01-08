@@ -198,15 +198,15 @@ export default function HomePage() {
       
       <UserHeader />
       
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 text-balance">Controle de Gastos</h1>
-          <p className="text-sm sm:text-base text-muted-foreground text-balance px-4">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2 text-balance">Controle de Gastos</h1>
+          <p className="text-xs sm:text-sm md:text-base text-muted-foreground text-balance px-2 sm:px-4">
             Registre seus gastos mensais e faturas de cartão de forma rápida e simples
           </p>
         </div>
 
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-4 sm:mb-6">
           <MonthlyBalance
             incomes={currentMonthIncomes}
             expenses={currentMonthExpenses}
@@ -214,15 +214,15 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="mb-6 sm:mb-8">
+        <div className="mb-4 sm:mb-6">
           <ExportManager expenses={expenses} cardBills={cardBills} incomes={incomes} />
         </div>
 
         <Tabs defaultValue="expenses" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 sm:mb-8 h-auto">
+          <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6 h-auto p-1">
             <TabsTrigger
               value="expenses"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm"
+              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
             >
               <Receipt className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span className="hidden xs:inline">Gastos Gerais</span>
@@ -230,7 +230,7 @@ export default function HomePage() {
             </TabsTrigger>
             <TabsTrigger
               value="cards"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm"
+              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
             >
               <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span className="hidden xs:inline">Faturas de Cartão</span>
@@ -238,27 +238,29 @@ export default function HomePage() {
             </TabsTrigger>
             <TabsTrigger
               value="incomes"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm"
+              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
             >
               <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span>Rendas</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="expenses" className="space-y-6 sm:space-y-8">
+          <TabsContent value="expenses" className="space-y-4 sm:space-y-6">
             <ExpenseSummary expenses={currentMonthExpenses.filter(e => e.category !== "Assinaturas")} />
 
             {/* Sub-abas para Gastos Gerais e Assinaturas */}
             <div className="flex items-center justify-between">
               <Tabs value={expenseSubTab} onValueChange={(v) => setExpenseSubTab(v as "general" | "subscriptions")} className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2">
-                  <TabsTrigger value="general" className="flex items-center gap-2">
-                    <Receipt className="h-4 w-4" />
-                    Gastos Gerais
+                <TabsList className="grid w-full max-w-md grid-cols-2 p-1">
+                  <TabsTrigger value="general" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <Receipt className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Gastos Gerais</span>
+                    <span className="xs:hidden">Gerais</span>
                   </TabsTrigger>
-                  <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4" />
-                    Assinaturas
+                  <TabsTrigger value="subscriptions" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Assinaturas</span>
+                    <span className="xs:hidden">Assinat.</span>
                   </TabsTrigger>
                 </TabsList>
               </Tabs>

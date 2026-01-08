@@ -60,24 +60,24 @@ export function SubscriptionSummary({ subscriptions }: SubscriptionSummaryProps)
   }))
 
   return (
-    <div className="grid gap-4 sm:gap-6">
+    <div className="grid gap-3 sm:gap-4">
       {/* Total Summary Card */}
       <Card className="shadow-sm border-border">
-        <CardHeader className="pb-3 sm:pb-4">
-          <CardTitle className="text-base sm:text-xl font-semibold text-foreground flex items-center gap-2">
-            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-            <span className="text-pretty">Assinaturas em {currentMonth}</span>
+        <CardHeader className="pb-2 sm:pb-3">
+          <CardTitle className="text-sm sm:text-base md:text-xl font-semibold text-foreground flex items-center gap-1.5 sm:gap-2">
+            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
+            <span className="text-pretty text-sm sm:text-base">Assinaturas em {currentMonth}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Mensal</p>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground break-all">{formatCurrency(totalAmount)}</p>
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground break-words">{formatCurrency(totalAmount)}</p>
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-xs sm:text-sm text-muted-foreground mb-1 whitespace-nowrap">Ativas</p>
-              <p className="text-xl sm:text-2xl font-semibold text-primary">{activeSubscriptions.length}</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-semibold text-primary">{activeSubscriptions.length}</p>
             </div>
           </div>
         </CardContent>
@@ -86,24 +86,24 @@ export function SubscriptionSummary({ subscriptions }: SubscriptionSummaryProps)
       {/* Chart Card */}
       {chartData.length > 0 && (
         <Card className="shadow-sm border-border">
-          <CardHeader className="pb-3 sm:pb-4">
-            <CardTitle className="text-base sm:text-xl font-semibold text-foreground flex items-center gap-2">
-              <PieChartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-              <span>Gastos por Assinatura</span>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base md:text-xl font-semibold text-foreground flex items-center gap-1.5 sm:gap-2">
+              <PieChartIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
+              <span className="text-sm sm:text-base">Gastos por Assinatura</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
               {/* Pie Chart */}
-              <div className="h-56 sm:h-64">
+              <div className="h-48 sm:h-56 md:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={chartData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={30}
-                      outerRadius={70}
+                      innerRadius={25}
+                      outerRadius={60}
                       paddingAngle={2}
                       dataKey="value"
                     >
@@ -120,12 +120,12 @@ export function SubscriptionSummary({ subscriptions }: SubscriptionSummaryProps)
               </div>
 
               {/* Subscription List */}
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-1.5 sm:space-y-2">
                 {chartData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div key={item.name} className="flex items-center justify-between gap-2 sm:gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 min-w-0 flex-1">
                       <div
-                        className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0"
+                        className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-full flex-shrink-0"
                         style={{ backgroundColor: item.color }}
                       />
                       <span className="text-xs sm:text-sm font-medium text-foreground truncate">{item.name}</span>

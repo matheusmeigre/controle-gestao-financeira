@@ -41,43 +41,43 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
   return (
     <Card className={balanceBgColor}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm sm:text-base font-medium">Saldo do Mês</CardTitle>
-        <Wallet className={`h-4 w-4 ${balanceColor} flex-shrink-0`} />
+        <CardTitle className="text-xs sm:text-sm md:text-base font-medium">Saldo do Mês</CardTitle>
+        <Wallet className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${balanceColor} flex-shrink-0`} />
       </CardHeader>
       <CardContent>
-        <div className={`text-2xl sm:text-3xl font-bold ${balanceColor} flex items-center gap-2 flex-wrap`}>
-          <BalanceIcon className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
-          <span className="break-all">{formatCurrency(Math.abs(balance))}</span>
+        <div className={`text-xl sm:text-2xl md:text-3xl font-bold ${balanceColor} flex items-center gap-1.5 sm:gap-2 flex-wrap`}>
+          <BalanceIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 flex-shrink-0" />
+          <span className="break-words">{formatCurrency(Math.abs(balance))}</span>
         </div>
-        <div className="mt-4 space-y-2 text-sm">
+        <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 text-sm">
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground text-xs sm:text-sm">Receitas:</span>
-            <span className="font-medium text-green-600 text-xs sm:text-sm break-all text-right">
+            <span className="font-medium text-green-600 text-xs sm:text-sm break-words text-right">
               {formatCurrency(totalIncome)}
             </span>
           </div>
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground text-xs sm:text-sm">Despesas:</span>
-            <span className="font-medium text-red-600 text-xs sm:text-sm break-all text-right">
+            <span className="font-medium text-red-600 text-xs sm:text-sm break-words text-right">
               -{formatCurrency(totalOutflow)}
             </span>
           </div>
-          <div className="border-t pt-2 mt-2 space-y-1">
+          <div className="border-t pt-1.5 sm:pt-2 mt-1.5 sm:mt-2 space-y-1">
             <div className="flex justify-between items-center text-xs text-muted-foreground gap-2">
               <span className="whitespace-nowrap">Gastos Gerais:</span>
-              <span className="break-all text-right">{formatCurrency(totalGeneralExpenses)}</span>
+              <span className="break-words text-right">{formatCurrency(totalGeneralExpenses)}</span>
             </div>
             <div className="flex justify-between items-center text-xs text-muted-foreground gap-2">
               <span className="whitespace-nowrap">Assinaturas:</span>
-              <span className="break-all text-right">{formatCurrency(totalSubscriptions)}</span>
+              <span className="break-words text-right">{formatCurrency(totalSubscriptions)}</span>
             </div>
             <div className="flex justify-between items-center text-xs text-muted-foreground gap-2">
               <span className="whitespace-nowrap">Faturas de Cartão:</span>
-              <span className="break-all text-right">{formatCurrency(totalCardBills)}</span>
+              <span className="break-words text-right">{formatCurrency(totalCardBills)}</span>
             </div>
           </div>
         </div>
-        {isPositive && <p className="text-xs text-green-600 mt-3 font-medium">Você está economizando este mês!</p>}
+        {isPositive && <p className="text-xs text-green-600 mt-2 sm:mt-3 font-medium">Você está economizando este mês!</p>}
         {!isPositive && !isNeutral && (
           <p className="text-xs text-red-600 mt-3 font-medium">Atenção: suas despesas superam suas receitas</p>
         )}

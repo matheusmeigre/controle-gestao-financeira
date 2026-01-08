@@ -88,12 +88,18 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
     }))
 
     const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
+    
+    const divisionByPerson = items.reduce((acc, item) => {
+      acc[item.personName] = (acc[item.personName] || 0) + item.amount
+      return acc
+    }, {} as Record<string, number>)
 
     onUpdateCardBill(billId, {
       cardName: editForm.cardName,
       description: editForm.description,
       items,
-      totalAmount
+      totalAmount,
+      divisionByPerson
     })
 
     handleCancelEdit()
