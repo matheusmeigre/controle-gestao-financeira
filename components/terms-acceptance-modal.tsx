@@ -24,7 +24,7 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
 
   // Detect scroll to bottom for Terms
   useEffect(() => {
-    const scrollElement = termsScrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    const scrollElement = termsScrollRef.current
     
     if (!scrollElement) return
 
@@ -46,7 +46,7 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
 
   // Detect scroll to bottom for Privacy
   useEffect(() => {
-    const scrollElement = privacyScrollRef.current?.querySelector('[data-radix-scroll-area-viewport]')
+    const scrollElement = privacyScrollRef.current
     
     if (!scrollElement) return
 
@@ -86,15 +86,15 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
 
         <CardContent className="flex-1 overflow-hidden p-0">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "terms" | "privacy")} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-2 rounded-none border-b px-4 pt-4 bg-muted/50">
-              <TabsTrigger value="terms" className="flex items-center gap-2 text-xs sm:text-sm relative">
+            <TabsList className="grid w-full grid-cols-2 rounded-none px-4 pt-2 pb-0 bg-transparent h-auto">
+              <TabsTrigger value="terms" className="flex items-center justify-center gap-2 text-xs sm:text-sm relative pb-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
                 <ScrollText className="h-4 w-4" />
                 <span>Termos de Uso</span>
                 {hasScrolledTermsToEnd && (
                   <CheckCircle2 className="h-4 w-4 text-green-600 absolute -right-1 -top-1" />
                 )}
               </TabsTrigger>
-              <TabsTrigger value="privacy" className="flex items-center gap-2 text-xs sm:text-sm relative">
+              <TabsTrigger value="privacy" className="flex items-center justify-center gap-2 text-xs sm:text-sm relative pb-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
                 <Shield className="h-4 w-4" />
                 <span>Política de Privacidade</span>
                 {hasScrolledPrivacyToEnd && (
@@ -103,9 +103,9 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-hidden relative">
-              <TabsContent value="terms" className="h-full m-0 data-[state=active]:flex data-[state=active]:flex-col">
-                <div ref={termsScrollRef} className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-hidden relative border-t">
+              <TabsContent value="terms" className="h-full m-0 p-0 data-[state=active]:block">
+                <div ref={termsScrollRef} className="h-full overflow-y-auto">
                   <TermsOfUse />
                 </div>
                 {!hasScrolledTermsToEnd && (
@@ -117,8 +117,8 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
                 )}
               </TabsContent>
 
-              <TabsContent value="privacy" className="h-full m-0 data-[state=active]:flex data-[state=active]:flex-col">
-                <div ref={privacyScrollRef} className="flex-1 overflow-y-auto">
+              <TabsContent value="privacy" className="h-full m-0 p-0 data-[state=active]:block">
+                <div ref={privacyScrollRef} className="h-full overflow-y-auto">
                   <PrivacyPolicy />
                 </div>
                 {!hasScrolledPrivacyToEnd && (
