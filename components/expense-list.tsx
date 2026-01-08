@@ -250,7 +250,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                     )}
 
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={saveEdit} className="bg-accent hover:bg-accent/90">
+                      <Button size="sm" onClick={saveEdit} className="bg-green-600 hover:bg-green-700 text-white">
                         <Check className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="outline" onClick={cancelEdit}>
