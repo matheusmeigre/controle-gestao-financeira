@@ -94,8 +94,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + "T00:00:00")
-      Assinaturas: "bg-cyan-100 text-cyan-800 border-cyan-200",
-      Cartão: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
     })
