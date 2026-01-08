@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TermsOfUse } from "@/components/terms-of-use"
 import { PrivacyPolicy } from "@/components/privacy-policy"
-import { ScrollText, Shield, CheckCircle2 } from "lucide-react"
+import { ScrollText, Shield } from "lucide-react"
 
 interface TermsAcceptanceModalProps {
   onAccept: () => void
@@ -86,26 +86,33 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
 
         <CardContent className="flex-1 overflow-hidden p-0">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "terms" | "privacy")} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-2 rounded-none px-4 pt-2 pb-0 bg-transparent h-auto">
-              <TabsTrigger value="terms" className="flex items-center justify-center gap-2 text-xs sm:text-sm relative pb-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+            <TabsList className="grid w-full grid-cols-2 rounded-none px-4 pt-2 pb-0 bg-transparent h-auto border-b">
+              <TabsTrigger 
+                value="terms" 
+                className="flex items-center justify-center gap-2 text-xs sm:text-sm pb-3 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+              >
                 <ScrollText className="h-4 w-4" />
                 <span>Termos de Uso</span>
-                {hasScrolledTermsToEnd && (
-                  <CheckCircle2 className="h-4 w-4 text-green-600 absolute -right-1 -top-1" />
-                )}
               </TabsTrigger>
-              <TabsTrigger value="privacy" className="flex items-center justify-center gap-2 text-xs sm:text-sm relative pb-3 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
+              <TabsTrigger 
+                value="privacy" 
+                className="flex items-center justify-center gap-2 text-xs sm:text-sm pb-3 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary transition-colors"
+              >
                 <Shield className="h-4 w-4" />
                 <span>Política de Privacidade</span>
-                {hasScrolledPrivacyToEnd && (
-                  <CheckCircle2 className="h-4 w-4 text-green-600 absolute -right-1 -top-1" />
-                )}
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-hidden relative border-t">
+            <div className="flex-1 overflow-hidden relative">
               <TabsContent value="terms" className="h-full m-0 p-0 data-[state=active]:block">
-                <div ref={termsScrollRef} className="h-full overflow-y-auto">
+                <div 
+                  ref={termsScrollRef} 
+                  className="h-full overflow-y-scroll pr-2 terms-scroll"
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgb(203 213 225) transparent'
+                  }}
+                >
                   <TermsOfUse />
                 </div>
                 {!hasScrolledTermsToEnd && (
@@ -118,7 +125,14 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
               </TabsContent>
 
               <TabsContent value="privacy" className="h-full m-0 p-0 data-[state=active]:block">
-                <div ref={privacyScrollRef} className="h-full overflow-y-auto">
+                <div 
+                  ref={privacyScrollRef} 
+                  className="h-full overflow-y-scroll pr-2 terms-scroll"
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgb(203 213 225) transparent'
+                  }}
+                >
                   <PrivacyPolicy />
                 </div>
                 {!hasScrolledPrivacyToEnd && (
@@ -191,7 +205,6 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
             disabled={!canAccept}
             className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-6 text-base transition-all"
           >
-            <CheckCircle2 className="h-5 w-5 mr-2" />
             {canAccept ? "Aceitar e Continuar" : "Leia e role ambos os documentos até o final"}
           </Button>
 

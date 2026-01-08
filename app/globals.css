@@ -91,5 +91,23 @@
   }
 }
 
+/* Custom scrollbar styles for terms modal */
+.terms-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.terms-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb {
+  background: rgb(203 213 225);
+  border-radius: 5px;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(148 163 184);
+}
+
 /* Adding custom screen breakpoint utilities for better mobile responsiveness */
 @custom-media --xs (min-width: 480px);
