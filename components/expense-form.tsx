@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Switch } from "@/components/ui/switch"
 import { CATEGORIES } from "@/types/expense"
 import { Plus } from "lucide-react"
 
@@ -16,6 +17,9 @@ interface ExpenseFormProps {
     description: string
     amount: number
     category: string
+    status?: "paid" | "pending"
+    isRecurring?: boolean
+    dueDate?: string
   }) => void
 }
 
@@ -23,6 +27,9 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
   const [description, setDescription] = useState("")
   const [amount, setAmount] = useState("")
   const [category, setCategory] = useState("")
+  const [status, setStatus] = useState<"paid" | "pending">("paid")
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [dueDate, setDueDate] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,16 +43,27 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
       return
     }
 
+    const needsDueDate = ["Contas", "Estudos", "Assinaturas"].includes(category)
+    if (needsDueDate && !dueDate) {
+      return
+    }
+
     onAddExpense({
       description: description.trim(),
       amount: numericAmount,
       category,
+      status,
+      isRecurring,
+      ...(needsDueDate && { dueDate })
     })
 
     // Clear form for next entry
     setDescription("")
     setAmount("")
     setCategory("")
+    setStatus("paid")
+    setIsRecurring(false)
+    setDueDate("")
   }
 
   return (
@@ -107,10 +125,66 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
             </Select>
           </div>
 
+          {["Contas", "Estudos", "Assinaturas"].includes(category) && (
+            <div className="space-y-2">
+              <Label htmlFor="dueDate" className="text-sm font-medium text-foreground">
+                Data de Vencimento
+              </Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="h-12 text-base"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="status" className="text-sm font-medium text-foreground">
+                Status do Pagamento
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {status === "paid" ? "Já foi pago" : "Ainda não foi pago"}
+              </p>
+            </div>
+            <Select value={status} onValueChange={(value) => setStatus(value as "paid" | "pending")}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="paid">Pago</SelectItem>
+                <SelectItem value="pending">Pendente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="recurring" className="text-sm font-medium text-foreground">
+                Gasto Recorrente
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Se repete todo mês
+              </p>
+            </div>
+            <Switch
+              id="recurring"
+              checked={isRecurring}
+              onCheckedChange={setIsRecurring}
+            />
+          </div>
+
           <Button
             type="submit"
             className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
-            disabled={!description.trim() || !amount || !category}
+            disabled={
+              !description.trim() || 
+              !amount || 
+              !category || 
+              (["Contas", "Estudos", "Assinaturas"].includes(category) && !dueDate)
+            }
           >
             <Plus className="h-5 w-5 mr-2" />
             Adicionar Gasto

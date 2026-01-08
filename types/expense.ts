@@ -5,6 +5,9 @@ export interface Expense {
   amount: number
   category: string
   date: string
+  status?: "paid" | "pending" // Status de pagamento
+  isRecurring?: boolean // Indica se é recorrente
+  dueDate?: string // Data de vencimento para Contas, Estudos e Assinaturas
 }
 
 export interface CardBill {
@@ -15,6 +18,7 @@ export interface CardBill {
   date: string
   description: string
   divisions: PersonDivision[]
+  items?: CardBillItem[] // Itens categorizados da fatura
 }
 
 export interface PersonDivision {
@@ -23,12 +27,22 @@ export interface PersonDivision {
   description?: string
 }
 
+export interface CardBillItem {
+  id: string
+  description: string
+  amount: number
+  category: string
+  personName: string
+  date?: string
+}
+
 export interface Income {
   id: string
   userId: string // ✅ Campo obrigatório para segregação
   description: string
   amount: number
   type: "salary" | "extra"
+  category?: string // Categoria da renda
   date: string
   status: "pending" | "received"
   registrationDate: string
@@ -43,6 +57,16 @@ export const CATEGORIES = [
   "Saúde",
   "Compras",
   "Estudos",
+  "Assinaturas",
+  "Outros",
+] as const
+
+export const INCOME_CATEGORIES = [
+  "Salário",
+  "Freelance",
+  "Investimentos",
+  "Vendas",
+  "Presente",
   "Outros",
 ] as const
 

@@ -5,17 +5,21 @@ import { useUser } from "@clerk/nextjs"
 import { ExpenseForm } from "@/components/expense-form"
 import { ExpenseList } from "@/components/expense-list"
 import { ExpenseSummary } from "@/components/expense-summary"
-import { CardBillForm } from "@/components/card-bill-form"
-import { CardBillsList } from "@/components/card-bills-list"
+import { CardBillFormV2 } from "@/components/card-bill-form-v2"
+import { CardBillsListV2 } from "@/components/card-bills-list-v2"
 import { CardSummary } from "@/components/card-summary"
 import { ExportManager } from "@/components/export-manager"
 import { IncomeForm } from "@/components/income-form"
 import { IncomeList } from "@/components/income-list"
 import { IncomeSummary } from "@/components/income-summary"
 import { MonthlyBalance } from "@/components/monthly-balance"
+import { SubscriptionForm } from "@/components/subscription-form"
+import { SubscriptionList } from "@/components/subscription-list"
+import { CategoryFilter } from "@/components/category-filter"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Expense, CardBill, Income } from "@/types/expense"
-import { Receipt, CreditCard, DollarSign } from "lucide-react"
+import { CATEGORIES, INCOME_CATEGORIES } from "@/types/expense"
+import { Receipt, CreditCard, DollarSign, RefreshCw } from "lucide-react"
 import { UserHeader } from "@/components/user-header"
 import { WelcomeModal } from "@/components/welcome-modal"
 import { loadUserData, saveUserData } from "@/lib/user-data"
@@ -26,6 +30,10 @@ export default function HomePage() {
   const [cardBills, setCardBills] = useState<CardBill[]>([])
   const [incomes, setIncomes] = useState<Income[]>([])
   const [showWelcome, setShowWelcome] = useState(false)
+  const [expenseCategoryFilter, setExpenseCategoryFilter] = useState("all")
+  const [cardBillCategoryFilter, setCardBillCategoryFilter] = useState("all")
+  const [incomeCategoryFilter, setIncomeCategoryFilter] = useState("all")
+  const [expenseSubTab, setExpenseSubTab] = useState<"general" | "subscriptions">("general")
 
   // 🎉 Detecta primeiro acesso do usuário
   useEffect(() => {
@@ -75,7 +83,7 @@ export default function HomePage() {
     const newExpense: Expense = {
       ...expense,
       id: Date.now().toString(),
-      userId: user.id, // ✅ Atribui userId automaticamente
+      userId: user.id,
       date: new Date().toISOString().split("T")[0],
     }
     setExpenses((prev) => [newExpense, ...prev])
@@ -87,7 +95,7 @@ export default function HomePage() {
     const newCardBill: CardBill = {
       ...cardBill,
       id: Date.now().toString(),
-      userId: user.id, // ✅ Atribui userId automaticamente
+      userId: user.id,
       date: new Date().toISOString().split("T")[0],
     }
     setCardBills((prev) => [newCardBill, ...prev])
@@ -99,7 +107,7 @@ export default function HomePage() {
     const newIncome: Income = {
       ...income,
       id: Date.now().toString(),
-      userId: user.id, // ✅ Atribui userId automaticamente
+      userId: user.id,
       date: new Date().toISOString().split("T")[0],
     }
     setIncomes((prev) => [newIncome, ...prev])
@@ -140,6 +148,25 @@ export default function HomePage() {
   const currentMonthExpenses = expenses.filter((expense) => expense.date.startsWith(currentMonth))
   const currentMonthCardBills = cardBills.filter((bill) => bill.date.startsWith(currentMonth))
   const currentMonthIncomes = incomes.filter((income) => income.date.startsWith(currentMonth))
+
+  // Filter by category
+  const filteredGeneralExpenses = expenseCategoryFilter === "all" 
+    ? currentMonthExpenses.filter(e => e.category !== "Assinaturas")
+    : currentMonthExpenses.filter(e => e.category === expenseCategoryFilter && e.category !== "Assinaturas")
+
+  const filteredSubscriptions = expenseCategoryFilter === "all"
+    ? currentMonthExpenses.filter(e => e.category === "Assinaturas")
+    : currentMonthExpenses.filter(e => e.category === "Assinaturas" && e.category === expenseCategoryFilter)
+
+  const filteredCardBills = cardBillCategoryFilter === "all"
+    ? currentMonthCardBills
+    : currentMonthCardBills.filter(bill => 
+        bill.items?.some(item => item.category === cardBillCategoryFilter)
+      )
+
+  const filteredIncomes = incomeCategoryFilter === "all"
+    ? currentMonthIncomes
+    : currentMonthIncomes.filter(income => income.category === incomeCategoryFilter)
 
   // Loading state
   if (!isLoaded || !user) {
@@ -190,7 +217,7 @@ export default function HomePage() {
               value="expenses"
               className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm"
             >
-              <Receipt className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <Receipt className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span className="hidden xs:inline">Gastos Gerais</span>
               <span className="xs:hidden">Gastos</span>
             </TabsTrigger>
@@ -198,7 +225,7 @@ export default function HomePage() {
               value="cards"
               className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm"
             >
-              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span className="hidden xs:inline">Faturas de Cartão</span>
               <span className="xs:hidden">Faturas</span>
             </TabsTrigger>
@@ -206,42 +233,104 @@ export default function HomePage() {
               value="incomes"
               className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 text-xs sm:text-sm"
             >
-              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
               <span>Rendas</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="expenses" className="space-y-6 sm:space-y-8">
-            <ExpenseSummary expenses={currentMonthExpenses} />
+            <ExpenseSummary expenses={currentMonthExpenses.filter(e => e.category !== "Assinaturas")} />
 
-            <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-              <div className="order-1">
-                <ExpenseForm onAddExpense={addExpense} />
-              </div>
-
-              <div className="order-2">
-                <ExpenseList
-                  expenses={currentMonthExpenses}
-                  onUpdateExpense={updateExpense}
-                  onDeleteExpense={deleteExpense}
-                />
-              </div>
+            {/* Sub-abas para Gastos Gerais e Assinaturas */}
+            <div className="flex items-center justify-between">
+              <Tabs value={expenseSubTab} onValueChange={(v) => setExpenseSubTab(v as "general" | "subscriptions")} className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2">
+                  <TabsTrigger value="general" className="flex items-center gap-2">
+                    <Receipt className="h-4 w-4" />
+                    Gastos Gerais
+                  </TabsTrigger>
+                  <TabsTrigger value="subscriptions" className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4" />
+                    Assinaturas
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
+
+            {/* Filtro de categoria */}
+            <div className="flex justify-end">
+              <CategoryFilter
+                categories={CATEGORIES}
+                selectedCategory={expenseCategoryFilter}
+                onCategoryChange={setExpenseCategoryFilter}
+              />
+            </div>
+
+            {expenseSubTab === "general" ? (
+              <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
+                <div className="order-1">
+                  <ExpenseForm onAddExpense={addExpense} />
+                </div>
+
+                <div className="order-2">
+                  <ExpenseList
+                    expenses={filteredGeneralExpenses}
+                    onUpdateExpense={updateExpense}
+                    onDeleteExpense={deleteExpense}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
+                <div className="order-1">
+                  <SubscriptionForm onAddSubscription={addExpense} />
+                </div>
+
+                <div className="order-2">
+                  <SubscriptionList
+                    subscriptions={filteredSubscriptions}
+                    onUpdateSubscription={updateExpense}
+                    onDeleteSubscription={deleteExpense}
+                  />
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="cards" className="space-y-6 sm:space-y-8">
             <CardSummary cardBills={currentMonthCardBills} />
 
+            {/* Filtro de categoria */}
+            <div className="flex justify-end">
+              <CategoryFilter
+                categories={CATEGORIES}
+                selectedCategory={cardBillCategoryFilter}
+                onCategoryChange={setCardBillCategoryFilter}
+              />
+            </div>
+
             <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
               <div className="order-1">
-                <CardBillForm onAddCardBill={addCardBill} />
+                <CardBillFormV2 onAddCardBill={addCardBill} />
+              </div>
+
+            {/* Filtro de categoria */}
+            <div className="flex justify-end">
+              <CategoryFilter
+                categories={INCOME_CATEGORIES}
+                selectedCategory={incomeCategoryFilter}
+                onCategoryChange={setIncomeCategoryFilter}
+              />
+            </div>
+
+            <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
+              <div className="order-1">
+                <IncomeForm onAddIncome={addIncome} />
               </div>
 
               <div className="order-2">
-                <CardBillsList cardBills={currentMonthCardBills} onDeleteCardBill={deleteCardBill} />
-              </div>
-            </div>
-          </TabsContent>
+                <IncomeList
+                  incomes={filtered
 
           <TabsContent value="incomes" className="space-y-6 sm:space-y-8">
             <IncomeSummary incomes={currentMonthIncomes} />

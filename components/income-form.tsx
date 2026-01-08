@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { PlusCircle, DollarSign } from "lucide-react"
 import type { Income } from "@/types/expense"
+import { INCOME_CATEGORIES } from "@/types/expense"
 
 interface IncomeFormProps {
   onAddIncome: (income: Omit<Income, "id" | "date">) => void
@@ -20,12 +21,13 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
   const [description, setDescription] = useState("")
   const [amount, setAmount] = useState("")
   const [type, setType] = useState<"salary" | "extra">("salary")
+  const [category, setCategory] = useState("")
   const [isReceived, setIsReceived] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!description.trim() || !amount || Number.parseFloat(amount) <= 0) {
+    if (!description.trim() || !amount || Number.parseFloat(amount) <= 0 || !category) {
       return
     }
 
@@ -35,6 +37,7 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
       description: description.trim(),
       amount: Number.parseFloat(amount),
       type,
+      category,
       status: isReceived ? "received" : "pending",
       registrationDate: currentDate,
       receivedDate: isReceived ? currentDate : null,
@@ -44,6 +47,7 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
     setDescription("")
     setAmount("")
     setType("salary")
+    setCategory("")
     setIsReceived(false)
   }
 
@@ -80,6 +84,22 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
               onChange={(e) => setDescription(e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="income-category">Categoria</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger id="income-category">
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {INCOME_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

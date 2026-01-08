@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import { type Expense, CATEGORIES, CARD_OPTIONS, PERSON_OPTIONS } from "@/types/expense"
-import { Edit2, Trash2, Check, X, Receipt, CreditCard, User } from "lucide-react"
+import { Edit2, Trash2, Check, X, Receipt, CreditCard, User, Calendar, RefreshCw, CheckCircle2, Clock } from "lucide-react"
 
 interface ExpenseListProps {
   expenses: Expense[]
@@ -23,6 +25,9 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
     category: "",
     cardName: "",
     personName: "",
+    status: "paid" as "paid" | "pending",
+    isRecurring: false,
+    dueDate: "",
   })
 
   const startEdit = (expense: Expense) => {
@@ -33,6 +38,9 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
       category: expense.category,
       cardName: expense.cardName || "",
       personName: expense.personName || "",
+      status: expense.status || "paid",
+      isRecurring: expense.isRecurring || false,
+      dueDate: expense.dueDate || "",
     })
   }
 
@@ -44,10 +52,16 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
 
     if (editForm.category === "Cartão" && (!editForm.cardName || !editForm.personName)) return
 
+    const needsDueDate = ["Contas", "Estudos", "Assinaturas"].includes(editForm.category)
+    if (needsDueDate && !editForm.dueDate) return
+
     onUpdateExpense(editingId, {
       description: editForm.description.trim(),
       amount: numericAmount,
       category: editForm.category,
+      status: editForm.status,
+      isRecurring: editForm.isRecurring,
+      ...(needsDueDate && { dueDate: editForm.dueDate }),
       ...(editForm.category === "Cartão" && {
         cardName: editForm.cardName,
         personName: editForm.personName,
@@ -59,7 +73,16 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditForm({ description: "", amount: "", category: "", cardName: "", personName: "" })
+    setEditForm({ 
+      description: "", 
+      amount: "", 
+      category: "", 
+      cardName: "", 
+      personName: "",
+      status: "paid",
+      isRecurring: false,
+      dueDate: "",
+    })
   }
 
   const formatCurrency = (amount: number) => {
@@ -71,7 +94,8 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString + "T00:00:00")
-    return date.toLocaleDateString("pt-BR", {
+      Assinaturas: "bg-cyan-100 text-cyan-800 border-cyan-200",
+      Cartão: "bg-emerald-100 text-emerald-800 border-emerald-200",
       day: "2-digit",
       month: "2-digit",
     })
@@ -118,39 +142,81 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                 className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border"
               >
                 {editingId === expense.id ? (
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <Input
-                      value={editForm.description}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
-                      className="text-sm"
-                      placeholder="Descrição"
-                    />
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={editForm.amount}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, amount: e.target.value }))}
-                      className="text-sm"
-                      placeholder="Valor"
-                    />
-                    <Select
-                      value={editForm.category}
-                      onValueChange={(value) => setEditForm((prev) => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger className="text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CATEGORIES.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="flex-1 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <Input
+                        value={editForm.description}
+                        onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                        className="text-sm"
+                        placeholder="Descrição"
+                      />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={editForm.amount}
+                        onChange={(e) => setEditForm((prev) => ({ ...prev, amount: e.target.value }))}
+                        className="text-sm"
+                        placeholder="Valor"
+                      />
+                      <Select
+                        value={editForm.category}
+                        onValueChange={(value) => setEditForm((prev) => ({ ...prev, category: value }))}
+                      >
+                        <SelectTrigger className="text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CATEGORIES.map((cat) => (
+                            <SelectItem key={cat} value={cat}>
+                              {cat}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {["Contas", "Estudos", "Assinaturas"].includes(editForm.category) && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Data de Vencimento</Label>
+                          <Input
+                            type="date"
+                            value={editForm.dueDate}
+                            onChange={(e) => setEditForm((prev) => ({ ...prev, dueDate: e.target.value }))}
+                            className="text-sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex items-center justify-between p-2 bg-muted rounded">
+                        <Label className="text-xs">Status</Label>
+                        <Select
+                          value={editForm.status}
+                          onValueChange={(value) => setEditForm((prev) => ({ ...prev, status: value as "paid" | "pending" }))}
+                        >
+                          <SelectTrigger className="w-28 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="paid">Pago</SelectItem>
+                            <SelectItem value="pending">Pendente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center justify-between p-2 bg-muted rounded">
+                        <Label className="text-xs">Recorrente</Label>
+                        <Switch
+                          checked={editForm.isRecurring}
+                          onCheckedChange={(checked) => setEditForm((prev) => ({ ...prev, isRecurring: checked }))}
+                        />
+                      </div>
+                    </div>
 
                     {editForm.category === "Cartão" && (
-                      <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <Select
                           value={editForm.cardName}
                           onValueChange={(value) => setEditForm((prev) => ({ ...prev, cardName: value }))}
@@ -181,10 +247,10 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                             ))}
                           </SelectContent>
                         </Select>
-                      </>
+                      </div>
                     )}
 
-                    <div className={`flex gap-2 ${editForm.category === "Cartão" ? "sm:col-span-3" : "sm:col-span-3"}`}>
+                    <div className="flex gap-2">
                       <Button size="sm" onClick={saveEdit} className="bg-accent hover:bg-accent/90">
                         <Check className="h-4 w-4" />
                       </Button>
@@ -196,13 +262,38 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                 ) : (
                   <>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="text-sm text-muted-foreground font-mono">{formatDate(expense.date)}</span>
                         <Badge variant="outline" className={`text-xs ${getCategoryColor(expense.category)}`}>
                           {expense.category}
                         </Badge>
+                        {expense.status === "pending" && (
+                          <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pendente
+                          </Badge>
+                        )}
+                        {expense.status === "paid" && (
+                          <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Pago
+                          </Badge>
+                        )}
+                        {expense.isRecurring && (
+                          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Recorrente
+                          </Badge>
+                        )}
                       </div>
                       <p className="font-medium text-foreground truncate">{expense.description}</p>
+
+                      {expense.dueDate && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
+                          <Calendar className="h-3 w-3" />
+                          <span>Venc: {new Date(expense.dueDate + "T00:00:00").toLocaleDateString("pt-BR")}</span>
+                        </div>
+                      )}
 
                       {expense.category === "Cartão" && (expense.cardName || expense.personName) && (
                         <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
@@ -221,7 +312,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                         </div>
                       )}
 
-                      <p className="text-lg font-semibold text-foreground">{formatCurrency(expense.amount)}</p>
+                      <p className="text-lg font-semibold text-foreground mt-1">{formatCurrency(expense.amount)}</p>
                     </div>
                     <div className="flex gap-2 ml-4">
                       <Button size="sm" variant="outline" onClick={() => startEdit(expense)} className="h-8 w-8 p-0">
