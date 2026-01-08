@@ -23,6 +23,8 @@ import { CATEGORIES, INCOME_CATEGORIES } from "@/types/expense"
 import { Receipt, CreditCard, DollarSign, RefreshCw } from "lucide-react"
 import { UserHeader } from "@/components/user-header"
 import { WelcomeModal } from "@/components/welcome-modal"
+import { TermsAcceptanceModal } from "@/components/terms-acceptance-modal"
+import { Footer } from "@/components/footer"
 import { loadUserData, saveUserData } from "@/lib/user-data"
 
 export default function HomePage() {
@@ -31,6 +33,7 @@ export default function HomePage() {
   const [cardBills, setCardBills] = useState<CardBill[]>([])
   const [incomes, setIncomes] = useState<Income[]>([])
   const [showWelcome, setShowWelcome] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
   const [expenseCategoryFilter, setExpenseCategoryFilter] = useState("all")
   const [cardBillCategoryFilter, setCardBillCategoryFilter] = useState("all")
   const [incomeCategoryFilter, setIncomeCategoryFilter] = useState("all")
@@ -40,12 +43,20 @@ export default function HomePage() {
   useEffect(() => {
     if (!user?.id) return
     
-    const welcomeKey = `welcome_shown_${user.id}`
-    const hasSeenWelcome = localStorage.getItem(welcomeKey)
+    const termsKey = `terms_accepted_${user.id}`
+    const hasAcceptedTerms = localStorage.getItem(termsKey)
     
-    if (!hasSeenWelcome) {
-      setShowWelcome(true)
-      localStorage.setItem(welcomeKey, 'true')
+    if (!hasAcceptedTerms) {
+      setShowTermsModal(true)
+    } else {
+      // Só mostra welcome se já aceitou os termos
+      const welcomeKey = `welcome_shown_${user.id}`
+      const hasSeenWelcome = localStorage.getItem(welcomeKey)
+      
+      if (!hasSeenWelcome) {
+        setShowWelcome(true)
+        localStorage.setItem(welcomeKey, 'true')
+      }
     }
   }, [user?.id])
 
@@ -175,6 +186,24 @@ export default function HomePage() {
     ? currentMonthIncomes
     : currentMonthIncomes.filter(income => income.category === incomeCategoryFilter)
 
+  // Handle terms acceptance
+  const handleAcceptTerms = () => {
+    if (!user?.id) return
+    
+    const termsKey = `terms_accepted_${user.id}`
+    localStorage.setItem(termsKey, 'true')
+    setShowTermsModal(false)
+    
+    // After accepting terms, check if should show welcome
+    const welcomeKey = `welcome_shown_${user.id}`
+    const hasSeenWelcome = localStorage.getItem(welcomeKey)
+    
+    if (!hasSeenWelcome) {
+      setShowWelcome(true)
+      localStorage.setItem(welcomeKey, 'true')
+    }
+  }
+
   // Loading state
   if (!isLoaded || !user) {
     return (
@@ -188,7 +217,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
+      {showTermsModal && (
+        <TermsAcceptanceModal onAccept={handleAcceptTerms} />
+      )}
+      
       {showWelcome && (
         <WelcomeModal 
           userName={user.firstName || user.emailAddresses[0]?.emailAddress.split('@')[0] || 'Usuário'}
@@ -365,6 +398,8 @@ export default function HomePage() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      <Footer />
     </div>
   )
 }
