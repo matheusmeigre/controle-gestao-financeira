@@ -15,6 +15,7 @@ import { IncomeSummary } from "@/components/income-summary"
 import { MonthlyBalance } from "@/components/monthly-balance"
 import { SubscriptionForm } from "@/components/subscription-form"
 import { SubscriptionList } from "@/components/subscription-list"
+import { SubscriptionSummary } from "@/components/subscription-summary"
 import { CategoryFilter } from "@/components/category-filter"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Expense, CardBill, Income } from "@/types/expense"
@@ -281,19 +282,23 @@ export default function HomePage() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-                <div className="order-1">
-                  <SubscriptionForm onAddSubscription={addExpense} />
-                </div>
+              <>
+                <SubscriptionSummary subscriptions={filteredSubscriptions} />
+                
+                <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
+                  <div className="order-1">
+                    <SubscriptionForm onAddSubscription={addExpense} />
+                  </div>
 
-                <div className="order-2">
-                  <SubscriptionList
-                    subscriptions={filteredSubscriptions}
-                    onUpdateSubscription={updateExpense}
-                    onDeleteSubscription={deleteExpense}
-                  />
+                  <div className="order-2">
+                    <SubscriptionList
+                      subscriptions={filteredSubscriptions}
+                      onUpdateSubscription={updateExpense}
+                      onDeleteSubscription={deleteExpense}
+                    />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </TabsContent>
 

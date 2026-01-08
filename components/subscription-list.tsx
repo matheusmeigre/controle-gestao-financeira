@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { type Expense } from "@/types/expense"
 import { Edit2, Trash2, Check, X, Calendar, CheckCircle2, Clock, RefreshCw, Power } from "lucide-react"
 
@@ -26,6 +27,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
     status: "paid" as "paid" | "pending",
     recurringFrequency: "monthly" as "monthly" | "yearly",
     isActive: true,
+    notes: "",
   })
 
   const startEdit = (subscription: Expense) => {
@@ -37,6 +39,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
       status: subscription.status || "paid",
       recurringFrequency: subscription.recurringFrequency || "monthly",
       isActive: subscription.isActive !== false,
+      notes: subscription.notes || "",
     })
   }
 
@@ -55,6 +58,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
       status: editForm.status,
       recurringFrequency: editForm.recurringFrequency,
       isActive: editForm.isActive,
+      ...(editForm.notes.trim() && { notes: editForm.notes.trim() }),
     })
 
     setEditingId(null)
@@ -62,7 +66,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditForm({ description: "", amount: "", dueDate: "", status: "paid", recurringFrequency: "monthly", isActive: true })
+    setEditForm({ description: "", amount: "", dueDate: "", status: "paid", recurringFrequency: "monthly", isActive: true, notes: "" })
   }
 
   const toggleActive = (id: string, currentActive: boolean | undefined) => {
@@ -166,6 +170,17 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                       </div>
                     </div>
 
+                    <div className="space-y-1">
+                      <Label className="text-xs">Observações (opcional)</Label>
+                      <Textarea
+                        value={editForm.notes}
+                        onChange={(e) => setEditForm((prev) => ({ ...prev, notes: e.target.value }))}
+                        placeholder="Descrição adicional..."
+                        className="text-sm min-h-[60px] resize-none"
+                        maxLength={200}
+                      />
+                    </div>
+
                     <div className="flex items-center justify-between p-2 bg-muted rounded">
                       <Label className="text-xs">Pago este mês</Label>
                       <Switch
@@ -221,6 +236,12 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                       <p className={`font-medium truncate text-lg ${subscription.isActive === false ? "text-muted-foreground line-through" : "text-foreground"}`}>
                         {subscription.description}
                       </p>
+
+                      {subscription.notes && (
+                        <p className="text-sm text-muted-foreground mt-1 italic line-clamp-2">
+                          {subscription.notes}
+                        </p>
+                      )}
 
                       {subscription.dueDate && (
                         <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import { Plus } from "lucide-react"
 
 interface SubscriptionFormProps {
@@ -20,6 +21,7 @@ interface SubscriptionFormProps {
     recurringFrequency: "monthly" | "yearly"
     dueDate: string
     isActive: boolean
+    notes?: string
   }) => void
 }
 
@@ -29,6 +31,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
   const [dueDate, setDueDate] = useState("")
   const [status, setStatus] = useState<"paid" | "pending">("pending")
   const [recurringFrequency, setRecurringFrequency] = useState<"monthly" | "yearly">("monthly")
+  const [notes, setNotes] = useState("")
   const [isRecurring] = useState(true) // Assinaturas são sempre recorrentes
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -52,6 +55,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
       recurringFrequency,
       dueDate,
       isActive: true,
+      ...(notes.trim() && { notes: notes.trim() }),
     })
 
     // Clear form for next entry
@@ -60,6 +64,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
     setDueDate("")
     setStatus("pending")
     setRecurringFrequency("monthly")
+    setNotes("")
   }
 
   return (
@@ -131,6 +136,21 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
                 <SelectItem value="yearly">Anual</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-sm font-medium text-foreground">
+              Observações <span className="text-muted-foreground font-normal">(opcional)</span>
+            </Label>
+            <Textarea
+              id="notes"
+              placeholder="Ex: Plano familiar, compartilhado com... "
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="min-h-[80px] text-base resize-none"
+              maxLength={200}
+            />
+            <p className="text-xs text-muted-foreground text-right">{notes.length}/200</p>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">

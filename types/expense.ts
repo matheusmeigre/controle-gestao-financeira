@@ -10,6 +10,7 @@ export interface Expense {
   recurringFrequency?: "monthly" | "yearly" // Frequência de recorrência: mensal ou anual
   dueDate?: string // Data de vencimento para Contas, Estudos e Assinaturas
   isActive?: boolean // Indica se a assinatura está ativa (apenas para categoria Assinaturas)
+  notes?: string // Observações/descrição adicional (opcional)
 }
 
 export interface CardBill {
