@@ -19,6 +19,7 @@ interface SubscriptionFormProps {
     isRecurring: boolean
     recurringFrequency: "monthly" | "yearly"
     dueDate: string
+    isActive: boolean
   }) => void
 }
 
@@ -49,7 +50,8 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
       status,
       isRecurring,
       recurringFrequency,
-      dueDate
+      dueDate,
+      isActive: true,
     })
 
     // Clear form for next entry

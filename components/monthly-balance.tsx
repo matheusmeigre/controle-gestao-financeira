@@ -20,9 +20,15 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
 
   // Calculate totals
   const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0)
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  
+  // Separar assinaturas ativas dos gastos gerais
+  const subscriptions = expenses.filter(exp => exp.category === "Assinaturas" && exp.isActive !== false)
+  const generalExpenses = expenses.filter(exp => exp.category !== "Assinaturas")
+  
+  const totalSubscriptions = subscriptions.reduce((sum, expense) => sum + expense.amount, 0)
+  const totalGeneralExpenses = generalExpenses.reduce((sum, expense) => sum + expense.amount, 0)
   const totalCardBills = cardBills.reduce((sum, bill) => sum + bill.totalAmount, 0)
-  const totalOutflow = totalExpenses + totalCardBills
+  const totalOutflow = totalGeneralExpenses + totalSubscriptions + totalCardBills
   const balance = totalIncome - totalOutflow
 
   // Determine color and icon based on balance
@@ -59,7 +65,11 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
           <div className="border-t pt-2 mt-2 space-y-1">
             <div className="flex justify-between items-center text-xs text-muted-foreground gap-2">
               <span className="whitespace-nowrap">Gastos Gerais:</span>
-              <span className="break-all text-right">{formatCurrency(totalExpenses)}</span>
+              <span className="break-all text-right">{formatCurrency(totalGeneralExpenses)}</span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground gap-2">
+              <span className="whitespace-nowrap">Assinaturas:</span>
+              <span className="break-all text-right">{formatCurrency(totalSubscriptions)}</span>
             </div>
             <div className="flex justify-between items-center text-xs text-muted-foreground gap-2">
               <span className="whitespace-nowrap">Faturas de Cartão:</span>

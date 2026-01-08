@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type Expense } from "@/types/expense"
-import { Edit2, Trash2, Check, X, Calendar, CheckCircle2, Clock, RefreshCw } from "lucide-react"
+import { Edit2, Trash2, Check, X, Calendar, CheckCircle2, Clock, RefreshCw, Power } from "lucide-react"
 
 interface SubscriptionListProps {
   subscriptions: Expense[]
@@ -25,6 +25,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
     dueDate: "",
     status: "paid" as "paid" | "pending",
     recurringFrequency: "monthly" as "monthly" | "yearly",
+    isActive: true,
   })
 
   const startEdit = (subscription: Expense) => {
@@ -35,6 +36,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
       dueDate: subscription.dueDate || "",
       status: subscription.status || "paid",
       recurringFrequency: subscription.recurringFrequency || "monthly",
+      isActive: subscription.isActive !== false,
     })
   }
 
@@ -52,6 +54,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
       dueDate: editForm.dueDate,
       status: editForm.status,
       recurringFrequency: editForm.recurringFrequency,
+      isActive: editForm.isActive,
     })
 
     setEditingId(null)
@@ -59,7 +62,11 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditForm({ description: "", amount: "", dueDate: "", status: "paid", recurringFrequency: "monthly" })
+    setEditForm({ description: "", amount: "", dueDate: "", status: "paid", recurringFrequency: "monthly", isActive: true })
+  }
+
+  const toggleActive = (id: string, currentActive: boolean | undefined) => {
+    onUpdateSubscription(id, { isActive: !currentActive })
   }
 
   const formatCurrency = (amount: number) => {
@@ -167,6 +174,14 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                       />
                     </div>
 
+                    <div className="flex items-center justify-between p-2 bg-muted rounded">
+                      <Label className="text-xs">Assinatura Ativa</Label>
+                      <Switch
+                        checked={editForm.isActive}
+                        onCheckedChange={(checked) => setEditForm((prev) => ({ ...prev, isActive: checked }))}
+                      />
+                    </div>
+
                     <div className="flex gap-2">
                       <Button size="sm" onClick={saveEdit} className="bg-green-600 hover:bg-green-700 text-white">
                         <Check className="h-4 w-4" />
@@ -180,6 +195,12 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                   <>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        {subscription.isActive === false && (
+                          <Badge variant="outline" className="text-xs bg-gray-100 text-gray-800 border-gray-200">
+                            <X className="h-3 w-3 mr-1" />
+                            Inativa
+                          </Badge>
+                        )}
                         {subscription.status === "pending" && (
                           <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
                             <Clock className="h-3 w-3 mr-1" />
@@ -197,7 +218,9 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                           {subscription.recurringFrequency === "yearly" ? "Anual" : "Mensal"}
                         </Badge>
                       </div>
-                      <p className="font-medium text-foreground truncate text-lg">{subscription.description}</p>
+                      <p className={`font-medium truncate text-lg ${subscription.isActive === false ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                        {subscription.description}
+                      </p>
 
                       {subscription.dueDate && (
                         <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
@@ -206,11 +229,20 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                         </div>
                       )}
 
-                      <p className="text-xl font-bold text-foreground mt-2">
+                      <p className={`text-xl font-bold mt-2 ${subscription.isActive === false ? "text-muted-foreground" : "text-foreground"}`}>
                         {formatCurrency(subscription.amount)}/{subscription.recurringFrequency === "yearly" ? "ano" : "mês"}
                       </p>
                     </div>
                     <div className="flex gap-2 ml-4">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => toggleActive(subscription.id, subscription.isActive !== false)}
+                        className={`h-8 w-8 p-0 ${subscription.isActive === false ? "text-green-600 hover:text-green-700" : "text-gray-600 hover:text-gray-700"}`}
+                        title={subscription.isActive === false ? "Ativar assinatura" : "Inativar assinatura"}
+                      >
+                        <Power className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="outline" onClick={() => startEdit(subscription)} className="h-8 w-8 p-0">
                         <Edit2 className="h-4 w-4" />
                       </Button>

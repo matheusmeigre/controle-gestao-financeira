@@ -9,6 +9,7 @@ export interface Expense {
   isRecurring?: boolean // Indica se é recorrente
   recurringFrequency?: "monthly" | "yearly" // Frequência de recorrência: mensal ou anual
   dueDate?: string // Data de vencimento para Contas, Estudos e Assinaturas
+  isActive?: boolean // Indica se a assinatura está ativa (apenas para categoria Assinaturas)
 }
 
 export interface CardBill {
@@ -58,7 +59,6 @@ export const CATEGORIES = [
   "Saúde",
   "Compras",
   "Estudos",
-  "Assinaturas",
   "Outros",
 ] as const
 

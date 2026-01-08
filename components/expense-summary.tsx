@@ -32,6 +32,7 @@ export function ExpenseSummary({ expenses }: ExpenseSummaryProps) {
       Roupas: "#84cc16",
       Outros: "#f97316",
       Compras: "#a855f7",
+      Assinaturas: "#06b6d4",
     }
 
     return categoryColors[category] || "#6366f1"
