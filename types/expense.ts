@@ -7,6 +7,7 @@ export interface Expense {
   date: string
   status?: "paid" | "pending" // Status de pagamento
   isRecurring?: boolean // Indica se é recorrente
+  recurringFrequency?: "monthly" | "yearly" // Frequência de recorrência: mensal ou anual
   dueDate?: string // Data de vencimento para Contas, Estudos e Assinaturas
 }
 

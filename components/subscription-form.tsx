@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
 
 interface SubscriptionFormProps {
@@ -16,6 +17,7 @@ interface SubscriptionFormProps {
     category: "Assinaturas"
     status?: "paid" | "pending"
     isRecurring: boolean
+    recurringFrequency: "monthly" | "yearly"
     dueDate: string
   }) => void
 }
@@ -25,6 +27,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
   const [amount, setAmount] = useState("")
   const [dueDate, setDueDate] = useState("")
   const [status, setStatus] = useState<"paid" | "pending">("pending")
+  const [recurringFrequency, setRecurringFrequency] = useState<"monthly" | "yearly">("monthly")
   const [isRecurring] = useState(true) // Assinaturas são sempre recorrentes
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,6 +48,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
       category: "Assinaturas",
       status,
       isRecurring,
+      recurringFrequency,
       dueDate
     })
 
@@ -53,6 +57,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
     setAmount("")
     setDueDate("")
     setStatus("pending")
+    setRecurringFrequency("monthly")
   }
 
   return (
@@ -83,7 +88,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount" className="text-sm font-medium text-foreground">
-                Valor Mensal (R$)
+                Valor (R$)
               </Label>
               <Input
                 id="amount"
@@ -109,6 +114,21 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
                 className="h-12 text-base"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="frequency" className="text-sm font-medium text-foreground">
+              Frequência de Cobrança
+            </Label>
+            <Select value={recurringFrequency} onValueChange={(value: "monthly" | "yearly") => setRecurringFrequency(value)}>
+              <SelectTrigger className="h-12 text-base">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Mensal</SelectItem>
+                <SelectItem value="yearly">Anual</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">

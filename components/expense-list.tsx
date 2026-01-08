@@ -27,6 +27,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
     personName: "",
     status: "paid" as "paid" | "pending",
     isRecurring: false,
+    recurringFrequency: "monthly" as "monthly" | "yearly",
     dueDate: "",
   })
 
@@ -40,6 +41,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
       personName: expense.personName || "",
       status: expense.status || "paid",
       isRecurring: expense.isRecurring || false,
+      recurringFrequency: expense.recurringFrequency || "monthly",
       dueDate: expense.dueDate || "",
     })
   }
@@ -61,6 +63,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
       category: editForm.category,
       status: editForm.status,
       isRecurring: editForm.isRecurring,
+      ...(editForm.isRecurring && { recurringFrequency: editForm.recurringFrequency }),
       ...(needsDueDate && { dueDate: editForm.dueDate }),
       ...(editForm.category === "Cartão" && {
         cardName: editForm.cardName,
@@ -81,6 +84,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
       personName: "",
       status: "paid",
       isRecurring: false,
+      recurringFrequency: "monthly",
       dueDate: "",
     })
   }
@@ -212,6 +216,24 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                           onCheckedChange={(checked) => setEditForm((prev) => ({ ...prev, isRecurring: checked }))}
                         />
                       </div>
+
+                      {editForm.isRecurring && (
+                        <div className="space-y-1">
+                          <Label className="text-xs">Frequência</Label>
+                          <Select 
+                            value={editForm.recurringFrequency} 
+                            onValueChange={(value: "monthly" | "yearly") => setEditForm((prev) => ({ ...prev, recurringFrequency: value }))}
+                          >
+                            <SelectTrigger className="text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="monthly">Mensal</SelectItem>
+                              <SelectItem value="yearly">Anual</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
 
                     {editForm.category === "Cartão" && (
@@ -281,7 +303,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                         {expense.isRecurring && (
                           <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 border-blue-200">
                             <RefreshCw className="h-3 w-3 mr-1" />
-                            Recorrente
+                            {expense.recurringFrequency === "yearly" ? "Anual" : "Mensal"}
                           </Badge>
                         )}
                       </div>

@@ -19,6 +19,7 @@ interface ExpenseFormProps {
     category: string
     status?: "paid" | "pending"
     isRecurring?: boolean
+    recurringFrequency?: "monthly" | "yearly"
     dueDate?: string
   }) => void
 }
@@ -29,6 +30,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
   const [category, setCategory] = useState("")
   const [status, setStatus] = useState<"paid" | "pending">("paid")
   const [isRecurring, setIsRecurring] = useState(false)
+  const [recurringFrequency, setRecurringFrequency] = useState<"monthly" | "yearly">("monthly")
   const [dueDate, setDueDate] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -54,6 +56,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
       category,
       status,
       isRecurring,
+      ...(isRecurring && { recurringFrequency }),
       ...(needsDueDate && { dueDate })
     })
 
@@ -63,6 +66,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
     setCategory("")
     setStatus("paid")
     setIsRecurring(false)
+    setRecurringFrequency("monthly")
     setDueDate("")
   }
 
@@ -166,7 +170,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
                 Gasto Recorrente
               </Label>
               <p className="text-xs text-muted-foreground">
-                Se repete todo mês
+                Se repete periodicamente
               </p>
             </div>
             <Switch
@@ -175,6 +179,23 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
               onCheckedChange={setIsRecurring}
             />
           </div>
+
+          {isRecurring && (
+            <div className="space-y-2">
+              <Label htmlFor="frequency" className="text-sm font-medium text-foreground">
+                Frequência de Recorrência
+              </Label>
+              <Select value={recurringFrequency} onValueChange={(value: "monthly" | "yearly") => setRecurringFrequency(value)}>
+                <SelectTrigger className="h-12 text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Mensal</SelectItem>
+                  <SelectItem value="yearly">Anual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <Button
             type="submit"

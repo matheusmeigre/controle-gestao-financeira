@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { type Expense } from "@/types/expense"
 import { Edit2, Trash2, Check, X, Calendar, CheckCircle2, Clock, RefreshCw } from "lucide-react"
 
@@ -23,6 +24,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
     amount: "",
     dueDate: "",
     status: "paid" as "paid" | "pending",
+    recurringFrequency: "monthly" as "monthly" | "yearly",
   })
 
   const startEdit = (subscription: Expense) => {
@@ -32,6 +34,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
       amount: subscription.amount.toString(),
       dueDate: subscription.dueDate || "",
       status: subscription.status || "paid",
+      recurringFrequency: subscription.recurringFrequency || "monthly",
     })
   }
 
@@ -48,6 +51,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
       amount: numericAmount,
       dueDate: editForm.dueDate,
       status: editForm.status,
+      recurringFrequency: editForm.recurringFrequency,
     })
 
     setEditingId(null)
@@ -55,7 +59,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditForm({ description: "", amount: "", dueDate: "", status: "paid" })
+    setEditForm({ description: "", amount: "", dueDate: "", status: "paid", recurringFrequency: "monthly" })
   }
 
   const formatCurrency = (amount: number) => {
@@ -138,17 +142,33 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                         />
                       </div>
 
-                      <div className="flex items-center justify-between p-2 bg-muted rounded">
-                        <Label className="text-xs">Pago este mês</Label>
-                        <Switch
-                          checked={editForm.status === "paid"}
-                          onCheckedChange={(checked) => setEditForm((prev) => ({ ...prev, status: checked ? "paid" : "pending" }))}
-                        />
+                      <div className="space-y-1">
+                        <Label className="text-xs">Frequência</Label>
+                        <Select 
+                          value={editForm.recurringFrequency} 
+                          onValueChange={(value: "monthly" | "yearly") => setEditForm((prev) => ({ ...prev, recurringFrequency: value }))}
+                        >
+                          <SelectTrigger className="text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="monthly">Mensal</SelectItem>
+                            <SelectItem value="yearly">Anual</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
 
+                    <div className="flex items-center justify-between p-2 bg-muted rounded">
+                      <Label className="text-xs">Pago este mês</Label>
+                      <Switch
+                        checked={editForm.status === "paid"}
+                        onCheckedChange={(checked) => setEditForm((prev) => ({ ...prev, status: checked ? "paid" : "pending" }))}
+                      />
+                    </div>
+
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={saveEdit} className="bg-accent hover:bg-accent/90">
+                      <Button size="sm" onClick={saveEdit} className="bg-green-600 hover:bg-green-700 text-white">
                         <Check className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="outline" onClick={cancelEdit}>
@@ -174,7 +194,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                         )}
                         <Badge variant="outline" className="text-xs bg-cyan-100 text-cyan-800 border-cyan-200">
                           <RefreshCw className="h-3 w-3 mr-1" />
-                          Mensal
+                          {subscription.recurringFrequency === "yearly" ? "Anual" : "Mensal"}
                         </Badge>
                       </div>
                       <p className="font-medium text-foreground truncate text-lg">{subscription.description}</p>
@@ -186,7 +206,9 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                         </div>
                       )}
 
-                      <p className="text-xl font-bold text-foreground mt-2">{formatCurrency(subscription.amount)}/mês</p>
+                      <p className="text-xl font-bold text-foreground mt-2">
+                        {formatCurrency(subscription.amount)}/{subscription.recurringFrequency === "yearly" ? "ano" : "mês"}
+                      </p>
                     </div>
                     <div className="flex gap-2 ml-4">
                       <Button size="sm" variant="outline" onClick={() => startEdit(subscription)} className="h-8 w-8 p-0">
