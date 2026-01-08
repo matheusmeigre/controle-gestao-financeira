@@ -126,6 +126,12 @@ export default function HomePage() {
     setCardBills((prev) => prev.filter((bill) => bill.id !== id))
   }
 
+  const updateCardBill = (id: string, updates: Partial<CardBill>) => {
+    setCardBills((prev) =>
+      prev.map((bill) => (bill.id === id ? { ...bill, ...updates } : bill))
+    )
+  }
+
   const deleteIncome = (id: string) => {
     setIncomes((prev) => prev.filter((income) => income.id !== id))
   }
@@ -320,7 +326,11 @@ export default function HomePage() {
               </div>
 
               <div className="order-2">
-                <CardBillsListV2 cardBills={filteredCardBills} onDeleteCardBill={deleteCardBill} />
+                <CardBillsListV2 
+                  cardBills={filteredCardBills} 
+                  onDeleteCardBill={deleteCardBill}
+                  onUpdateCardBill={updateCardBill}
+                />
               </div>
             </div>
           </TabsContent>
