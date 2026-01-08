@@ -1,20 +1,17 @@
 "use client"
 
-import { ScrollArea } from "@/components/ui/scroll-area"
-
 export function PrivacyPolicy() {
   return (
-    <ScrollArea className="h-full w-full">
-      <div className="space-y-6 text-sm leading-relaxed p-6">
-        <div className="text-center space-y-2 mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Política de Privacidade</h1>
-          <p className="text-xs text-muted-foreground">
-            Meu Controle Financeiro
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Última atualização: Janeiro de 2026
-          </p>
-        </div>
+    <div className="space-y-6 text-sm leading-relaxed p-6 max-w-4xl mx-auto">
+      <div className="text-center space-y-2 mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Política de Privacidade</h1>
+        <p className="text-xs text-muted-foreground">
+          Meu Controle Financeiro
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Última atualização: Janeiro de 2026
+        </p>
+      </div>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">1. Introdução</h2>
@@ -298,6 +295,5 @@ export function PrivacyPolicy() {
           </p>
         </section>
       </div>
-    </ScrollArea>
   )
 }
