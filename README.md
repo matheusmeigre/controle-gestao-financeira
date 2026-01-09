@@ -8,6 +8,11 @@ Aplicação web moderna para controle de gastos pessoais, rendas e faturas de ca
 ![Clerk](https://img.shields.io/badge/Auth-Clerk-6C47FF?logo=clerk)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss)
 
+<img width="1898" height="903" alt="image" src="https://github.com/user-attachments/assets/d8e8d701-1e51-47ae-a676-1a26f4c7886d" />
+<img width="1917" height="905" alt="image" src="https://github.com/user-attachments/assets/b7085d5f-4697-48cd-850a-adfe629eef44" />
+
+
+
 ---
 
 ## ✨ Features
