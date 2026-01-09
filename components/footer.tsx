@@ -39,62 +39,82 @@ export function Footer() {
       </footer>
 
       {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
-            <CardHeader className="border-b flex-shrink-0 pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-primary" />
-                  Termos de Uso e Privacidade
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowTermsModal(false)}
-                  className="h-8 w-8"
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-4xl my-8">
+            <Card className="flex flex-col shadow-2xl max-h-[90vh]">
+              <CardHeader className="border-b flex-shrink-0 pb-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                    <Shield className="h-6 w-6 text-primary" />
+                    Termos de Uso e Privacidade
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowTermsModal(false)}
+                    className="h-8 w-8 shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Consulte nossos termos de uso e política de privacidade.
+                </p>
+              </CardHeader>
+
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <Tabs 
+                  value={activeTab} 
+                  onValueChange={(v) => setActiveTab(v as "terms" | "privacy")} 
+                  className="h-full flex flex-col"
                 >
-                  <X className="h-4 w-4" />
+                  <TabsList className="grid w-full grid-cols-2 rounded-none border-b shrink-0 mx-4 mt-4">
+                    <TabsTrigger value="terms" className="flex items-center gap-2 text-xs sm:text-sm">
+                      <ScrollText className="h-4 w-4" />
+                      <span>Termos de Uso</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="privacy" className="flex items-center gap-2 text-xs sm:text-sm">
+                      <Shield className="h-4 w-4" />
+                      <span>Política de Privacidade</span>
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <div className="flex-1 overflow-y-auto">
+                    <TabsContent 
+                      value="terms" 
+                      className="h-full m-0 p-6 focus-visible:outline-none"
+                      style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgb(203 213 225) transparent'
+                      }}
+                    >
+                      <TermsOfUse />
+                    </TabsContent>
+
+                    <TabsContent 
+                      value="privacy" 
+                      className="h-full m-0 p-6 focus-visible:outline-none"
+                      style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgb(203 213 225) transparent'
+                      }}
+                    >
+                      <PrivacyPolicy />
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </div>
+
+              <div className="border-t p-4 flex-shrink-0 bg-muted/20">
+                <Button
+                  onClick={() => setShowTermsModal(false)}
+                  className="w-full bg-primary hover:bg-primary/90"
+                >
+                  Fechar
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Consulte nossos termos de uso e política de privacidade.
-              </p>
-            </CardHeader>
-
-            <CardContent className="flex-1 overflow-hidden p-0">
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "terms" | "privacy")} className="h-full flex flex-col">
-                <TabsList className="grid w-full grid-cols-2 rounded-none border-b px-4 pt-4">
-                  <TabsTrigger value="terms" className="flex items-center gap-2 text-xs sm:text-sm">
-                    <ScrollText className="h-4 w-4" />
-                    <span>Termos de Uso</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="privacy" className="flex items-center gap-2 text-xs sm:text-sm">
-                    <Shield className="h-4 w-4" />
-                    <span>Política de Privacidade</span>
-                  </TabsTrigger>
-                </TabsList>
-
-                <div className="flex-1 overflow-hidden">
-                  <TabsContent value="terms" className="h-full m-0">
-                    <TermsOfUse />
-                  </TabsContent>
-
-                  <TabsContent value="privacy" className="h-full m-0">
-                    <PrivacyPolicy />
-                  </TabsContent>
-                </div>
-              </Tabs>
-            </CardContent>
-
-            <div className="border-t p-4 flex-shrink-0">
-              <Button
-                onClick={() => setShowTermsModal(false)}
-                className="w-full bg-primary hover:bg-primary/90"
-              >
-                Fechar
-              </Button>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       )}
     </>
