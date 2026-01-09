@@ -2,7 +2,7 @@
 
 export function TermsOfUse() {
   return (
-    <div className="space-y-6 text-sm leading-relaxed p-6 max-w-4xl mx-auto">
+    <div className="space-y-6 text-sm leading-relaxed max-w-4xl mx-auto">
       <div className="text-center space-y-2 mb-6">
         <h1 className="text-2xl font-bold text-foreground">Termos de Uso</h1>
         <p className="text-xs text-muted-foreground">

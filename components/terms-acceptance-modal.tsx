@@ -36,6 +36,27 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
     }
   }, [])
 
+  // Check scroll state when switching tabs
+  useEffect(() => {
+    const checkScroll = () => {
+      const scrollElement = activeTab === "terms" ? termsScrollRef.current : privacyScrollRef.current
+      if (!scrollElement) return
+
+      const { scrollTop, scrollHeight, clientHeight } = scrollElement
+      const isAtBottom = Math.abs(scrollHeight - clientHeight - scrollTop) < 10
+      
+      if (activeTab === "terms" && isAtBottom && !hasScrolledTermsToEnd) {
+        setHasScrolledTermsToEnd(true)
+      } else if (activeTab === "privacy" && isAtBottom && !hasScrolledPrivacyToEnd) {
+        setHasScrolledPrivacyToEnd(true)
+      }
+    }
+
+    // Small delay to ensure content is rendered
+    const timer = setTimeout(checkScroll, 100)
+    return () => clearTimeout(timer)
+  }, [activeTab, hasScrolledTermsToEnd, hasScrolledPrivacyToEnd])
+
   // Detect scroll to bottom for Terms
   useEffect(() => {
     const scrollElement = termsScrollRef.current
@@ -117,11 +138,11 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative max-h-[50vh]">
               <TabsContent value="terms" className="h-full m-0 p-0 data-[state=active]:block">
                 <div 
                   ref={termsScrollRef} 
-                  className="h-full overflow-y-scroll pr-2 terms-scroll"
+                  className="h-full overflow-y-scroll pr-2 terms-scroll p-4"
                   style={{
                     scrollbarWidth: 'thin',
                     scrollbarColor: 'rgb(203 213 225) transparent'
@@ -141,7 +162,7 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
               <TabsContent value="privacy" className="h-full m-0 p-0 data-[state=active]:block">
                 <div 
                   ref={privacyScrollRef} 
-                  className="h-full overflow-y-scroll pr-2 terms-scroll"
+                  className="h-full overflow-y-scroll pr-2 terms-scroll p-4"
                   style={{
                     scrollbarWidth: 'thin',
                     scrollbarColor: 'rgb(203 213 225) transparent'
