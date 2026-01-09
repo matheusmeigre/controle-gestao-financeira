@@ -63,8 +63,8 @@ function DocumentModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <Card className="w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+      <Card className="w-full max-w-4xl my-8 flex flex-col shadow-2xl relative">
         <CardHeader className="shrink-0 pb-4 space-y-2 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -85,7 +85,7 @@ function DocumentModal({
           </p>
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-hidden p-0 relative">
+        <CardContent className="overflow-hidden p-0 relative" style={{ maxHeight: 'calc(85vh - 180px)' }}>
           <div 
             ref={scrollRef}
             className="h-full overflow-y-scroll p-6 terms-scroll"
@@ -142,16 +142,6 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    
-    return () => {
-      document.body.style.overflow = originalOverflow
-    }
-  }, [])
-
   const canAccept = hasReadTerms && hasReadPrivacy && acceptedTerms && acceptedPrivacy
 
 
@@ -175,8 +165,8 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
         <PrivacyPolicy />
       </DocumentModal>
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-        <Card className="w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+        <Card className="w-full max-w-3xl my-8 flex flex-col shadow-2xl relative">
           <CardHeader className="shrink-0 pb-4 space-y-2 border-b">
             <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
               <Shield className="h-6 w-6 text-primary" />
