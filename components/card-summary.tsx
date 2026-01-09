@@ -95,8 +95,8 @@ export function CardSummary({ cardBills }: CardSummaryProps) {
         <Card className="shadow-sm border-border">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+              <div className="p-1.5 sm:p-2 bg-green-100 dark:bg-green-950/30 rounded-lg flex-shrink-0">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-500" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Total Dividido</p>
@@ -109,8 +109,8 @@ export function CardSummary({ cardBills }: CardSummaryProps) {
         <Card className="shadow-sm border-border">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              <div className="p-1.5 sm:p-2 bg-blue-100 dark:bg-blue-950/30 rounded-lg flex-shrink-0">
+                <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-500" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Cartões Ativos</p>
