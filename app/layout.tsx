@@ -4,8 +4,7 @@ import { Inter } from "next/font/google"
 import { JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
-import { ClerkProvider } from "@clerk/nextjs"
-import "./globals.css"
+import { ClerkProvider } from "@clerk/nextjs"import { ThemeProvider } from "@/components/theme-provider"import "./globals.css"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -46,10 +45,17 @@ export default function RootLayout({
         card: 'shadow-lg'
       }
     }}>
-      <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
         <body className="font-sans antialiased">
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-          <Analytics />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <Analytics />
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

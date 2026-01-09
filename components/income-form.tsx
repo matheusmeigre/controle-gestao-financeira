@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { PlusCircle, DollarSign } from "lucide-react"
 import type { Income } from "@/types/expense"
 import { INCOME_CATEGORIES } from "@/types/expense"
@@ -19,7 +20,7 @@ interface IncomeFormProps {
 
 export function IncomeForm({ onAddIncome }: IncomeFormProps) {
   const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
+  const [amount, setAmount] = useState(0)
   const [type, setType] = useState<"salary" | "extra">("salary")
   const [category, setCategory] = useState("")
   const [isReceived, setIsReceived] = useState(false)
@@ -27,7 +28,7 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!description.trim() || !amount || Number.parseFloat(amount) <= 0 || !category) {
+    if (!description.trim() || amount <= 0 || !category) {
       return
     }
 
@@ -35,7 +36,7 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
 
     onAddIncome({
       description: description.trim(),
-      amount: Number.parseFloat(amount),
+      amount,
       type,
       category,
       status: isReceived ? "received" : "pending",
@@ -45,7 +46,7 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
 
     // Reset form
     setDescription("")
-    setAmount("")
+    setAmount(0)
     setType("salary")
     setCategory("")
     setIsReceived(false)
@@ -103,16 +104,11 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="income-amount">Valor (R$)</Label>
-            <Input
+            <Label htmlFor="income-amount">Valor</Label>
+            <CurrencyInput
               id="income-amount"
-              type="number"
-              step="0.01"
-              min="0.01"
-              placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              required
+              onChange={setAmount}
             />
           </div>
 

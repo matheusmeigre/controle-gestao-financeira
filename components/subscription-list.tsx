@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { type Expense } from "@/types/expense"
 import { Edit2, Trash2, Check, X, Calendar, CheckCircle2, Clock, RefreshCw, Power } from "lucide-react"
 
@@ -22,7 +23,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     description: "",
-    amount: "",
+    amount: 0,
     dueDate: "",
     status: "paid" as "paid" | "pending",
     recurringFrequency: "monthly" as "monthly" | "yearly",
@@ -34,7 +35,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
     setEditingId(subscription.id)
     setEditForm({
       description: subscription.description,
-      amount: subscription.amount.toString(),
+      amount: subscription.amount,
       dueDate: subscription.dueDate || "",
       status: subscription.status || "paid",
       recurringFrequency: subscription.recurringFrequency || "monthly",
@@ -46,14 +47,13 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
   const saveEdit = () => {
     if (!editingId) return
 
-    const numericAmount = Number.parseFloat(editForm.amount.replace(",", "."))
-    if (isNaN(numericAmount) || numericAmount <= 0) return
+    if (editForm.amount <= 0) return
 
     if (!editForm.dueDate) return
 
     onUpdateSubscription(editingId, {
       description: editForm.description.trim(),
-      amount: numericAmount,
+      amount: editForm.amount,
       dueDate: editForm.dueDate,
       status: editForm.status,
       recurringFrequency: editForm.recurringFrequency,
@@ -66,7 +66,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditForm({ description: "", amount: "", dueDate: "", status: "paid", recurringFrequency: "monthly", isActive: true, notes: "" })
+    setEditForm({ description: "", amount: 0, dueDate: "", status: "paid", recurringFrequency: "monthly", isActive: true, notes: "" })
   }
 
   const toggleActive = (id: string, currentActive: boolean | undefined) => {
@@ -132,13 +132,10 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                         className="text-sm"
                         placeholder="Nome da assinatura"
                       />
-                      <Input
-                        type="number"
-                        step="0.01"
+                      <CurrencyInput
                         value={editForm.amount}
-                        onChange={(e) => setEditForm((prev) => ({ ...prev, amount: e.target.value }))}
+                        onChange={(value) => setEditForm((prev) => ({ ...prev, amount: value }))}
                         className="text-sm"
-                        placeholder="Valor"
                       />
                     </div>
 

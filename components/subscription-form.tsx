@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { Plus } from "lucide-react"
 
 interface SubscriptionFormProps {
@@ -27,7 +28,7 @@ interface SubscriptionFormProps {
 
 export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
   const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
+  const [amount, setAmount] = useState(0)
   const [dueDate, setDueDate] = useState("")
   const [status, setStatus] = useState<"paid" | "pending">("pending")
   const [recurringFrequency, setRecurringFrequency] = useState<"monthly" | "yearly">("monthly")
@@ -37,18 +38,13 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!description.trim() || !amount || !dueDate) {
-      return
-    }
-
-    const numericAmount = Number.parseFloat(amount.replace(",", "."))
-    if (isNaN(numericAmount) || numericAmount <= 0) {
+    if (!description.trim() || amount <= 0 || !dueDate) {
       return
     }
 
     onAddSubscription({
       description: description.trim(),
-      amount: numericAmount,
+      amount,
       category: "Assinaturas",
       status,
       isRecurring,
@@ -60,7 +56,7 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
 
     // Clear form for next entry
     setDescription("")
-    setAmount("")
+    setAmount(0)
     setDueDate("")
     setStatus("pending")
     setRecurringFrequency("monthly")
@@ -95,16 +91,12 @@ export function SubscriptionForm({ onAddSubscription }: SubscriptionFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount" className="text-sm font-medium text-foreground">
-                Valor (R$)
+                Valor
               </Label>
-              <Input
+              <CurrencyInput
                 id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0,00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={setAmount}
                 className="h-12 text-base"
               />
             </div>
