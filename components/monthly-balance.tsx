@@ -34,14 +34,18 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
   // Determine color and icon based on balance
   const isPositive = balance > 0
   const isNeutral = balance === 0
-  const balanceColor = isPositive ? "text-green-600" : isNeutral ? "text-muted-foreground" : "text-red-600"
-  const balanceBgColor = isPositive ? "bg-green-50" : isNeutral ? "bg-muted" : "bg-red-50"
+  const balanceColor = isPositive ? "text-green-600 dark:text-green-500" : isNeutral ? "text-muted-foreground" : "text-red-600 dark:text-red-500"
+  const balanceBgColor = isPositive 
+    ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800/50" 
+    : isNeutral 
+    ? "bg-muted dark:bg-slate-800/50" 
+    : "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/50"
   const BalanceIcon = isPositive ? TrendingUp : isNeutral ? Minus : TrendingDown
 
   return (
     <Card className={balanceBgColor}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xs sm:text-sm md:text-base font-medium">Saldo do Mês</CardTitle>
+        <CardTitle className="text-xs sm:text-sm md:text-base font-medium text-foreground">Saldo do Mês</CardTitle>
         <Wallet className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${balanceColor} flex-shrink-0`} />
       </CardHeader>
       <CardContent>
@@ -52,13 +56,13 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
         <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 text-sm">
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground text-xs sm:text-sm">Receitas:</span>
-            <span className="font-medium text-green-600 text-xs sm:text-sm break-words text-right">
+            <span className="font-medium text-green-600 dark:text-green-500 text-xs sm:text-sm break-words text-right">
               {formatCurrency(totalIncome)}
             </span>
           </div>
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground text-xs sm:text-sm">Despesas:</span>
-            <span className="font-medium text-red-600 text-xs sm:text-sm break-words text-right">
+            <span className="font-medium text-red-600 dark:text-red-500 text-xs sm:text-sm break-words text-right">
               -{formatCurrency(totalOutflow)}
             </span>
           </div>
@@ -77,7 +81,7 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
             </div>
           </div>
         </div>
-        {isPositive && <p className="text-xs text-green-600 mt-2 sm:mt-3 font-medium">Você está economizando este mês!</p>}
+        {isPositive && <p className="text-xs text-green-600 dark:text-green-500 mt-2 sm:mt-3 font-medium">Você está economizando este mês!</p>}
         {!isPositive && !isNeutral && (
           <p className="text-xs text-red-600 mt-3 font-medium">Atenção: suas despesas superam suas receitas</p>
         )}
