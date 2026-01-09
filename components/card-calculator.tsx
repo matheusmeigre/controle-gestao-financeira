@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calculator, Plus, Delete as Delete2, ArrowRight, Trash2, DivideIcon, Users } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
+import { CurrencyInput } from "@/components/ui/currency-input"
 
 interface CardCalculatorProps {
   onApplyTotal: (total: number, divisions?: { personName: string; amount: number }[]) => void
@@ -214,7 +215,7 @@ export function CardCalculator({ onApplyTotal }: CardCalculatorProps) {
     const newPeople = [...splitPeople]
     newPeople[index] = {
       ...newPeople[index],
-      [field]: field === "name" ? value : Number(value),
+      [field]: field === "name" ? value : (typeof value === 'number' ? value : Number(value)),
     }
     setSplitPeople(newPeople)
   }
@@ -577,13 +578,9 @@ export function CardCalculator({ onApplyTotal }: CardCalculatorProps) {
                             className="h-10 flex-1"
                           />
                           {splitMethod === "custom" && (
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0,00"
-                              value={person.amount || ""}
-                              onChange={(e) => handleSplitPersonChange(index, "amount", e.target.value)}
+                            <CurrencyInput
+                              value={typeof person.amount === 'number' ? person.amount : 0}
+                              onChange={(value) => handleSplitPersonChange(index, "amount", value)}
                               className="h-10 flex-1"
                             />
                           )}

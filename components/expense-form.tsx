@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { CATEGORIES } from "@/types/expense"
 import { Plus } from "lucide-react"
 
@@ -26,7 +27,7 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
   const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
+  const [amount, setAmount] = useState(0)
   const [category, setCategory] = useState("")
   const [status, setStatus] = useState<"paid" | "pending">("paid")
   const [isRecurring, setIsRecurring] = useState(false)
@@ -36,12 +37,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!description.trim() || !amount || !category) {
-      return
-    }
-
-    const numericAmount = Number.parseFloat(amount.replace(",", "."))
-    if (isNaN(numericAmount) || numericAmount <= 0) {
+    if (!description.trim() || amount <= 0 || !category) {
       return
     }
 
@@ -52,7 +48,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
 
     onAddExpense({
       description: description.trim(),
-      amount: numericAmount,
+      amount,
       category,
       status,
       isRecurring,
@@ -62,7 +58,7 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
 
     // Clear form for next entry
     setDescription("")
-    setAmount("")
+    setAmount(0)
     setCategory("")
     setStatus("paid")
     setIsRecurring(false)
@@ -97,16 +93,12 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="amount" className="text-sm font-medium text-foreground">
-              Valor (R$)
+              Valor
             </Label>
-            <Input
+            <CurrencyInput
               id="amount"
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={setAmount}
               className="h-12 text-base"
             />
           </div>

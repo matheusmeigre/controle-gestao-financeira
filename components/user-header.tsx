@@ -2,12 +2,13 @@
 
 import { UserButton, useUser } from "@clerk/nextjs"
 import { LogOut } from "lucide-react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export function UserHeader() {
   const { user } = useUser()
 
   return (
-    <header className="border-b bg-white/50 backdrop-blur-sm sticky top-0 z-50">
+    <header className="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 max-w-6xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -15,16 +16,17 @@ export function UserHeader() {
               {user?.firstName?.[0] || user?.emailAddresses[0]?.emailAddress[0].toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                 {user?.firstName || user?.emailAddresses[0]?.emailAddress.split('@')[0]}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {user?.emailAddresses[0]?.emailAddress}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <UserButton 
               afterSignOutUrl="/sign-in"
               appearance={{

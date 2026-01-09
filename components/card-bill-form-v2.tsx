@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { CARD_OPTIONS, PERSON_OPTIONS, CATEGORIES, type CardBill, type CardBillItem } from "@/types/expense"
 import { CreditCard, Plus, Receipt, Trash2, Edit2, Check, X } from 'lucide-react'
 
@@ -24,7 +25,7 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
   // Formulário temporário para adicionar item
   const [newItem, setNewItem] = useState({
     description: "",
-    amount: "",
+    amount: 0,
     category: "",
     personName: ""
   })
@@ -33,20 +34,20 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     description: "",
-    amount: "",
+    amount: 0,
     category: "",
     personName: ""
   })
 
   const handleAddItem = () => {
-    if (!newItem.description.trim() || !newItem.amount || !newItem.category || !newItem.personName) {
+    if (!newItem.description.trim() || newItem.amount <= 0 || !newItem.category || !newItem.personName) {
       return
     }
 
     const itemToAdd = {
       tempId: Date.now().toString(),
       description: newItem.description.trim(),
-      amount: Number.parseFloat(newItem.amount),
+      amount: newItem.amount,
       category: newItem.category,
       personName: newItem.personName
     }
@@ -56,7 +57,7 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
     // Limpar formulário
     setNewItem({
       description: "",
-      amount: "",
+      amount: 0,
       category: "",
       personName: ""
     })
@@ -70,14 +71,14 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
     setEditingId(item.tempId)
     setEditForm({
       description: item.description,
-      amount: item.amount.toString(),
+      amount: item.amount,
       category: item.category,
       personName: item.personName
     })
   }
 
   const saveEdit = (tempId: string) => {
-    if (!editForm.description.trim() || !editForm.amount || !editForm.category || !editForm.personName) {
+    if (!editForm.description.trim() || editForm.amount <= 0 || !editForm.category || !editForm.personName) {
       return
     }
 
@@ -86,7 +87,7 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
         ? {
             ...item,
             description: editForm.description.trim(),
-            amount: Number.parseFloat(editForm.amount),
+            amount: editForm.amount,
             category: editForm.category,
             personName: editForm.personName
           }
@@ -246,14 +247,10 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
                   </div>
 
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Valor (R$) *</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0,00"
+                    <Label className="text-xs text-muted-foreground">Valor *</Label>
+                    <CurrencyInput
                       value={newItem.amount}
-                      onChange={(e) => setNewItem({...newItem, amount: e.target.value})}
+                      onChange={(value) => setNewItem({...newItem, amount: value})}
                       className="h-10"
                     />
                   </div>
@@ -336,12 +333,9 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
                               onChange={(e) => setEditForm({...editForm, description: e.target.value})}
                               className="h-9 text-sm"
                             />
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="Valor"
+                            <CurrencyInput
                               value={editForm.amount}
-                              onChange={(e) => setEditForm({...editForm, amount: e.target.value})}
+                              onChange={(value) => setEditForm({...editForm, amount: value})}
                               className="h-9 text-sm"
                             />
                           </div>

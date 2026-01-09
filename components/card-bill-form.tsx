@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { CARD_OPTIONS, type CardBill, type PersonDivision } from "@/types/expense"
 import { CreditCard, Plus, Minus, Receipt } from 'lucide-react'
 import { CardCalculator } from "./card-calculator"
@@ -18,7 +19,7 @@ interface CardBillFormProps {
 
 export function CardBillForm({ onAddCardBill }: CardBillFormProps) {
   const [cardName, setCardName] = useState("")
-  const [totalAmount, setTotalAmount] = useState("")
+  const [totalAmount, setTotalAmount] = useState(0)
   const [description, setDescription] = useState("")
   const [divisions, setDivisions] = useState<PersonDivision[]>([{ personName: "", amount: 0 }])
 
@@ -43,19 +44,13 @@ export function CardBillForm({ onAddCardBill }: CardBillFormProps) {
   }
 
   const getRemainingAmount = () => {
-    const total = Number.parseFloat(totalAmount.replace(",", ".")) || 0
-    return total - getTotalDivisions()
+    return totalAmount - getTotalDivisions()
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!cardName || !totalAmount || !description.trim()) {
-      return
-    }
-
-    const numericTotal = Number.parseFloat(totalAmount.replace(",", "."))
-    if (isNaN(numericTotal) || numericTotal <= 0) {
+    if (!cardName || totalAmount <= 0 || !description.trim()) {
       return
     }
 
@@ -66,20 +61,20 @@ export function CardBillForm({ onAddCardBill }: CardBillFormProps) {
 
     onAddCardBill({
       cardName,
-      totalAmount: numericTotal,
+      totalAmount,
       description: description.trim(),
       divisions: validDivisions,
     })
 
     // Clear form
     setCardName("")
-    setTotalAmount("")
+    setTotalAmount(0)
     setDescription("")
     setDivisions([{ personName: "", amount: 0 }])
   }
 
   const handleApplyCalculatorTotal = (total: number, divisions?: { personName: string; amount: number }[]) => {
-    setTotalAmount(total.toString())
+    setTotalAmount(total)
     if (divisions && divisions.length > 0) {
       setDivisions(divisions)
     }
@@ -119,16 +114,12 @@ export function CardBillForm({ onAddCardBill }: CardBillFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="totalAmount" className="text-sm font-medium text-foreground">
-                Valor Total da Fatura (R$)
+                Valor Total da Fatura
               </Label>
-              <Input
+              <CurrencyInput
                 id="totalAmount"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0,00"
                 value={totalAmount}
-                onChange={(e) => setTotalAmount(e.target.value)}
+                onChange={setTotalAmount}
                 className="h-12 text-base"
               />
             </div>
@@ -181,14 +172,10 @@ export function CardBillForm({ onAddCardBill }: CardBillFormProps) {
                 </div>
 
                 <div className="flex-1 space-y-2">
-                  <Label className="text-sm text-muted-foreground">Valor (R$)</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0,00"
-                    value={division.amount || ""}
-                    onChange={(e) => handleDivisionChange(index, "amount", Number.parseFloat(e.target.value) || 0)}
+                  <Label className="text-sm text-muted-foreground">Valor</Label>
+                  <CurrencyInput
+                    value={division.amount || 0}
+                    onChange={(value) => handleDivisionChange(index, "amount", value)}
                     className="h-10"
                   />
                 </div>

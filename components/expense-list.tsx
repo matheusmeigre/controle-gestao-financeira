@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import { type Expense, CATEGORIES, CARD_OPTIONS, PERSON_OPTIONS } from "@/types/expense"
 import { Edit2, Trash2, Check, X, Receipt, CreditCard, User, Calendar, RefreshCw, CheckCircle2, Clock } from "lucide-react"
 
@@ -21,7 +22,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState({
     description: "",
-    amount: "",
+    amount: 0,
     category: "",
     cardName: "",
     personName: "",
@@ -35,7 +36,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
     setEditingId(expense.id)
     setEditForm({
       description: expense.description,
-      amount: expense.amount.toString(),
+      amount: expense.amount,
       category: expense.category,
       cardName: expense.cardName || "",
       personName: expense.personName || "",
@@ -49,8 +50,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
   const saveEdit = () => {
     if (!editingId) return
 
-    const numericAmount = Number.parseFloat(editForm.amount.replace(",", "."))
-    if (isNaN(numericAmount) || numericAmount <= 0) return
+    if (editForm.amount <= 0) return
 
     if (editForm.category === "Cartão" && (!editForm.cardName || !editForm.personName)) return
 
@@ -59,7 +59,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
 
     onUpdateExpense(editingId, {
       description: editForm.description.trim(),
-      amount: numericAmount,
+      amount: editForm.amount,
       category: editForm.category,
       status: editForm.status,
       isRecurring: editForm.isRecurring,
@@ -153,13 +153,10 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                         className="text-sm"
                         placeholder="Descrição"
                       />
-                      <Input
-                        type="number"
-                        step="0.01"
+                      <CurrencyInput
                         value={editForm.amount}
-                        onChange={(e) => setEditForm((prev) => ({ ...prev, amount: e.target.value }))}
+                        onChange={(value) => setEditForm((prev) => ({ ...prev, amount: value }))}
                         className="text-sm"
-                        placeholder="Valor"
                       />
                       <Select
                         value={editForm.category}

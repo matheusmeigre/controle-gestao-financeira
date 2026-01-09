@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { CurrencyInput } from "@/components/ui/currency-input"
 import type { CardBill, CardBillItem } from "@/types/expense"
 import { CARD_OPTIONS, PERSON_OPTIONS, CATEGORIES } from "@/types/expense"
 import { CreditCard, Trash2, Calendar, Users, ChevronDown, ChevronUp, Package, Edit2, Check, X, Plus } from "lucide-react"
@@ -32,7 +33,7 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
     items: [] as (Omit<CardBillItem, "id"> & { tempId: string; id?: string })[],
     newItem: {
       description: "",
-      amount: "",
+      amount: 0,
       category: "",
       personName: ""
     }
@@ -107,7 +108,7 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
 
   const handleAddItemInEdit = () => {
     const { description, amount, category, personName } = editForm.newItem
-    if (!description || !amount || !category || !personName) {
+    if (!description || !amount || amount <= 0 || !category || !personName) {
       alert("Preencha todos os campos do item")
       return
     }
@@ -115,7 +116,7 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
     const newItem = {
       tempId: `new-${Date.now()}`,
       description,
-      amount: parseFloat(amount),
+      amount: typeof amount === 'number' ? amount : parseFloat(amount as any),
       category,
       personName
     }
@@ -125,7 +126,7 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
       items: [...prev.items, newItem],
       newItem: {
         description: "",
-        amount: "",
+        amount: 0,
         category: "",
         personName: ""
       }
@@ -264,15 +265,12 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
 
                     <div className="grid gap-2">
                       <Label htmlFor={`new-item-amount-${bill.id}`} className="text-sm">Valor</Label>
-                      <Input
+                      <CurrencyInput
                         id={`new-item-amount-${bill.id}`}
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={editForm.newItem.amount}
-                        onChange={(e) => setEditForm(prev => ({
+                        value={typeof editForm.newItem.amount === 'number' ? editForm.newItem.amount : 0}
+                        onChange={(value) => setEditForm(prev => ({
                           ...prev,
-                          newItem: { ...prev.newItem, amount: e.target.value }
+                          newItem: { ...prev.newItem, amount: value }
                         }))}
                       />
                     </div>
