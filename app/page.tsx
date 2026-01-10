@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
+import Link from "next/link"
 import { ExpenseForm } from "@/components/expense-form"
 import { ExpenseList } from "@/components/expense-list"
 import { ExpenseSummary } from "@/components/expense-summary"
@@ -18,9 +19,10 @@ import { SubscriptionList } from "@/components/subscription-list"
 import { SubscriptionSummary } from "@/components/subscription-summary"
 import { CategoryFilter } from "@/components/category-filter"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import type { Expense, CardBill, Income } from "@/types/expense"
 import { CATEGORIES, INCOME_CATEGORIES } from "@/types/expense"
-import { Receipt, CreditCard, DollarSign, RefreshCw } from "lucide-react"
+import { Receipt, CreditCard, DollarSign, RefreshCw, Wallet } from "lucide-react"
 import { UserHeader } from "@/components/user-header"
 import { WelcomeModal } from "@/components/welcome-modal"
 import { TermsAcceptanceModal } from "@/components/terms-acceptance-modal"
@@ -251,33 +253,50 @@ export default function HomePage() {
           <ExportManager expenses={expenses} cardBills={cardBills} incomes={incomes} />
         </div>
 
-        <Tabs defaultValue="expenses" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4 sm:mb-6 h-auto p-1">
-            <TabsTrigger
-              value="expenses"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
+        {/* Navegação Principal com Botão de Cartões */}
+        <div className="mb-4 flex flex-col sm:flex-row gap-2">
+          <Tabs defaultValue="expenses" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+              <TabsTrigger
+                value="expenses"
+                className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
+              >
+                <Receipt className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                <span className="hidden xs:inline">Gastos Gerais</span>
+                <span className="xs:hidden">Gastos</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="cards"
+                className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
+              >
+                <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                <span className="hidden xs:inline">Faturas de Cartão</span>
+                <span className="xs:hidden">Faturas</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="incomes"
+                className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
+              >
+                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+                <span>Rendas</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          {/* Botão de Gestão de Cartões */}
+          <Link href="/cards" className="w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              className="w-full flex items-center justify-center gap-2 h-10"
             >
-              <Receipt className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-              <span className="hidden xs:inline">Gastos Gerais</span>
-              <span className="xs:hidden">Gastos</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="cards"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
-            >
-              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-              <span className="hidden xs:inline">Faturas de Cartão</span>
-              <span className="xs:hidden">Faturas</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="incomes"
-              className="flex items-center justify-center gap-1 sm:gap-2 py-2 px-1.5 sm:px-2 text-xs sm:text-sm"
-            >
-              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
-              <span>Rendas</span>
-            </TabsTrigger>
-          </TabsList>
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">Gestão de Cartões</span>
+              <span className="sm:hidden">Cartões</span>
+            </Button>
+          </Link>
+        </div>
 
+        <Tabs defaultValue="expenses" className="w-full">
           <TabsContent value="expenses" className="space-y-4 sm:space-y-6">
             <ExpenseSummary expenses={currentMonthExpenses.filter(e => e.category !== "Assinaturas")} />
 

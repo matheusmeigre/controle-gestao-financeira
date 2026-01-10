@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { Receipt, Plus, Filter } from 'lucide-react'
+import { Receipt, Plus, Filter, Home, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { getInvoices } from '@/server/actions/invoices'
 import { getCards } from '@/server/actions/cards'
@@ -36,6 +36,22 @@ export default async function InvoicesPage({
   
   return (
     <div className="container mx-auto py-8 space-y-6">
+      {/* Navegação */}
+      <div className="flex items-center gap-2">
+        <Link href="/">
+          <Button variant="ghost" size="sm">
+            <Home className="mr-2 h-4 w-4" />
+            Início
+          </Button>
+        </Link>
+        <Link href="/cards">
+          <Button variant="ghost" size="sm">
+            <CreditCard className="mr-2 h-4 w-4" />
+            Gerenciar Cartões
+          </Button>
+        </Link>
+      </div>
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

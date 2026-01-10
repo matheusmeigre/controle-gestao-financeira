@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt } from 'lucide-react'
+import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt, Home } from 'lucide-react'
 import Link from 'next/link'
 import { getInvoice } from '@/server/actions/invoices'
 import { getCard } from '@/server/actions/cards'
@@ -50,25 +50,39 @@ export default async function InvoiceDetailPage({
   
   return (
     <div className="container mx-auto py-8 max-w-6xl space-y-6">
+      {/* Navegação */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Link href="/">
+          <Button variant="ghost" size="sm">
+            <Home className="mr-2 h-4 w-4" />
+            Início
+          </Button>
+        </Link>
+        <Link href="/invoices">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Faturas
+          </Button>
+        </Link>
+        <Link href="/cards">
+          <Button variant="ghost" size="sm">
+            <CreditCardIcon className="mr-2 h-4 w-4" />
+            Gerenciar Cartões
+          </Button>
+        </Link>
+      </div>
+      
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/invoices">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold">
-              {MONTHS[invoice.month - 1]} {invoice.year}
-            </h1>
-            {card && (
-              <p className="text-muted-foreground">
-                {card.nickname} • {card.bankName} • •••• {card.last4Digits}
-              </p>
-            )}
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold">
+            {MONTHS[invoice.month - 1]} {invoice.year}
+          </h1>
+          {card && (
+            <p className="text-muted-foreground">
+              {card.nickname} • {card.bankName} • •••• {card.last4Digits}
+            </p>
+          )}
         </div>
         {invoice.isPaid ? (
           <Badge className="bg-green-500 text-lg px-4 py-2">Paga</Badge>
