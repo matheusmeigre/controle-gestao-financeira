@@ -27,24 +27,17 @@ export function CardForm({ onSuccess }: CardFormProps) {
     register,
     handleSubmit,
     control,
-    formState: { errors, dirtyFields, isSubmitted },
+    formState: { errors, isSubmitted },
     reset,
   } = useForm<CreateCreditCardInput>({
     resolver: zodResolver(createCreditCardSchema),
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       closingDay: 10,
       dueDay: 15,
       isActive: true,
     },
   })
-  
-  // Helper para determinar se deve mostrar erro
-  // Mostra erro apenas se o campo foi modificado pelo usuário OU houve tentativa de submit
-  const shouldShowError = (fieldName: keyof CreateCreditCardInput) => {
-    return errors[fieldName] && (dirtyFields[fieldName] || isSubmitted)
-  }
   
   const onSubmit = async (data: CreateCreditCardInput) => {
     try {
@@ -89,8 +82,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('nickname')}
               disabled={isSubmitting}
             />
-            {shouldShowError('nickname') && (
-              <p className="text-sm text-red-500">{errors.nickname?.message}</p>
+            {isSubmitted && errors.nickname && (
+              <p className="text-sm text-red-500">{errors.nickname.message}</p>
             )}
           </div>
           
@@ -100,9 +93,9 @@ export function CardForm({ onSuccess }: CardFormProps) {
             control={control}
             render={({ field }) => (
               <BankSelector
-                value={field.value}
+                value={field.value || ''}
                 onChange={field.onChange}
-                error={shouldShowError('bankName') ? errors.bankName?.message : undefined}
+                error={isSubmitted && errors.bankName ? errors.bankName.message : undefined}
                 disabled={isSubmitting}
               />
             )}
@@ -115,7 +108,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
             </Label>
             <select
               id="brand"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               {...register('brand')}
               disabled={isSubmitting}
             >
@@ -126,8 +119,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 </option>
               ))}
             </select>
-            {shouldShowError('brand') && (
-              <p className="text-sm text-red-500">{errors.brand?.message}</p>
+            {isSubmitted && errors.brand && (
+              <p className="text-sm text-red-500">{errors.brand.message}</p>
             )}
           </div>
           
@@ -143,15 +136,17 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('last4Digits')}
               disabled={isSubmitting}
             />
-            {shouldShowError('last4Digits') && (
-              <p className="text-sm text-red-500">{errors.last4Digits?.message}</p>
+            {isSubmitted && errors.last4Digits && (
+              <p className="text-sm text-red-500">{errors.last4Digits.message}</p>
             )}
           </div>
           
           {/* Dias de Fechamento e Vencimento */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="closingDay">Dia de Fechamento</Label>
+              <Label htmlFor="closingDay">
+                Dia de Fechamento <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="closingDay"
                 type="number"
@@ -160,13 +155,15 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 {...register('closingDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {shouldShowError('closingDay') && (
-                <p className="text-sm text-red-500">{errors.closingDay?.message}</p>
+              {isSubmitted && errors.closingDay && (
+                <p className="text-sm text-red-500">{errors.closingDay.message}</p>
               )}
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="dueDay">Dia de Vencimento</Label>
+              <Label htmlFor="dueDay">
+                Dia de Vencimento <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="dueDay"
                 type="number"
@@ -175,8 +172,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 {...register('dueDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {shouldShowError('dueDay') && (
-                <p className="text-sm text-red-500">{errors.dueDay?.message}</p>
+              {isSubmitted && errors.dueDay && (
+                <p className="text-sm text-red-500">{errors.dueDay.message}</p>
               )}
             </div>
           </div>
