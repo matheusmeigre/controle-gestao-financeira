@@ -24,6 +24,8 @@ export function CreditLimitInput({ value, onChange, disabled }: CreditLimitInput
     if (value !== undefined && !isEditing) {
       setRangeValue(value)
       setInputValue(value.toString())
+    } else if (value === undefined && !isEditing) {
+      setInputValue('')
     }
   }, [value, isEditing])
   
