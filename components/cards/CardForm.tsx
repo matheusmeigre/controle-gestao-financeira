@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { Loader2 } from 'lucide-react'
-import { createCreditCardSchema, type CreateCreditCardInput } from '@/types/card'
+import { createCreditCardSchema, type CreateCreditCardInput, type CreditCard } from '@/types/card'
 import { createCard } from '@/server/actions/cards'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +16,7 @@ import { BankSelector } from './BankSelector'
 import { CreditLimitInput } from './CreditLimitInput'
 
 const CARD_BRANDS = ['Visa', 'Mastercard', 'Elo', 'American Express', 'Hipercard', 'Outros'] as const
+const STORAGE_KEY = 'credit_cards'
 
 interface CardFormProps {
   onSuccess?: () => void
@@ -22,6 +25,8 @@ interface CardFormProps {
 export function CardForm({ onSuccess }: CardFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const { user } = useUser()
   
   const {
     register,
@@ -53,15 +58,50 @@ export function CardForm({ onSuccess }: CardFormProps) {
       
       console.log('Form Data Submitted:', data)
       
+      if (!user?.id) {
+        setError('Usuário não autenticado')
+        return
+      }
+      
+      // Buscar cartões existentes do localStorage
+      const stored = localStorage.getItem(STORAGE_KEY)
+      const allCards: CreditCard[] = stored ? JSON.parse(stored) : []
+      
+      // Verificar duplicatas
+      const duplicate = allCards.find(
+        card => card.userId === user.id &&
+        card.last4Digits === data.last4Digits &&
+        card.isActive
+      )
+      
+      if (duplicate) {
+        setError('Cartão já cadastrado com estes últimos 4 dígitos')
+        return
+      }
+      
+      // Criar cartão via server action (validação)
       const result = await createCard(data)
       
-      if (!result.success) {
+      if (!result.success || !result.data) {
         setError(result.error || 'Erro ao cadastrar cartão')
         return
       }
       
+      // Salvar no localStorage
+      const newCard = result.data
+      allCards.push(newCard)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allCards))
+      
+      console.log('Card saved successfully:', newCard)
+      
       reset()
-      onSuccess?.()
+      
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push('/cards')
+        router.refresh()
+      }
     } catch (err) {
       setError('Erro inesperado ao cadastrar cartão')
       console.error(err)

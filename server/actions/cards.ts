@@ -9,10 +9,10 @@ import type { CreditCard, CreateCreditCardInput, UpdateCreditCardInput } from '@
  * 
  * PRIVACY BY DESIGN: Nunca armazene número completo ou CVV
  * Apenas: nickname, bank_name, brand, last_4_digits
+ * 
+ * NOTA: Esta implementação usa localStorage no lado do cliente.
+ * Para produção, recomenda-se implementar um banco de dados real (Prisma/Supabase)
  */
-
-// Mock database - Substituir por Prisma/Supabase/etc
-let cards: CreditCard[] = []
 
 export async function createCard(input: CreateCreditCardInput) {
   try {
@@ -27,21 +27,6 @@ export async function createCard(input: CreateCreditCardInput) {
       return { success: false, error: 'Últimos 4 dígitos inválidos' }
     }
     
-    // Verifica duplicatas (mesmo banco + últimos 4 dígitos)
-    const duplicate = cards.find(
-      card => card.userId === userId &&
-      card.bankName === input.bankName &&
-      card.last4Digits === input.last4Digits &&
-      card.isActive
-    )
-    
-    if (duplicate) {
-      return { 
-        success: false, 
-        error: 'Cartão já cadastrado com estes últimos 4 dígitos' 
-      }
-    }
-    
     const newCard: CreditCard = {
       id: crypto.randomUUID(),
       userId,
@@ -51,10 +36,7 @@ export async function createCard(input: CreateCreditCardInput) {
       updatedAt: new Date(),
     }
     
-    cards.push(newCard)
-    
-    revalidatePath('/cards')
-    
+    // Retorna o cartão para ser salvo no localStorage pelo cliente
     return { success: true, data: newCard }
   } catch (error) {
     console.error('[createCard] Error:', error)
@@ -73,11 +55,9 @@ export async function getCards() {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const userCards = cards.filter(
-      card => card.userId === userId && card.isActive
-    )
-    
-    return { success: true, data: userCards }
+    // O cliente irá buscar os cartões do localStorage
+    // Esta função existe apenas para validar autenticação
+    return { success: true, data: [], userId }
   } catch (error) {
     console.error('[getCards] Error:', error)
     return { 
@@ -95,15 +75,8 @@ export async function getCard(cardId: string) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const card = cards.find(
-      c => c.id === cardId && c.userId === userId && c.isActive
-    )
-    
-    if (!card) {
-      return { success: false, error: 'Cartão não encontrado' }
-    }
-    
-    return { success: true, data: card }
+    // O cliente irá buscar o cartão do localStorage
+    return { success: true, userId }
   } catch (error) {
     console.error('[getCard] Error:', error)
     return { 
@@ -121,27 +94,8 @@ export async function updateCard(input: UpdateCreditCardInput) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const cardIndex = cards.findIndex(
-      c => c.id === input.id && c.userId === userId
-    )
-    
-    if (cardIndex === -1) {
-      return { success: false, error: 'Cartão não encontrado' }
-    }
-    
-    // Atualiza apenas campos fornecidos
-    const updatedCard = {
-      ...cards[cardIndex],
-      ...input,
-      updatedAt: new Date(),
-    }
-    
-    cards[cardIndex] = updatedCard
-    
-    revalidatePath('/cards')
-    revalidatePath(`/cards/${input.id}`)
-    
-    return { success: true, data: updatedCard }
+    // O cliente irá atualizar no localStorage
+    return { success: true, data: input, userId }
   } catch (error) {
     console.error('[updateCard] Error:', error)
     return { 
@@ -159,21 +113,8 @@ export async function deleteCard(cardId: string) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const cardIndex = cards.findIndex(
-      c => c.id === cardId && c.userId === userId
-    )
-    
-    if (cardIndex === -1) {
-      return { success: false, error: 'Cartão não encontrado' }
-    }
-    
-    // Soft delete
-    cards[cardIndex].isActive = false
-    cards[cardIndex].updatedAt = new Date()
-    
-    revalidatePath('/cards')
-    
-    return { success: true }
+    // O cliente irá deletar do localStorage
+    return { success: true, userId }
   } catch (error) {
     console.error('[deleteCard] Error:', error)
     return { 
