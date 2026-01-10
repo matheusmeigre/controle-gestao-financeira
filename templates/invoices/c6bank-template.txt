@@ -1,0 +1,35 @@
+# Template: Fatura C6 Bank
+# Formato de texto extraído de PDF do C6 Bank
+
+C6 BANK
+Cartão de Crédito
+
+FATURA - JANEIRO 2026
+
+INFORMAÇÕES DO CARTÃO
+Titular: PEDRO OLIVEIRA
+Final: 4321
+Vencimento: 25/01/2026
+Fechamento: 18/01/2026
+Limite Disponível: R$ 5.000,00
+
+RESUMO
+Fatura Anterior: R$ 0,00
+Pagamentos: R$ 0,00
+Gastos deste mês: R$ 678,90
+TOTAL: R$ 678,90
+
+TRANSAÇÕES
+
+10/01  UBER                                    R$ 32,00
+10/01  99 POP                                  R$ 28,50
+11/01  RAPPI *MERCADO                          R$ 156,70
+12/01  MAGAZINE LUIZA                          R$ 189,00
+13/01  CINEMARK                                R$ 78,00
+14/01  MCDONALDS                               R$ 45,90
+15/01  AMAZON BRASIL                           R$ 98,80
+16/01  FARMACIA DROGA RAIA                     R$ 50,00
+
+PAGAMENTO
+Pix, boleto ou débito automático
+Acesse o app C6 Bank para mais detalhes

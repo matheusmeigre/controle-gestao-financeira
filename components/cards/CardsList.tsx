@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { CreditCard as CreditCardIcon, Plus, Trash2, Eye } from 'lucide-react'
+import { CreditCard as CreditCardIcon, Plus, Trash2, Eye, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import type { CreditCard } from '@/types/card'
 import { Button } from '@/components/ui/button'
@@ -161,6 +161,16 @@ export function CardsList() {
 
             {/* Botões de ação */}
             <div className="absolute top-4 right-4 flex gap-2">
+              <Link href={`/cards/${card.id}/edit`}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-8 w-8 p-0 bg-white/20 hover:bg-white/30 border-none"
+                  title="Editar cartão"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </Link>
               <Link href={`/invoices?cardId=${card.id}`}>
                 <Button
                   size="sm"
