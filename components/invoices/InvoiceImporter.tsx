@@ -74,6 +74,7 @@ export function InvoiceImporter({ cardId, month, year, onImportSuccess }: Invoic
     onDrop,
     accept: {
       'text/csv': ['.csv'],
+      'application/pdf': ['.pdf'],
       'application/x-ofx': ['.ofx'],
       'application/vnd.intu.qfx': ['.qfx'],
     },
@@ -96,7 +97,7 @@ export function InvoiceImporter({ cardId, month, year, onImportSuccess }: Invoic
         <CardTitle>Importar Fatura Automaticamente</CardTitle>
         <CardDescription>
           Faça upload do arquivo da fatura do seu banco para importação automática.
-          Formatos suportados: CSV (Nubank, Inter), OFX/QFX (Genérico)
+          Formatos suportados: PDF, CSV (Nubank, Inter), OFX/QFX (Genérico)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -126,7 +127,7 @@ export function InvoiceImporter({ cardId, month, year, onImportSuccess }: Invoic
                   ou clique para selecionar
                 </p>
                 <p className="text-xs text-muted-foreground mt-4">
-                  CSV, OFX, QFX • Máximo 10MB
+                  PDF, CSV, OFX, QFX • Máximo 10MB
                 </p>
               </>
             )}

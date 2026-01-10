@@ -41,7 +41,7 @@ export interface InvoiceParser {
   readonly name: string
 }
 
-export type ParserType = 'nubank' | 'inter' | 'generic-ofx' | 'generic-csv'
+export type ParserType = 'nubank' | 'inter' | 'pdf' | 'generic-ofx' | 'generic-csv'
 
 export interface ParserConfig {
   type: ParserType

@@ -1,6 +1,7 @@
 import { NubankParser } from './nubank-parser'
 import { InterParser } from './inter-parser'
 import { GenericOFXParser } from './generic-ofx'
+import { PDFParser } from './pdf-parser'
 import type { InvoiceParser, ParseResult, ParserConfig } from './types'
 
 /**
@@ -29,6 +30,12 @@ export class InvoiceParserFactory {
       parser: new InterParser(),
       supportedExtensions: ['.csv'],
       priority: 90,
+    },
+    {
+      type: 'pdf',
+      parser: new PDFParser(),
+      supportedExtensions: ['.pdf'],
+      priority: 80, // Alta prioridade para PDF
     },
     {
       type: 'generic-ofx',
@@ -76,7 +83,7 @@ export class InvoiceParserFactory {
       errors: [
         'Formato de arquivo não reconhecido.',
         `Extensão: ${this.getFileExtension(file.name)}`,
-        'Formatos suportados: CSV (Nubank, Inter), OFX/QFX (Genérico)'
+        'Formatos suportados: PDF, CSV (Nubank, Inter), OFX/QFX (Genérico)'
       ]
     }
   }
