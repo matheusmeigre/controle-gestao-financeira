@@ -93,7 +93,11 @@ export function CardForm({ onSuccess }: CardFormProps) {
             <Input
               id="nickname"
               placeholder="Ex: Cartão Pessoal, Cartão Corporativo"
-              {...register('nickname')}
+              {...register('nickname', {
+                onChange: (e) => {
+                  setValue('nickname', e.target.value, { shouldValidate: true })
+                }
+              })}
               disabled={isSubmitting}
               aria-invalid={!!errors.nickname}
             />
@@ -152,7 +156,9 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('last4Digits', {
                 onChange: (e) => {
                   // Remove caracteres não numéricos
-                  e.target.value = e.target.value.replace(/\D/g, '')
+                  const cleanValue = e.target.value.replace(/\D/g, '')
+                  e.target.value = cleanValue
+                  setValue('last4Digits', cleanValue, { shouldValidate: true })
                 }
               })}
               disabled={isSubmitting}
