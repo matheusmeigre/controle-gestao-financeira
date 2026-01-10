@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { createCreditCardSchema, type CreateCreditCardInput } from '@/types/card'
@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { BankSelector } from './BankSelector'
+import { CreditLimitInput } from './CreditLimitInput'
 
 const CARD_BRANDS = ['Visa', 'Mastercard', 'Elo', 'American Express', 'Hipercard', 'Outros'] as const
 
@@ -24,10 +26,12 @@ export function CardForm({ onSuccess }: CardFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    control,
+    formState: { errors, touchedFields },
     reset,
   } = useForm<CreateCreditCardInput>({
     resolver: zodResolver(createCreditCardSchema),
+    mode: 'onBlur',
     defaultValues: {
       closingDay: 10,
       dueDay: 15,
@@ -78,26 +82,24 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('nickname')}
               disabled={isSubmitting}
             />
-            {errors.nickname && (
+            {errors.nickname && touchedFields.nickname && (
               <p className="text-sm text-red-500">{errors.nickname.message}</p>
             )}
           </div>
           
           {/* Instituição */}
-          <div className="space-y-2">
-            <Label htmlFor="bankName">
-              Instituição Bancária <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="bankName"
-              placeholder="Ex: Nubank, Inter, Itaú"
-              {...register('bankName')}
-              disabled={isSubmitting}
-            />
-            {errors.bankName && (
-              <p className="text-sm text-red-500">{errors.bankName.message}</p>
+          <Controller
+            name="bankName"
+            control={control}
+            render={({ field }) => (
+              <BankSelector
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.bankName && touchedFields.bankName ? errors.bankName.message : undefined}
+                disabled={isSubmitting}
+              />
             )}
-          </div>
+          />
           
           {/* Bandeira */}
           <div className="space-y-2">
@@ -119,7 +121,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
             </select>
             {errors.brand && (
               <p className="text-sm text-red-500">{errors.brand.message}</p>
-            )}
+            )}touchedFields.brand && 
           </div>
           
           {/* Últimos 4 Dígitos */}
@@ -134,7 +136,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('last4Digits')}
               disabled={isSubmitting}
             />
-            {errors.last4Digits && (
+            {errors.last4Digits && touchedFields.last4Digits && (
               <p className="text-sm text-red-500">{errors.last4Digits.message}</p>
             )}
           </div>
@@ -151,7 +153,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 {...register('closingDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {errors.closingDay && (
+              {errors.closingDay && touchedFields.closingDay && (
                 <p className="text-sm text-red-500">{errors.closingDay.message}</p>
               )}
             </div>
@@ -166,30 +168,24 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 {...register('dueDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {errors.dueDay && (
+              {errors.dueDay && touchedFields.dueDay && (
                 <p className="text-sm text-red-500">{errors.dueDay.message}</p>
               )}
             </div>
           </div>
           
           {/* Limite (Opcional) */}
-          <div className="space-y-2">
-            <Label htmlFor="creditLimit">Limite de Crédito (Opcional)</Label>
-            <Input
-              id="creditLimit"
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              {...register('creditLimit', { 
-                valueAsNumber: true,
-                setValueAs: (v) => v === '' ? undefined : parseFloat(v)
-              })}
-              disabled={isSubmitting}
-            />
-            {errors.creditLimit && (
-              <p className="text-sm text-red-500">{errors.creditLimit.message}</p>
+          <Controller
+            name="creditLimit"
+            control={control}
+            render={({ field }) => (
+              <CreditLimitInput
+                value={field.value}
+                onChange={field.onChange}
+                disabled={isSubmitting}
+              />
             )}
-          </div>
+          />
           
           {/* Error Message */}
           {error && (
