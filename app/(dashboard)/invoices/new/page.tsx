@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Loader2, Home, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { CardSelector } from '@/components/cards/CardSelector'
 import { MonthYearPicker } from '@/components/invoices/MonthYearPicker'
@@ -119,13 +119,27 @@ export default function NewInvoicePage() {
   
   return (
     <div className="container mx-auto py-8 max-w-5xl space-y-6">
-      {/* Back Button */}
-      <Link href="/invoices">
-        <Button variant="ghost" size="sm">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar para Faturas
-        </Button>
-      </Link>
+      {/* Navegação */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Link href="/">
+          <Button variant="ghost" size="sm">
+            <Home className="mr-2 h-4 w-4" />
+            Início
+          </Button>
+        </Link>
+        <Link href="/invoices">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para Faturas
+          </Button>
+        </Link>
+        <Link href="/cards">
+          <Button variant="ghost" size="sm">
+            <CreditCard className="mr-2 h-4 w-4" />
+            Gerenciar Cartões
+          </Button>
+        </Link>
+      </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
