@@ -123,37 +123,3 @@ export async function deleteCard(cardId: string) {
     }
   }
 }
-  }
-}
-
-export async function deleteCard(cardId: string) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    const cardIndex = cards.findIndex(
-      c => c.id === cardId && c.userId === userId
-    )
-    
-    if (cardIndex === -1) {
-      return { success: false, error: 'Cartão não encontrado' }
-    }
-    
-    // Soft delete
-    cards[cardIndex].isActive = false
-    cards[cardIndex].updatedAt = new Date()
-    
-    revalidatePath('/cards')
-    
-    return { success: true }
-  } catch (error) {
-    console.error('[deleteCard] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao deletar cartão' 
-    }
-  }
-}
