@@ -27,17 +27,22 @@ export function CardForm({ onSuccess }: CardFormProps) {
     register,
     handleSubmit,
     control,
-    formState: { errors, touchedFields },
+    formState: { errors, touchedFields, isSubmitted },
     reset,
   } = useForm<CreateCreditCardInput>({
     resolver: zodResolver(createCreditCardSchema),
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: {
       closingDay: 10,
       dueDay: 15,
       isActive: true,
     },
   })
+  
+  // Helper para determinar se deve mostrar erro
+  const shouldShowError = (fieldName: keyof CreateCreditCardInput) => {
+    return errors[fieldName] && (touchedFields[fieldName] || isSubmitted)
+  }
   
   const onSubmit = async (data: CreateCreditCardInput) => {
     try {
@@ -82,8 +87,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('nickname')}
               disabled={isSubmitting}
             />
-            {errors.nickname && touchedFields.nickname && (
-              <p className="text-sm text-red-500">{errors.nickname.message}</p>
+            {shouldShowError('nickname') && (
+              <p className="text-sm text-red-500">{errors.nickname?.message}</p>
             )}
           </div>
           
@@ -95,7 +100,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
               <BankSelector
                 value={field.value}
                 onChange={field.onChange}
-                error={errors.bankName && touchedFields.bankName ? errors.bankName.message : undefined}
+                error={shouldShowError('bankName') ? errors.bankName?.message : undefined}
                 disabled={isSubmitting}
               />
             )}
@@ -119,9 +124,9 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 </option>
               ))}
             </select>
-            {errors.brand && (
-              <p className="text-sm text-red-500">{errors.brand.message}</p>
-            )}touchedFields.brand && 
+            {shouldShowError('brand') && (
+              <p className="text-sm text-red-500">{errors.brand?.message}</p>
+            )}
           </div>
           
           {/* Últimos 4 Dígitos */}
@@ -136,8 +141,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
               {...register('last4Digits')}
               disabled={isSubmitting}
             />
-            {errors.last4Digits && touchedFields.last4Digits && (
-              <p className="text-sm text-red-500">{errors.last4Digits.message}</p>
+            {shouldShowError('last4Digits') && (
+              <p className="text-sm text-red-500">{errors.last4Digits?.message}</p>
             )}
           </div>
           
@@ -153,8 +158,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 {...register('closingDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {errors.closingDay && touchedFields.closingDay && (
-                <p className="text-sm text-red-500">{errors.closingDay.message}</p>
+              {shouldShowError('closingDay') && (
+                <p className="text-sm text-red-500">{errors.closingDay?.message}</p>
               )}
             </div>
             
@@ -168,8 +173,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 {...register('dueDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {errors.dueDay && touchedFields.dueDay && (
-                <p className="text-sm text-red-500">{errors.dueDay.message}</p>
+              {shouldShowError('dueDay') && (
+                <p className="text-sm text-red-500">{errors.dueDay?.message}</p>
               )}
             </div>
           </div>
