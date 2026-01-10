@@ -1,0 +1,30 @@
+# Template: Fatura Nubank
+# Formato de texto extraído de PDF do Nubank
+
+FATURA - JANEIRO/2026
+Nu Pagamentos S.A. (Nubank)
+
+INFORMAÇÕES DO CARTÃO
+Cartão Final: 7994
+Vencimento: 24/01/2026
+Fechamento: 17/01/2026
+Limite Total: R$ 9.100,00
+
+LANÇAMENTOS
+
+DATA        DESCRIÇÃO                                      VALOR
+10/01/2026  UBER *TRIP                                    R$ 25,00
+10/01/2026  IFOOD *RESTAURANTE BRASILEIRO                 R$ 45,90
+11/01/2026  MERCADO EXTRA - SAO PAULO                     R$ 156,78
+12/01/2026  POSTO SHELL                                   R$ 200,00
+12/01/2026  NETFLIX.COM                                   R$ 39,90
+13/01/2026  SPOTIFY                                       R$ 19,90
+14/01/2026  FARMACIA SAO PAULO                            R$ 67,50
+15/01/2026  UBER *TRIP                                    R$ 18,00
+15/01/2026  PADARIA DOCE PÃO                             R$ 23,45
+
+TOTAL DA FATURA: R$ 596,43
+
+Para pagar sua fatura:
+PIX: Chave aleatória ou QR Code
+Boleto: Código de barras disponível no app

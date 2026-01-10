@@ -1,0 +1,39 @@
+# Template: Fatura Itaú
+# Formato de texto extraído de PDF do Itaú Unibanco
+
+ITAÚ UNIBANCO S.A.
+Cartão de Crédito
+
+FATURA - JANEIRO/2026
+
+IDENTIFICAÇÃO DO CARTÃO
+Número do Cartão: XXXX XXXX XXXX 5678
+Nome do Titular: JOSE DA SILVA
+Vencimento: 15/01/2026
+Melhor dia para compra: até dia 20
+
+RESUMO DOS LANÇAMENTOS
+Saldo Anterior                          R$ 0,00
+(-) Pagamentos Recebidos               R$ 0,00
+(+) Compras Nacionais                  R$ 1.245,80
+(+) Compras Internacionais             R$ 0,00
+(+) Juros e Encargos                   R$ 0,00
+TOTAL DESTA FATURA                     R$ 1.245,80
+
+LANÇAMENTOS NACIONAIS
+
+Data Compra  Data Lançto  Descrição                           Valor (R$)
+05/01/26     06/01/26    AMERICANAS.COM                        234,90
+06/01/26     07/01/26    CARREFOUR SUPERMERCADOS               456,78
+07/01/26     08/01/26    POSTO BR PETROLEO                     220,00
+08/01/26     09/01/26    MC DONALDS                             45,80
+09/01/26     10/01/26    NETFLIX SERVICOS                       55,90
+10/01/26     11/01/26    UBER DO BRASIL                         35,40
+11/01/26     12/01/26    FARMACIA PAGUE MENOS                   89,50
+12/01/26     13/01/26    PADARIA E CONFEITARIA                  28,90
+13/01/26     14/01/26    MERCADO LIVRE                          78,62
+
+FORMAS DE PAGAMENTO
+Internet Banking: www.itau.com.br
+App Itaú: Disponível para iOS e Android
+Agências e Caixas Eletrônicos

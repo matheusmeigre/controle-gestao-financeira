@@ -1,0 +1,38 @@
+# Template: Fatura Santander
+# Formato de texto extraído de PDF do Santander
+
+BANCO SANTANDER (BRASIL) S.A.
+FATURA DO CARTÃO DE CRÉDITO
+
+COMPETÊNCIA: JANEIRO/2026
+
+TITULAR DO CARTÃO: ANA PAULA COSTA
+CARTÃO FINAL: 8765
+VENCIMENTO: 18/01/2026
+FECHAMENTO: 11/01/2026
+
+DEMONSTRATIVO
+
+Saldo Anterior                                 R$ 0,00
+Pagamentos e Créditos                         R$ 0,00
+Compras e Débitos                             R$ 1.134,56
+Juros e Encargos                              R$ 0,00
+IOF                                           R$ 0,00
+TOTAL DA FATURA                               R$ 1.134,56
+
+LANÇAMENTOS
+
+Data Compra  Descrição                                    Valor
+06/01/26    AMERICANAS COM BR                          R$ 234,90
+07/01/26    EXTRA SUPERMERCADOS                        R$ 345,67
+08/01/26    POSTO SHELL                                R$ 210,00
+09/01/26    IFOOD COMERCIO                             R$ 78,90
+10/01/26    NETSHOES                                   R$ 156,80
+11/01/26    UBER BRASIL                                R$ 42,30
+12/01/26    NETFLIX                                    R$ 45,90
+13/01/26    DROGARIA SAO PAULO                         R$ 20,09
+
+ATENDIMENTO
+Central de Relacionamento: 4004 3535 (Capitais)
+0800 702 3535 (Demais Regiões)
+www.santander.com.br

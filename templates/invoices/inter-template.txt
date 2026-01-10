@@ -1,0 +1,36 @@
+# Template: Fatura Banco Inter
+# Formato de texto extraído de PDF do Inter
+
+BANCO INTER S.A.
+www.inter.co
+
+FATURA DO CARTÃO DE CRÉDITO
+PERÍODO: 01/01/2026 a 31/01/2026
+
+DADOS DO CARTÃO
+Final do Cartão: 3912
+Vencimento: 20/01/2026
+Data de Fechamento: 13/01/2026
+
+RESUMO DA FATURA
+Saldo Anterior: R$ 0,00
+Pagamentos: R$ 0,00
+Compras e Saques: R$ 823,67
+Encargos e Tarifas: R$ 0,00
+TOTAL A PAGAR: R$ 823,67
+
+LANÇAMENTOS DO PERÍODO
+
+Data        Descrição                                   Valor
+08/01       99 VIAGENS                                 R$ 35,00
+08/01       MERCADOPAGO*LOJA                          R$ 89,90
+09/01       MAGAZINE LUIZA                            R$ 234,50
+10/01       IFOOD *BURGUER KING                       R$ 42,00
+11/01       POSTO IPIRANGA                            R$ 180,00
+12/01       AMAZON PRIME VIDEO                        R$ 14,90
+13/01       DROGARIA PACHECO                          R$ 78,90
+14/01       UBER *EATS                                R$ 38,50
+15/01       SUPERMERCADO VERDEMAR                     R$ 109,97
+
+Informações e Dúvidas: 0800 940 0007
+Central de Atendimento 24h

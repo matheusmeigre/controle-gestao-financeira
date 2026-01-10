@@ -1,0 +1,42 @@
+# Template: Fatura Banco do Brasil
+# Formato de texto extraído de PDF do BB
+
+BANCO DO BRASIL S.A.
+CARTÃO DE CRÉDITO OUROCARD
+
+FATURA - JANEIRO DE 2026
+
+DADOS DO CARTÃO
+Nome: CARLOS RODRIGUES
+Nº do Cartão: **** **** **** 2468
+Melhor Dia de Compra: até dia 25
+Vencimento: 20/01/2026
+
+VALORES DA FATURA
+Saldo Anterior:                    R$ 0,00
+(-) Pagamentos Efetuados:          R$ 0,00
+(+) Lançamentos Nacionais:         R$ 856,90
+(+) Lançamentos Internacionais:    R$ 0,00
+(+) Encargos e Tarifas:            R$ 0,00
+TOTAL A PAGAR:                     R$ 856,90
+
+LANÇAMENTOS NACIONAIS
+
+Data       Estabelecimento                           Valor (R$)
+08/01/26   LOJAS AMERICANAS SA                        189,90
+09/01/26   CARREFOUR EXPRESS                          234,50
+10/01/26   POSTO IPIRANGA                             180,00
+11/01/26   PIZZARIA DELIVERY                           78,90
+12/01/26   FARMACIA POPULAR                            45,60
+13/01/26   UBER VIAGENS                                32,00
+14/01/26   SPOTIFY SERVICOS                            21,90
+15/01/26   MERCADO LIVRE ATIVIDADES                    74,10
+
+FORMAS DE PAGAMENTO
+- App BB (PIX ou Débito)
+- Internet Banking
+- Agências e Terminais de Autoatendimento
+- Correspondentes Bancários
+
+Central de Atendimento BB: 4004-0001 (Capitais e Regiões Metropolitanas)
+0800 729 0001 (Demais Localidades)

@@ -1,0 +1,38 @@
+# Template: Fatura Bradesco
+# Formato de texto extraído de PDF do Bradesco
+
+BANCO BRADESCO S.A.
+CARTÃO DE CRÉDITO
+
+FATURA MÊS: JANEIRO/2026
+
+DADOS DO CARTÃO
+Portador: MARIA SANTOS
+Final do Cartão: 9876
+Data de Vencimento: 10/01/2026
+Data de Fechamento: 03/01/2026
+
+DEMONSTRATIVO DA FATURA
+Saldo da Fatura Anterior           R$ 0,00
+(-) Pagamento - Obrigado!         R$ 0,00
+(+) Compras do Período            R$ 987,45
+(+) Saques                        R$ 0,00
+(+) IOF                           R$ 0,00
+(=) VALOR TOTAL A PAGAR          R$ 987,45
+
+COMPRAS REALIZADAS
+
+Data       Estabelecimento                              Valor
+04/01/26   EXTRA HIPERMERCADOS                       R$ 298,50
+05/01/26   ZARA BRASIL                               R$ 189,90
+06/01/26   POSTO SHELL                               R$ 195,00
+07/01/26   IFOOD *OUTBACK                            R$ 98,70
+08/01/26   RENNER LOJAS                              R$ 145,80
+09/01/26   UBER BRASIL                                R$ 28,50
+10/01/26   SPOTIFY BRASIL                             R$ 21,90
+10/01/26   DROGASIL                                   R$ 9,15
+
+CENTRAL DE ATENDIMENTO
+0800 570 0237 (Capitais e Regiões Metropolitanas)
+4002 0237 (Demais Localidades)
+Atendimento 24 horas, 7 dias por semana
