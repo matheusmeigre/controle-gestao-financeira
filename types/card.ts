@@ -6,11 +6,13 @@ export const creditCardSchema = z.object({
   userId: z.string(),
   nickname: z.string().min(1, 'Apelido é obrigatório').max(50),
   bankName: z.string().min(1, 'Instituição é obrigatória'),
-  brand: z.enum(['Visa', 'Mastercard', 'Elo', 'American Express', 'Hipercard', 'Outros']),
-  last4Digits: z.string().regex(/^\d{4}$/, 'Últimos 4 dígitos inválidos'),
-  closingDay: z.number().min(1).max(31), // Dia de fechamento da fatura
-  dueDay: z.number().min(1).max(31), // Dia de vencimento
-  creditLimit: z.number().positive().optional(),
+  brand: z.enum(['Visa', 'Mastercard', 'Elo', 'American Express', 'Hipercard', 'Outros'], {
+    errorMap: () => ({ message: 'Selecione uma bandeira' })
+  }),
+  last4Digits: z.string().regex(/^\d{4}$/, 'Deve conter exatamente 4 dígitos'),
+  closingDay: z.coerce.number().min(1, 'Mínimo 1').max(31, 'Máximo 31'),
+  dueDay: z.coerce.number().min(1, 'Mínimo 1').max(31, 'Máximo 31'),
+  creditLimit: z.coerce.number().positive().optional(),
   isActive: z.boolean().default(true),
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),

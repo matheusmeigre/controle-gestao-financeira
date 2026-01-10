@@ -152,7 +152,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 type="number"
                 min={1}
                 max={31}
-                {...register('closingDay', { valueAsNumber: true })}
+                {...register('closingDay')}
                 disabled={isSubmitting}
               />
               {isSubmitted && errors.closingDay && (
@@ -169,7 +169,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 type="number"
                 min={1}
                 max={31}
-                {...register('dueDay', { valueAsNumber: true })}
+                {...register('dueDay')}
                 disabled={isSubmitting}
               />
               {isSubmitted && errors.dueDay && (
