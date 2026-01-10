@@ -34,7 +34,8 @@ export function BankSelector({ value, onChange, error, disabled }: BankSelectorP
   }, [])
   
   const handleSelect = (bank: typeof BRAZILIAN_BANKS[0]) => {
-    onChange(formatBankDisplay(bank))
+    const displayValue = formatBankDisplay(bank)
+    onChange(displayValue)
     setIsOpen(false)
     setSearchQuery('')
   }
@@ -45,6 +46,9 @@ export function BankSelector({ value, onChange, error, disabled }: BankSelectorP
         Instituição Bancária <span className="text-red-500">*</span>
       </Label>
       
+      {/* Campo oculto para garantir que o valor seja capturado */}
+      <input type="hidden" id="bankName" value={value} />
+      
       <div className="relative" ref={dropdownRef}>
         <Button
           type="button"
@@ -52,6 +56,7 @@ export function BankSelector({ value, onChange, error, disabled }: BankSelectorP
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
           className={`w-full justify-between ${error ? 'border-red-500' : ''}`}
+          aria-label="Selecionar banco"
         >
           <span className={selectedBank ? 'text-foreground' : 'text-muted-foreground'}>
             {selectedBank ? formatBankDisplay(selectedBank) : 'Selecione o banco...'}

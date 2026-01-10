@@ -29,13 +29,19 @@ export function CardForm({ onSuccess }: CardFormProps) {
     control,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<CreateCreditCardInput>({
     resolver: zodResolver(createCreditCardSchema),
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
+      nickname: '',
+      bankName: '',
+      brand: undefined,
+      last4Digits: '',
       closingDay: 10,
       dueDay: 15,
+      creditLimit: undefined,
       isActive: true,
     },
   })
@@ -44,6 +50,8 @@ export function CardForm({ onSuccess }: CardFormProps) {
     try {
       setIsSubmitting(true)
       setError(null)
+      
+      console.log('Form Data Submitted:', data)
       
       const result = await createCard(data)
       
@@ -62,6 +70,11 @@ export function CardForm({ onSuccess }: CardFormProps) {
     }
   }
   
+  const onError = (errors: unknown) => {
+    console.log('Form Validation Errors:', errors)
+    console.log('Current Form Values:', watch())
+  }
+  
   return (
     <Card>
       <CardHeader>
@@ -71,7 +84,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
           {/* Apelido */}
           <div className="space-y-2">
             <Label htmlFor="nickname">
@@ -136,7 +149,12 @@ export function CardForm({ onSuccess }: CardFormProps) {
               id="last4Digits"
               placeholder="0000"
               maxLength={4}
-              {...register('last4Digits')}
+              {...register('last4Digits', {
+                onChange: (e) => {
+                  // Remove caracteres não numéricos
+                  e.target.value = e.target.value.replace(/\D/g, '')
+                }
+              })}
               disabled={isSubmitting}
               aria-invalid={!!errors.last4Digits}
             />
@@ -156,7 +174,16 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 type="number"
                 min={1}
                 max={31}
-                {...register('closingDay', { valueAsNumber: true })}
+                placeholder="10"
+                {...register('closingDay', { 
+                  valueAsNumber: true,
+                  onChange: (e) => {
+                    const value = parseInt(e.target.value)
+                    if (!isNaN(value)) {
+                      setValue('closingDay', value, { shouldValidate: true })
+                    }
+                  }
+                })}
                 disabled={isSubmitting}
                 aria-invalid={!!errors.closingDay}
               />
@@ -174,7 +201,16 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 type="number"
                 min={1}
                 max={31}
-                {...register('dueDay', { valueAsNumber: true })}
+                placeholder="15"
+                {...register('dueDay', { 
+                  valueAsNumber: true,
+                  onChange: (e) => {
+                    const value = parseInt(e.target.value)
+                    if (!isNaN(value)) {
+                      setValue('dueDay', value, { shouldValidate: true })
+                    }
+                  }
+                })}
                 disabled={isSubmitting}
                 aria-invalid={!!errors.dueDay}
               />
