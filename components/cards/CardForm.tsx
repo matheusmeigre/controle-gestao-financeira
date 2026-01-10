@@ -27,11 +27,12 @@ export function CardForm({ onSuccess }: CardFormProps) {
     register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitted },
+    formState: { errors },
     reset,
   } = useForm<CreateCreditCardInput>({
     resolver: zodResolver(createCreditCardSchema),
-    mode: 'onSubmit',
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       closingDay: 10,
       dueDay: 15,
@@ -81,8 +82,9 @@ export function CardForm({ onSuccess }: CardFormProps) {
               placeholder="Ex: Cartão Pessoal, Cartão Corporativo"
               {...register('nickname')}
               disabled={isSubmitting}
+              aria-invalid={!!errors.nickname}
             />
-            {isSubmitted && errors.nickname && (
+            {errors.nickname && (
               <p className="text-sm text-red-500">{errors.nickname.message}</p>
             )}
           </div>
@@ -95,7 +97,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
               <BankSelector
                 value={field.value || ''}
                 onChange={field.onChange}
-                error={isSubmitted && errors.bankName ? errors.bankName.message : undefined}
+                error={errors.bankName?.message}
                 disabled={isSubmitting}
               />
             )}
@@ -111,6 +113,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               {...register('brand')}
               disabled={isSubmitting}
+              aria-invalid={!!errors.brand}
             >
               <option value="">Selecione...</option>
               {CARD_BRANDS.map(brand => (
@@ -119,7 +122,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 </option>
               ))}
             </select>
-            {isSubmitted && errors.brand && (
+            {errors.brand && (
               <p className="text-sm text-red-500">{errors.brand.message}</p>
             )}
           </div>
@@ -135,8 +138,9 @@ export function CardForm({ onSuccess }: CardFormProps) {
               maxLength={4}
               {...register('last4Digits')}
               disabled={isSubmitting}
+              aria-invalid={!!errors.last4Digits}
             />
-            {isSubmitted && errors.last4Digits && (
+            {errors.last4Digits && (
               <p className="text-sm text-red-500">{errors.last4Digits.message}</p>
             )}
           </div>
@@ -152,10 +156,11 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 type="number"
                 min={1}
                 max={31}
-                {...register('closingDay')}
+                {...register('closingDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
+                aria-invalid={!!errors.closingDay}
               />
-              {isSubmitted && errors.closingDay && (
+              {errors.closingDay && (
                 <p className="text-sm text-red-500">{errors.closingDay.message}</p>
               )}
             </div>
@@ -169,10 +174,11 @@ export function CardForm({ onSuccess }: CardFormProps) {
                 type="number"
                 min={1}
                 max={31}
-                {...register('dueDay')}
+                {...register('dueDay', { valueAsNumber: true })}
                 disabled={isSubmitting}
+                aria-invalid={!!errors.dueDay}
               />
-              {isSubmitted && errors.dueDay && (
+              {errors.dueDay && (
                 <p className="text-sm text-red-500">{errors.dueDay.message}</p>
               )}
             </div>
