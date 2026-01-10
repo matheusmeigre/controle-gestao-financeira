@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useUser } from '@clerk/nextjs'
 import { CreditCard as CreditCardIcon, ChevronDown } from 'lucide-react'
 import type { CreditCard } from '@/types/card'
-import { getCards } from '@/server/actions/cards'
 import { Label } from '@/components/ui/label'
+
+const STORAGE_KEY = 'credit_cards'
 
 interface CardSelectorProps {
   value?: string
@@ -13,23 +15,33 @@ interface CardSelectorProps {
 }
 
 export function CardSelector({ value, onChange, disabled }: CardSelectorProps) {
+  const { user } = useUser()
   const [cards, setCards] = useState<CreditCard[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   useEffect(() => {
     loadCards()
-  }, [])
+  }, [user])
   
-  const loadCards = async () => {
+  const loadCards = () => {
+    if (!user) {
+      setIsLoading(false)
+      return
+    }
+
     try {
       setIsLoading(true)
-      const result = await getCards()
+      const stored = localStorage.getItem(STORAGE_KEY)
       
-      if (result.success && result.data) {
-        setCards(result.data)
+      if (stored) {
+        const allCards: CreditCard[] = JSON.parse(stored)
+        const userCards = allCards.filter(
+          card => card.userId === user.id && card.isActive
+        )
+        setCards(userCards)
       } else {
-        setError(result.error || 'Erro ao carregar cartões')
+        setCards([])
       }
     } catch (err) {
       setError('Erro ao carregar cartões')
