@@ -27,11 +27,12 @@ export function CardForm({ onSuccess }: CardFormProps) {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors, touchedFields, isSubmitted },
     reset,
   } = useForm<CreateCreditCardInput>({
     resolver: zodResolver(createCreditCardSchema),
-    mode: 'onTouched',
+    mode: 'onChange',
     defaultValues: {
       closingDay: 10,
       dueDay: 15,
@@ -41,7 +42,10 @@ export function CardForm({ onSuccess }: CardFormProps) {
   
   // Helper para determinar se deve mostrar erro
   const shouldShowError = (fieldName: keyof CreateCreditCardInput) => {
-    return errors[fieldName] && (touchedFields[fieldName] || isSubmitted)
+    const fieldValue = watch(fieldName)
+    const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== ''
+    // Só mostra erro se o campo não tem valor E (foi tocado OU houve tentativa de submit)
+    return errors[fieldName] && !hasValue && (touchedFields[fieldName] || isSubmitted)
   }
   
   const onSubmit = async (data: CreateCreditCardInput) => {
