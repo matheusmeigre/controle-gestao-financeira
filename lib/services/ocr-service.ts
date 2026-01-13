@@ -133,14 +133,48 @@ export class OcrService {
       }
 
       // 5. Verifica se há dados
-      if (!validatedResponse.data || !validatedResponse.data.itens || validatedResponse.data.itens.length === 0) {
+      if (!validatedResponse.data) {
         return {
           success: false,
-          error: 'OCR não extraiu nenhuma transação do PDF',
+          error: 'OCR não retornou dados',
           warnings: [
             'O PDF pode estar vazio, com baixa qualidade ou em formato não suportado',
             'Tente usar um PDF exportado diretamente do aplicativo do banco',
           ],
+        }
+      }
+
+      // 5.1. Se não há itens estruturados, tenta extrair do raw_text
+      if (!validatedResponse.data.itens || validatedResponse.data.itens.length === 0) {
+        console.log('[OcrService] Itens vazios, tentando extrair do raw_text...')
+        
+        if (validatedResponse.raw_text) {
+          const extractedItems = this.extractTransactionsFromRawText(validatedResponse.raw_text)
+          
+          if (extractedItems.length > 0) {
+            console.log(`[OcrService] ✅ Extraídas ${extractedItems.length} transações do raw_text`)
+            validatedResponse.data.itens = extractedItems
+          } else {
+            console.log('[OcrService] ❌ Não foi possível extrair transações do raw_text')
+            return {
+              success: false,
+              error: 'OCR não extraiu nenhuma transação do PDF',
+              warnings: [
+                'A API retornou o texto mas não conseguiu estruturar as transações',
+                'O formato do PDF pode não ser compatível',
+                'Tente usar um PDF exportado diretamente do aplicativo do banco',
+              ],
+            }
+          }
+        } else {
+          return {
+            success: false,
+            error: 'OCR não extraiu nenhuma transação do PDF',
+            warnings: [
+              'O PDF pode estar vazio, com baixa qualidade ou em formato não suportado',
+              'Tente usar um PDF exportado diretamente do aplicativo do banco',
+            ],
+          }
         }
       }
 
@@ -354,6 +388,109 @@ export class OcrService {
       .replace(/\s+/g, ' ') // Remove espaços duplicados
       .replace(/[^\w\sÀ-ÿ\-\/\*]/gi, '') // Remove caracteres especiais exceto acentos, hífen, barra e asterisco
       .substring(0, 200) // Limita tamanho
+  }
+
+  /**
+   * Extrai transações do raw_text como fallback quando a API não estrutura os itens
+   * Usa regex para identificar padrões de transações brasileiras
+   */
+  private static extractTransactionsFromRawText(rawText: string): OcrItem[] {
+    const transactions: OcrItem[] = []
+    
+    // Mapeia mês português para número
+    const monthMap: Record<string, string> = {
+      'JAN': '01', 'FEV': '02', 'MAR': '03', 'ABR': '04',
+      'MAI': '05', 'JUN': '06', 'JUL': '07', 'AGO': '08',
+      'SET': '09', 'OUT': '10', 'NOV': '11', 'DEZ': '12'
+    }
+    
+    // Extrai ano do documento (procura por YYYY no contexto da fatura)
+    const yearMatch = rawText.match(/20\d{2}/)
+    const documentYear = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear()
+    
+    const lines = rawText.split('\n')
+    
+    // Padrão completo para transações Nubank
+    // Formato: DD MMM •••• NNNN Descrição R$ VALOR,CC
+    const nubankPattern = /^(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+[•\*]+\s*\d{4}\s+(.+?)\s+R\$\s*([\d.,]+)$/i
+    
+    // Padrão simplificado como fallback
+    const simplePattern = /(\d{1,2})\s+(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+.*?R\$\s*([\d.,]+)/i
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim()
+      
+      // Ignora linhas muito curtas ou que são claramente cabeçalhos/separadores
+      if (trimmedLine.length < 10 || 
+          trimmedLine.includes('TRANSAÇÕES') || 
+          trimmedLine.includes('Pagamentos e Financiamentos') ||
+          trimmedLine.includes('---') ||
+          trimmedLine.startsWith('Página') ||
+          trimmedLine.includes('Matheus M Silva') ||
+          /^Total de compras/i.test(trimmedLine) ||
+          /cartões.*R\$/i.test(trimmedLine)) {
+        continue
+      }
+      
+      // Tenta padrão Nubank primeiro
+      let match = trimmedLine.match(nubankPattern)
+      let description = ''
+      let day = ''
+      let monthStr = ''
+      let amountStr = ''
+      
+      if (match) {
+        day = match[1]
+        monthStr = match[2]
+        description = match[3]
+        amountStr = match[4]
+      } else {
+        // Fallback para padrão simplificado
+        match = trimmedLine.match(simplePattern)
+        if (match) {
+          day = match[1]
+          monthStr = match[2]
+          amountStr = match[3]
+          
+          // Extrai descrição manualmente
+          const descStart = trimmedLine.indexOf(monthStr) + monthStr.length
+          const descEnd = trimmedLine.lastIndexOf('R$')
+          description = trimmedLine.substring(descStart, descEnd).trim()
+        }
+      }
+      
+      if (match && description && amountStr) {
+        // Normaliza valor
+        const cleanAmount = amountStr.replace(/\./g, '').replace(',', '.')
+        const amount = parseFloat(cleanAmount)
+        
+        // Remove padrões de cartão e limpa descrição
+        description = description
+          .replace(/[•\*]{4}\s*\d{4}/g, '') // Remove •••• NNNN ou **** NNNN
+          .replace(/\s+/g, ' ') // Normaliza espaços
+          .trim()
+        
+        // Valida dados e descrição mínima
+        if (description && 
+            description.length >= 3 && // Descrição deve ter pelo menos 3 caracteres
+            !/^(a|de|em|para)\s+\d{1,2}\s+[A-Z]{3}/i.test(description) && // Ignora fragmentos como "a 17 NOV"
+            amount > 0 && 
+            !isNaN(amount)) {
+          const month = monthMap[monthStr.toUpperCase()] || '01'
+          const formattedDay = day.padStart(2, '0')
+          
+          transactions.push({
+            descricao: description,
+            valor: amount,
+            data: `${documentYear}-${month}-${formattedDay}`
+          })
+        }
+      }
+    }
+    
+    console.log(`[OcrService] Extraídas ${transactions.length} transações do raw_text`)
+    
+    return transactions
   }
 
   /**
