@@ -2,6 +2,7 @@ import { NubankParser } from './nubank-parser'
 import { InterParser } from './inter-parser'
 import { GenericOFXParser } from './generic-ofx'
 import { PDFParser } from './pdf-parser'
+import { OcrParser } from './ocr-parser'
 import type { InvoiceParser, ParseResult, ParserConfig } from './types'
 
 /**
@@ -33,9 +34,15 @@ export class InvoiceParserFactory {
     },
     {
       type: 'pdf',
-      parser: new PDFParser(),
+      parser: new OcrParser(), // 🤖 OCR Parser com IA - prioridade alta para PDFs
       supportedExtensions: ['.pdf'],
-      priority: 80, // Alta prioridade para PDF
+      priority: 85, // Prioridade maior que PDFParser fallback
+    },
+    {
+      type: 'pdf',
+      parser: new PDFParser(), // Fallback caso OCR falhe
+      supportedExtensions: ['.pdf'],
+      priority: 80,
     },
     {
       type: 'generic-ofx',

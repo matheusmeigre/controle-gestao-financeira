@@ -18,43 +18,141 @@ import type { Invoice, InvoiceItem, CreateInvoiceInput, AddInvoiceItemInput } fr
 // Mock database
 let invoices: Invoice[] = []
 
+/**
+ * ====================================
+ * 📤 Server Action: Upload e Processamento de Faturas
+ * ====================================
+ * 
+ * Esta função processa uploads de arquivos de fatura (PDF, CSV, OFX, QFX)
+ * e os converte em transações estruturadas.
+ * 
+ * Estratégia de parsing:
+ * 1. PDFs → Prioriza OCR com IA (alta precisão)
+ * 2. CSVs → Parsers específicos (Nubank, Inter)
+ * 3. OFX/QFX → Parser genérico
+ * 
+ * Funcionalidades:
+ * - ✅ Validação de autenticação
+ * - ✅ Validação de arquivo e parâmetros
+ * - ✅ Detecção automática de formato
+ * - ✅ Processamento com parsers especializados
+ * - ✅ OCR inteligente para PDFs (via API externa)
+ * - ✅ Categorização automática de transações
+ * - ✅ Normalização de dados financeiros
+ * - ✅ Tratamento robusto de erros
+ * - ✅ Warnings para baixa confiança OCR
+ * 
+ * @param formData - FormData contendo:
+ *   - file: Arquivo da fatura (PDF, CSV, OFX, QFX)
+ *   - cardId: ID do cartão (UUID)
+ *   - month: Mês da competência (1-12)
+ *   - year: Ano da competência
+ * 
+ * @returns Resultado do processamento com transações ou erro
+ */
 export async function processInvoiceUpload(formData: FormData) {
+  const startTime = Date.now()
+  
   try {
+    // 1️⃣ Autenticação
     const { userId } = await auth()
     
     if (!userId) {
-      return { success: false, error: 'Não autenticado' }
+      return { 
+        success: false, 
+        error: 'Não autenticado. Faça login para continuar.' 
+      }
     }
     
+    // 2️⃣ Extração e validação de parâmetros
     const file = formData.get('file') as File
     const cardId = formData.get('cardId') as string
     const month = parseInt(formData.get('month') as string)
     const year = parseInt(formData.get('year') as string)
     
+    // Validação de arquivo
     if (!file) {
-      return { success: false, error: 'Nenhum arquivo fornecido' }
-    }
-    
-    if (!cardId || !month || !year) {
       return { 
         success: false, 
-        error: 'Cartão e competência são obrigatórios' 
+        error: 'Nenhum arquivo fornecido. Faça upload de um arquivo PDF, CSV, OFX ou QFX.' 
       }
     }
     
-    // Parse do arquivo
-    console.log(`[processInvoiceUpload] Processando arquivo: ${file.name}`)
-    const parseResult = await parseInvoiceFile(file)
-    
-    if (!parseResult.success) {
+    // Validação de parâmetros obrigatórios
+    if (!cardId || !month || !year) {
       return { 
         success: false, 
-        error: 'Erro ao processar arquivo',
+        error: 'Cartão e competência (mês/ano) são obrigatórios.',
+        details: [
+          !cardId ? 'Cartão não especificado' : '',
+          !month ? 'Mês não especificado' : '',
+          !year ? 'Ano não especificado' : '',
+        ].filter(Boolean)
+      }
+    }
+    
+    // Validação de competência
+    if (month < 1 || month > 12) {
+      return {
+        success: false,
+        error: 'Mês inválido. Deve estar entre 1 e 12.'
+      }
+    }
+    
+    if (year < 2020 || year > 2100) {
+      return {
+        success: false,
+        error: 'Ano inválido. Deve estar entre 2020 e 2100.'
+      }
+    }
+    
+    // 3️⃣ Log de processamento
+    const fileExtension = file.name.split('.').pop()?.toLowerCase()
+    console.log('='.repeat(60))
+    console.log(`[processInvoiceUpload] 📄 Novo upload`)
+    console.log(`├─ Arquivo: ${file.name}`)
+    console.log(`├─ Tipo: ${file.type}`)
+    console.log(`├─ Extensão: .${fileExtension}`)
+    console.log(`├─ Tamanho: ${(file.size / 1024).toFixed(2)} KB`)
+    console.log(`├─ Cartão: ${cardId}`)
+    console.log(`└─ Competência: ${month.toString().padStart(2, '0')}/${year}`)
+    console.log('='.repeat(60))
+    
+    // 4️⃣ Processamento do arquivo com parser factory
+    // O factory irá automaticamente escolher o melhor parser:
+    // - PDFs: Tenta OCR primeiro, depois fallback para regex
+    // - CSVs: Tenta Nubank/Inter específicos
+    // - OFX/QFX: Parser genérico
+    const parseResult = await parseInvoiceFile(file)
+    
+    // 5️⃣ Tratamento de falha no parsing
+    if (!parseResult.success) {
+      console.log(`[processInvoiceUpload] ❌ Falha no parsing`)
+      console.log(`└─ Erros:`, parseResult.errors)
+      
+      return { 
+        success: false, 
+        error: 'Não foi possível processar o arquivo',
         details: parseResult.errors 
       }
     }
     
-    // Converte transações parseadas para itens de fatura
+    // 6️⃣ Validação de transações extraídas
+    if (!parseResult.transactions || parseResult.transactions.length === 0) {
+      console.log(`[processInvoiceUpload] ⚠️ Nenhuma transação encontrada`)
+      
+      return {
+        success: false,
+        error: 'Nenhuma transação encontrada no arquivo',
+        details: [
+          'O arquivo pode estar vazio ou em formato não suportado',
+          'Verifique se o arquivo é uma fatura válida',
+          ...parseResult.errors
+        ]
+      }
+    }
+    
+    // 7️⃣ Conversão de transações para itens de fatura
     const items: InvoiceItem[] = parseResult.transactions.map(t => ({
       id: crypto.randomUUID(),
       date: t.date,
@@ -66,19 +164,50 @@ export async function processInvoiceUpload(formData: FormData) {
       createdAt: new Date(),
     }))
     
+    // 8️⃣ Metadados enriquecidos
+    const metadata = {
+      ...parseResult.metadata,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: fileExtension,
+      processedAt: new Date().toISOString(),
+      itemCount: items.length,
+      cardId,
+      month,
+      year,
+    }
+    
+    // 9️⃣ Log de sucesso
+    const processingTime = Date.now() - startTime
+    console.log(`[processInvoiceUpload] ✅ Sucesso!`)
+    console.log(`├─ Transações: ${items.length}`)
+    console.log(`├─ Total: R$ ${metadata.totalAmount?.toFixed(2) || '0.00'}`)
+    console.log(`├─ Banco: ${metadata.bankName || 'N/A'}`)
+    console.log(`└─ Tempo: ${processingTime}ms`)
+    console.log('='.repeat(60))
+    
+    // 🔟 Retorno estruturado
     return { 
       success: true, 
       data: {
         items,
-        metadata: parseResult.metadata,
+        metadata,
+        // Passa warnings do parser (ex: baixa confiança OCR)
         warnings: parseResult.errors.length > 0 ? parseResult.errors : undefined
       }
     }
+    
   } catch (error) {
-    console.error('[processInvoiceUpload] Error:', error)
+    // Tratamento de erros inesperados
+    console.error('[processInvoiceUpload] 💥 Erro inesperado:', error)
+    
     return { 
       success: false, 
-      error: 'Erro ao processar arquivo de fatura' 
+      error: 'Erro inesperado ao processar arquivo de fatura',
+      details: [
+        error instanceof Error ? error.message : String(error),
+        'Entre em contato com o suporte se o problema persistir'
+      ]
     }
   }
 }
