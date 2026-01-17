@@ -34,6 +34,7 @@ export default function HomePage() {
   const [cardBillCategoryFilter, setCardBillCategoryFilter] = useState("all")
   const [incomeCategoryFilter, setIncomeCategoryFilter] = useState("all")
   const [expenseSubTab, setExpenseSubTab] = useState<"general" | "subscriptions">("general")
+  const [mainTab, setMainTab] = useState<"expenses" | "cards" | "incomes">("expenses")
 
   // 🎉 Detecta primeiro acesso do usuário
   useEffect(() => {
@@ -249,7 +250,7 @@ export default function HomePage() {
 
         {/* Navegação Principal com Botão de Cartões */}
         <div className="mb-4 flex flex-col sm:flex-row gap-2">
-          <Tabs defaultValue="expenses" className="w-full">
+          <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "expenses" | "cards" | "incomes")} className="w-full">
             <TabsList className="grid w-full grid-cols-3 h-auto p-1">
               <TabsTrigger
                 value="expenses"
@@ -290,7 +291,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <Tabs defaultValue="expenses" className="w-full">
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as "expenses" | "cards" | "incomes")} className="w-full">
           <TabsContent value="expenses" className="space-y-4 sm:space-y-6">
             <ExpenseSummary expenses={currentMonthExpenses.filter(e => e.category !== "Assinaturas")} />
 
