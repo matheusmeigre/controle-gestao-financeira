@@ -21,6 +21,11 @@ export interface ParseResult {
     cardLast4?: string
     totalAmount?: number
     statementPeriod?: string
+    // Datas da fatura extraídas do arquivo
+    closingDate?: string // Data de fechamento (formato ISO)
+    dueDate?: string // Data de vencimento (formato ISO)
+    referenceMonth?: number // Mês de referência (1-12)
+    referenceYear?: number // Ano de referência
   }
 }
 
