@@ -1,37 +1,71 @@
-import { Suspense } from 'react'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { Receipt, Plus, Filter, Home, CreditCard } from 'lucide-react'
 import Link from 'next/link'
-import { getInvoices } from '@/server/actions/invoices'
-import { getCards } from '@/server/actions/cards'
+import { useUser } from '@clerk/nextjs'
+import { InvoiceRepository } from '@/features/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import type { Invoice } from '@/features/invoices/types'
+import type { CreditCard as CardType } from '@/features/cards/types'
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-export default async function InvoicesPage({
-  searchParams,
-}: {
-  searchParams: { cardId?: string; month?: string; year?: string }
-}) {
-  const [invoicesResult, cardsResult] = await Promise.all([
-    getInvoices({
-      cardId: searchParams.cardId,
-      month: searchParams.month ? parseInt(searchParams.month) : undefined,
-      year: searchParams.year ? parseInt(searchParams.year) : undefined,
-    }),
-    getCards(),
-  ])
+const STORAGE_KEY = 'credit_cards'
+
+export default function InvoicesPage() {
+  const { user } = useUser()
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [cards, setCards] = useState<CardType[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   
-  const invoices = invoicesResult.success && invoicesResult.data ? invoicesResult.data : []
-  const cards = cardsResult.success && cardsResult.data ? cardsResult.data : []
+  useEffect(() => {
+    if (!user?.id) return
+    
+    const loadData = async () => {
+      try {
+        setIsLoading(true)
+        
+        // Carrega faturas
+        const invoiceRepo = new InvoiceRepository()
+        const userInvoices = await invoiceRepo.findAll(user.id)
+        setInvoices(userInvoices)
+        
+        // Carrega cartões
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const allCards: CardType[] = JSON.parse(stored)
+          const userCards = allCards.filter(c => c.userId === user.id && c.isActive)
+          setCards(userCards)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadData()
+  }, [user?.id])
   
   const getCardName = (cardId: string) => {
     const card = cards.find(c => c.id === cardId)
     return card ? `${card.nickname} (•••• ${card.last4Digits})` : 'Cartão desconhecido'
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">Carregando faturas...</div>
+        </div>
+      </div>
+    )
   }
   
   return (
@@ -75,9 +109,7 @@ export default async function InvoicesPage({
             <Receipt className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">Nenhuma fatura encontrada</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-md">
-              {searchParams.cardId || searchParams.month || searchParams.year
-                ? 'Nenhuma fatura encontrada com os filtros aplicados.'
-                : 'Crie sua primeira fatura ou importe automaticamente de um arquivo.'}
+              Crie sua primeira fatura ou importe automaticamente de um arquivo.
             </p>
             <Link href="/invoices/new">
               <Button>
