@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Trash2, Loader2, Home, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { CardSelector } from '@/features/cards'
-import { MonthYearPicker, InvoiceImporter } from '@/features/invoices'
+import { 
+  MonthYearPicker, 
+  InvoiceImporter, 
+  InvoiceDatesDisplay,
+  useInvoiceCreation 
+} from '@/features/invoices'
 import { createInvoice } from '@/server/actions/invoices'
 import type { InvoiceItem } from '@/types/invoice'
 import { Button } from '@/components/ui/button'
@@ -18,14 +23,19 @@ export default function NewInvoicePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Form state
-  const [cardId, setCardId] = useState('')
-  const [competency, setCompetency] = useState({
-    month: new Date().getMonth() + 1,
-    year: new Date().getFullYear()
-  })
-  const [closingDate, setClosingDate] = useState('')
-  const [dueDate, setDueDate] = useState('')
+  // 🎣 Hook customizado para gerenciar criação de fatura
+  // Calcula automaticamente datas de fechamento e vencimento!
+  const {
+    cardId,
+    setCardId,
+    competency,
+    setCompetency,
+    calculatedDates,
+    competencyDisplay,
+    isReadyToCreate,
+  } = useInvoiceCreation()
+  
+  // Items management
   const [items, setItems] = useState<InvoiceItem[]>([])
   
   // Manual item entry
@@ -72,13 +82,14 @@ export default function NewInvoicePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!cardId) {
-      setError('Selecione um cartão')
+    // Validações
+    if (!isReadyToCreate) {
+      setError('Selecione um cartão válido')
       return
     }
     
-    if (!closingDate || !dueDate) {
-      setError('Preencha as datas de fechamento e vencimento')
+    if (!calculatedDates) {
+      setError('Erro ao calcular datas da fatura')
       return
     }
     
@@ -95,8 +106,8 @@ export default function NewInvoicePage() {
         cardId,
         month: competency.month,
         year: competency.year,
-        closingDate: new Date(closingDate),
-        dueDate: new Date(dueDate),
+        closingDate: calculatedDates.closingDate,
+        dueDate: calculatedDates.dueDate,
         items,
       })
       
@@ -161,38 +172,175 @@ export default function NewInvoicePage() {
               onChange={setCompetency}
               disabled={isSubmitting}
             />
-            
-            <div className="grid grid-cols-2 gap-4">
+          </CardContent>
+        </Card>
+        
+        {/* ✨ Datas Calculadas Automaticamente */}
+        {calculatedDates && (
+          <InvoiceDatesDisplay 
+            dates={calculatedDates}
+            competencyDisplay={competencyDisplay}
+          />
+        )}
+        
+        {/* Import */}
+        {cardId && (
+          <InvoiceImporter
+            cardId={cardId}
+            month={competency.month}
+            year={competency.year}
+            onImportSuccess={handleImportSuccess}
+          />
+        )}
+        
+        {/* Manual Item Entry */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Adicionar Item Manualmente</CardTitle>
+            <CardDescription>
+              Adicione itens individuais à fatura
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="closingDate">
-                  Data de Fechamento <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="itemDate">Data</Label>
                 <Input
-                  id="closingDate"
+                  id="itemDate"
                   type="date"
-                  value={closingDate}
-                  onChange={(e) => setClosingDate(e.target.value)}
-                  disabled={isSubmitting}
-                  required
+                  value={newItem.date}
+                  onChange={(e) => setNewItem(prev => ({ ...prev, date: e.target.value }))}
+                />
+              </div>
+              
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="itemDescription">Descrição</Label>
+                <Input
+                  id="itemDescription"
+                  placeholder="Ex: Compra em loja"
+                  value={newItem.description}
+                  onChange={(e) => setNewItem(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="dueDate">
-                  Data de Vencimento <span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="itemAmount">Valor (R$)</Label>
                 <Input
-                  id="dueDate"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  disabled={isSubmitting}
-                  required
+                  id="itemAmount"
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={newItem.amount}
+                  onChange={(e) => setNewItem(prev => ({ ...prev, amount: e.target.value }))}
                 />
               </div>
             </div>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddManualItem}
+              disabled={!newItem.description || !newItem.amount}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Item
+            </Button>
           </CardContent>
         </Card>
+        
+        {/* Items List */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Itens da Fatura ({items.length})</CardTitle>
+                <CardDescription>
+                  Total: {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  }).format(totalAmount)}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {items.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum item adicionado. Importe um arquivo ou adicione manualmente.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {items.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">{item.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(item.date).toLocaleDateString('pt-BR')} • {item.category}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL'
+                        }).format(item.amount)}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveItem(item.id!)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        
+        {/* Error Message */}
+        {error && (
+          <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+        
+        {/* Submit Button */}
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting || !isReadyToCreate || items.length === 0}
+            className="flex-1"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Criando Fatura...
+              </>
+            ) : (
+              'Criar Fatura'
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}
         
         {/* Import */}
         {cardId && (

@@ -1,6 +1,14 @@
 // Components
 export { InvoiceImporter } from './components/InvoiceImporter'
 export { MonthYearPicker } from './components/MonthYearPicker'
+export { InvoiceDatesDisplay } from './components/InvoiceDatesDisplay'
+
+// Hooks
+export { useInvoiceCreation } from './hooks/useInvoiceCreation'
+
+// Utils
+export { InvoiceDateCalculator } from './utils/invoice-dates.utils'
+export type { InvoiceCompetency, CardDates, CalculatedDates } from './utils/invoice-dates.utils'
 
 // Services
 export { InvoiceService } from './services/invoice.service'
