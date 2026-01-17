@@ -29,7 +29,42 @@ export abstract class BaseRepository<T extends { id: string; userId: string }> {
     }
     
     const data = localStorage.getItem(this.getStorageKey(userId))
-    return data ? JSON.parse(data) : []
+    const items = data ? JSON.parse(data) : []
+    
+    // Deserializar datas (converter strings ISO de volta para Date)
+    return items.map((item: any) => this.deserializeDates(item))
+  }
+
+  /**
+   * Converte strings de data de volta para objetos Date
+   * Override este método em repositórios específicos se necessário
+   */
+  protected deserializeDates(item: any): T {
+    // Lista de campos que devem ser convertidos para Date
+    const dateFields = ['createdAt', 'updatedAt', 'date', 'closingDate', 'dueDate']
+    
+    const deserialized = { ...item }
+    
+    for (const field of dateFields) {
+      if (deserialized[field] && typeof deserialized[field] === 'string') {
+        deserialized[field] = new Date(deserialized[field])
+      }
+    }
+    
+    // Se tem items (array de itens), deserializar datas dos itens também
+    if (Array.isArray(deserialized.items)) {
+      deserialized.items = deserialized.items.map((subItem: any) => {
+        const deserializedItem = { ...subItem }
+        for (const field of dateFields) {
+          if (deserializedItem[field] && typeof deserializedItem[field] === 'string') {
+            deserializedItem[field] = new Date(deserializedItem[field])
+          }
+        }
+        return deserializedItem
+      })
+    }
+    
+    return deserialized as T
   }
 
   /**

@@ -24,8 +24,16 @@ export function InvoiceDatesDisplay({
   competencyDisplay,
   className = '' 
 }: InvoiceDatesDisplayProps) {
-  const closingFormatted = InvoiceDateCalculator.formatForDisplay(dates.closingDate)
-  const dueFormatted = InvoiceDateCalculator.formatForDisplay(dates.dueDate)
+  // Garantir que as datas sejam objetos Date válidos
+  const closingDate = typeof dates.closingDate === 'string' 
+    ? new Date(dates.closingDate) 
+    : dates.closingDate
+  const dueDate = typeof dates.dueDate === 'string' 
+    ? new Date(dates.dueDate) 
+    : dates.dueDate
+  
+  const closingFormatted = InvoiceDateCalculator.formatForDisplay(closingDate)
+  const dueFormatted = InvoiceDateCalculator.formatForDisplay(dueDate)
   
   return (
     <Card className={`border-primary/20 bg-primary/5 ${className}`}>

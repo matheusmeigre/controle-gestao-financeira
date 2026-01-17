@@ -21,10 +21,10 @@ export interface CardDates {
 }
 
 export interface CalculatedDates {
-  closingDate: Date
-  dueDate: Date
-  closingDateISO: string
-  dueDateISO: string
+  closingDate: Date | string
+  dueDate: Date | string
+  closingDateISO?: string
+  dueDateISO?: string
 }
 
 export class InvoiceDateCalculator {
@@ -171,11 +171,19 @@ export class InvoiceDateCalculator {
   
   /**
    * Utilitário para formatar data para exibição (DD/MM/YYYY)
+   * Aceita Date object ou string ISO (YYYY-MM-DD)
    */
-  static formatForDisplay(date: Date): string {
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
+  static formatForDisplay(date: Date | string): string {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    
+    if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+      console.error('Invalid date provided to formatForDisplay:', date)
+      return 'Data inválida'
+    }
+    
+    const day = String(dateObj.getDate()).padStart(2, '0')
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+    const year = dateObj.getFullYear()
     return `${day}/${month}/${year}`
   }
   
