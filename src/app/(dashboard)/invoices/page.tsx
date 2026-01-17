@@ -24,8 +24,6 @@ export default function InvoicesPage() {
   const [cards, setCards] = useState<CardType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
-  const [isLoading, setIsLoading] = useState(true)
-  
   useEffect(() => {
     if (!user?.id) return
     
