@@ -1,14 +1,21 @@
 /**
  * 🔧 Utilitários para Gerenciamento de Dados Multi-Tenant
  * 
- * Este arquivo contém funções helpers para manipulação segura de dados
- * com segregação por usuário (userId).
+ * DEPRECATED: Este arquivo está sendo substituído pelo Repository Pattern
+ * Use os repositories específicos em @/lib/repositories
+ * 
+ * Mantido apenas para compatibilidade com código legado durante a migração
  */
 
 import type { Expense, CardBill, Income } from "@/types/expense"
+import { 
+  ExpenseRepository, 
+  CardRepository, 
+  IncomeRepository 
+} from '@/lib/repositories'
 
 /**
- * Gera a chave do localStorage específica para o usuário
+ * @deprecated Use ExpenseRepository.findAll(userId) instead
  */
 export function getUserStorageKey(baseKey: string, userId: string): string {
   return `${baseKey}_${userId}`
