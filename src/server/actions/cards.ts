@@ -2,17 +2,17 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import type { CreditCard, CreateCreditCardInput, UpdateCreditCardInput } from '@/types/card'
+import { CardService } from '@/features/cards'
+import type { CreditCard, CreateCreditCardInput, UpdateCreditCardInput } from '@/features/cards/types'
 
 /**
  * Server Actions para gerenciamento de cartões de crédito
+ * Refatorado para usar CardService da feature
  * 
  * PRIVACY BY DESIGN: Nunca armazene número completo ou CVV
- * Apenas: nickname, bank_name, brand, last_4_digits
- * 
- * NOTA: Esta implementação usa localStorage no lado do cliente.
- * Para produção, recomenda-se implementar um banco de dados real (Prisma/Supabase)
  */
+
+const cardService = new CardService()
 
 export async function createCard(input: CreateCreditCardInput) {
   try {

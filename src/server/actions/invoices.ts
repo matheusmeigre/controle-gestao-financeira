@@ -2,21 +2,16 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { parseInvoiceFile } from '@/lib/parsers'
-import type { Invoice, InvoiceItem, CreateInvoiceInput, AddInvoiceItemInput } from '@/types/invoice'
+import { parseInvoiceFile } from '@/features/invoices/parsers'
+import { InvoiceService } from '@/features/invoices'
+import type { Invoice, InvoiceItem, CreateInvoiceInput, AddInvoiceItemInput } from '@/features/invoices/types'
 
 /**
  * Server Actions para gerenciamento de faturas
- * 
- * Funcionalidades:
- * - Upload e parse automático de faturas
- * - CRUD de faturas
- * - Gestão de itens da fatura
- * - Validação de duplicatas (idempotência)
+ * Refatorado para usar InvoiceService da feature
  */
 
-// Mock database
-let invoices: Invoice[] = []
+const invoiceService = new InvoiceService()
 
 /**
  * ====================================
