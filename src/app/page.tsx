@@ -2,6 +2,7 @@
 
 import { useUser } from '@clerk/nextjs'
 import { ExportManager } from '@/components/export-manager'
+import { EnhancedExportManager } from '@/components/enhanced-export-manager'
 import { MonthlyBalance } from '@/components/monthly-balance'
 import { UserHeader } from '@/components/user-header'
 import { WelcomeModal } from '@/components/welcome-modal'
@@ -92,8 +93,9 @@ export default function HomePage() {
         </div>
 
         {/* Export Manager */}
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-4 sm:mb-6 grid gap-4 lg:grid-cols-2">
           <ExportManager expenses={expenses} cardBills={cardBills} incomes={incomes} />
+          <EnhancedExportManager expenses={expenses} cardBills={cardBills} incomes={incomes} />
         </div>
 
         {/* Main Navigation */}
