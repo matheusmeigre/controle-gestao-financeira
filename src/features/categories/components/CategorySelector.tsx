@@ -42,8 +42,8 @@ export function CategorySelector({
               'hover:shadow-md hover:scale-[1.02] active:scale-[0.98]',
               'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
               value === category
-                ? 'border-primary bg-primary/5 shadow-sm'
-                : 'border-gray-200 bg-white hover:border-gray-300'
+                ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm'
+                : 'border-border bg-card hover:border-border/80 dark:hover:border-border'
             )}
           >
             <div className="flex items-center gap-2">

@@ -17,6 +17,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Calendar } from 'lucide-react'
 
 export default function NewInvoicePage() {
   const router = useRouter()
@@ -24,7 +26,6 @@ export default function NewInvoicePage() {
   const [error, setError] = useState<string | null>(null)
   
   // 🎣 Hook customizado para gerenciar criação de fatura
-  // Calcula automaticamente datas de fechamento e vencimento!
   const {
     cardId,
     setCardId,
@@ -38,6 +39,14 @@ export default function NewInvoicePage() {
   // Items management
   const [items, setItems] = useState<InvoiceItem[]>([])
   
+  // Datas extraídas do arquivo (prioritárias sobre as calculadas)
+  const [extractedDates, setExtractedDates] = useState<{
+    closingDate: string
+    dueDate: string
+    referenceMonth?: number
+    referenceYear?: number
+  } | null>(null)
+  
   // Manual item entry
   const [newItem, setNewItem] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -46,8 +55,26 @@ export default function NewInvoicePage() {
     category: 'Outros',
   })
   
-  const handleImportSuccess = (importedItems: InvoiceItem[]) => {
+  const handleImportSuccess = (importedItems: InvoiceItem[], metadata?: any) => {
     setItems(prev => [...prev, ...importedItems])
+    
+    // Se o arquivo contém datas de fechamento e vencimento, usa elas
+    if (metadata?.closingDate && metadata?.dueDate) {
+      setExtractedDates({
+        closingDate: metadata.closingDate,
+        dueDate: metadata.dueDate,
+        referenceMonth: metadata.referenceMonth,
+        referenceYear: metadata.referenceYear,
+      })
+      
+      // Atualiza a competência se disponível
+      if (metadata.referenceMonth && metadata.referenceYear) {
+        setCompetency({
+          month: metadata.referenceMonth,
+          year: metadata.referenceYear,
+        })
+      }
+    }
   }
   
   const handleAddManualItem = () => {
@@ -88,8 +115,11 @@ export default function NewInvoicePage() {
       return
     }
     
-    if (!calculatedDates) {
-      setError('Erro ao calcular datas da fatura')
+    // Usa datas extraídas do arquivo se disponíveis, senão usa as calculadas
+    const datesToUse = extractedDates || calculatedDates
+    
+    if (!datesToUse) {
+      setError('Erro ao determinar datas da fatura')
       return
     }
     
@@ -104,10 +134,10 @@ export default function NewInvoicePage() {
       
       const result = await createInvoice({
         cardId,
-        month: competency.month,
-        year: competency.year,
-        closingDate: calculatedDates.closingDate,
-        dueDate: calculatedDates.dueDate,
+        month: extractedDates?.referenceMonth || competency.month,
+        year: extractedDates?.referenceYear || competency.year,
+        closingDate: datesToUse.closingDate,
+        dueDate: datesToUse.dueDate,
         items,
       })
       
@@ -175,12 +205,39 @@ export default function NewInvoicePage() {
           </CardContent>
         </Card>
         
-        {/* ✨ Datas Calculadas Automaticamente */}
-        {calculatedDates && (
-          <InvoiceDatesDisplay 
-            dates={calculatedDates}
-            competencyDisplay={competencyDisplay}
-          />
+        {/* Datas da Fatura */}
+        {(extractedDates || calculatedDates) && (
+          <Card className="border-2 border-primary/20">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  Datas da Fatura
+                </CardTitle>
+                {extractedDates && (
+                  <Badge variant="default" className="bg-green-600">
+                    ✓ Extraídas do arquivo
+                  </Badge>
+                )}
+                {!extractedDates && calculatedDates && (
+                  <Badge variant="outline">
+                    🧮 Calculadas automaticamente
+                  </Badge>
+                )}
+              </div>
+              <CardDescription>
+                {extractedDates 
+                  ? 'Datas identificadas automaticamente na fatura importada'
+                  : 'Datas calculadas com base nas configurações do cartão'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InvoiceDatesDisplay 
+                dates={extractedDates || calculatedDates}
+                competencyDisplay={competencyDisplay}
+              />
+            </CardContent>
+          </Card>
         )}
         
         {/* Import */}

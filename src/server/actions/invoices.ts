@@ -170,6 +170,8 @@ export async function processInvoiceUpload(formData: FormData) {
       cardId,
       month,
       year,
+      // Datas extraídas do arquivo (se disponíveis)
+      hasExtractedDates: !!(parseResult.metadata?.closingDate && parseResult.metadata?.dueDate),
     }
     
     // 9️⃣ Log de sucesso
@@ -178,6 +180,8 @@ export async function processInvoiceUpload(formData: FormData) {
     console.log(`├─ Transações: ${items.length}`)
     console.log(`├─ Total: R$ ${metadata.totalAmount?.toFixed(2) || '0.00'}`)
     console.log(`├─ Banco: ${metadata.bankName || 'N/A'}`)
+    console.log(`├─ Data Fechamento: ${parseResult.metadata?.closingDate || 'não extraída'}`)
+    console.log(`├─ Data Vencimento: ${parseResult.metadata?.dueDate || 'não extraída'}`)
     console.log(`└─ Tempo: ${processingTime}ms`)
     console.log('='.repeat(60))
     
