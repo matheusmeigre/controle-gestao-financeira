@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { parseInvoiceFile } from '@/features/invoices/parsers'
 import { InvoiceService } from '@/features/invoices'
+import { InvoiceRepository } from '@/features/invoices/services/invoice.repository'
 import type { Invoice, InvoiceItem, CreateInvoiceInput, AddInvoiceItemInput } from '@/features/invoices/types'
 
 /**
@@ -12,6 +13,7 @@ import type { Invoice, InvoiceItem, CreateInvoiceInput, AddInvoiceItemInput } fr
  */
 
 const invoiceService = new InvoiceService()
+const invoiceRepository = new InvoiceRepository()
 
 /**
  * ====================================
@@ -219,45 +221,17 @@ export async function createInvoice(input: CreateInvoiceInput) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    // Verifica se já existe fatura para este cartão/competência
-    const existing = invoices.find(
-      inv => inv.userId === userId &&
-      inv.cardId === input.cardId &&
-      inv.month === input.month &&
-      inv.year === input.year
-    )
-    
-    if (existing) {
-      return { 
-        success: false, 
-        error: 'Já existe uma fatura para este cartão nesta competência' 
-      }
-    }
-    
-    // Calcula total dos itens
-    const totalAmount = input.items.reduce((sum, item) => sum + item.amount, 0)
-    
-    const newInvoice: Invoice = {
-      id: crypto.randomUUID(),
-      userId,
-      ...input,
-      totalAmount,
-      paidAmount: 0,
-      isPaid: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-    
-    invoices.push(newInvoice)
+    // Usa o InvoiceService para criar a fatura
+    const result = await invoiceService.createInvoice(userId, input)
     
     revalidatePath('/invoices')
     
-    return { success: true, data: newInvoice }
+    return { success: true, data: result }
   } catch (error) {
     console.error('[createInvoice] Error:', error)
     return { 
       success: false, 
-      error: 'Erro ao criar fatura' 
+      error: error instanceof Error ? error.message : 'Erro ao criar fatura'
     }
   }
 }
@@ -274,7 +248,8 @@ export async function getInvoices(filters?: {
       return { success: false, error: 'Não autenticado' }
     }
     
-    let userInvoices = invoices.filter(inv => inv.userId === userId)
+    // Usa InvoiceRepository para buscar faturas
+    let userInvoices = await invoiceRepository.findByUser(userId)
     
     // Aplica filtros
     if (filters?.cardId) {
@@ -287,12 +262,6 @@ export async function getInvoices(filters?: {
       userInvoices = userInvoices.filter(inv => inv.year === filters.year)
     }
     
-    // Ordena por data (mais recente primeiro)
-    userInvoices.sort((a, b) => {
-      if (a.year !== b.year) return b.year - a.year
-      return b.month - a.month
-    })
-    
     return { success: true, data: userInvoices }
   } catch (error) {
     console.error('[getInvoices] Error:', error)
@@ -300,7 +269,7 @@ export async function getInvoices(filters?: {
       success: false, 
       error: 'Erro ao buscar faturas' 
     }
-  }
+  }Repository.findById(userId, invoice
 }
 
 export async function getInvoice(invoiceId: string) {
@@ -311,9 +280,7 @@ export async function getInvoice(invoiceId: string) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const invoice = invoices.find(
-      inv => inv.id === invoiceId && inv.userId === userId
-    )
+    const invoice = await invoiceService.getInvoiceById(invoiceId, userId)
     
     if (!invoice) {
       return { success: false, error: 'Fatura não encontrada' }
@@ -337,43 +304,12 @@ export async function addInvoiceItem(input: AddInvoiceItemInput) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const invoice = invoices.find(
-      inv => inv.id === input.invoiceId && inv.userId === userId
-    )
-    
-    if (!invoice) {
-      return { success: false, error: 'Fatura não encontrada' }
-    }
-    
-    // Validação de duplicata (idempotência)
-    const isDuplicate = invoice.items.some(
-      item => 
-        item.date.getTime() === input.item.date.getTime() &&
-        item.description === input.item.description &&
-        item.amount === input.item.amount
-    )
-    
-    if (isDuplicate) {
-      return { 
-        success: false, 
-        error: 'Item duplicado. Esta transação já existe na fatura.' 
-      }
-    }
-    
-    const newItem: InvoiceItem = {
-      id: crypto.randomUUID(),
-      invoiceId: input.invoiceId,
-      ...input.item,
-      createdAt: new Date(),
-    }
-    
-    invoice.items.push(newItem)
-    invoice.totalAmount = invoice.items.reduce((sum, item) => sum + item.amount, 0)
-    invoice.updatedAt = new Date()
+    // Usa InvoiceService para adicionar item
+    const result = await invoiceService.addInvoiceItem(userId, input)
     
     revalidatePath(`/invoices/${input.invoiceId}`)
     
-    return { success: true, data: newItem }
+    return { success: true, data: result }
   } catch (error) {
     console.error('[addInvoiceItem] Error:', error)
     return { 
@@ -391,23 +327,8 @@ export async function removeInvoiceItem(invoiceId: string, itemId: string) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const invoice = invoices.find(
-      inv => inv.id === invoiceId && inv.userId === userId
-    )
-    
-    if (!invoice) {
-      return { success: false, error: 'Fatura não encontrada' }
-    }
-    
-    const itemIndex = invoice.items.findIndex(item => item.id === itemId)
-    
-    if (itemIndex === -1) {
-      return { success: false, error: 'Item não encontrado' }
-    }
-    
-    invoice.items.splice(itemIndex, 1)
-    invoice.totalAmount = invoice.items.reduce((sum, item) => sum + item.amount, 0)
-    invoice.updatedAt = new Date()
+    // Usa InvoiceService para remover item
+    await invoiceService.removeInvoiceItem(userId, { invoiceId, itemId })
     
     revalidatePath(`/invoices/${invoiceId}`)
     
@@ -429,17 +350,16 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const invoice = invoices.find(
-      inv => inv.id === invoiceId && inv.userId === userId
-    )
+    // Usa InvoiceRepository para atualizar pagamento
+    const invoice = await invoiceRepository.update(userId, invoiceId, {
+      paidAmount,
+      isPaid: paidAmount >= 0,
+      updatedAt: new Date()
+    })
     
     if (!invoice) {
       return { success: false, error: 'Fatura não encontrada' }
     }
-    
-    invoice.paidAmount = paidAmount
-    invoice.isPaid = paidAmount >= invoice.totalAmount
-    invoice.updatedAt = new Date()
     
     revalidatePath(`/invoices/${invoiceId}`)
     revalidatePath('/invoices')
