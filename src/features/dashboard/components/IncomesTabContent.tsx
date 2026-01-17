@@ -7,7 +7,7 @@
 import React from 'react'
 import { IncomeForm, IncomeList, IncomeSummary } from '@/features/incomes'
 import { CategoryFilter } from '@/components/category-filter'
-import { INCOME_CATEGORIES } from '@/types/expense'
+import { INCOME_CATEGORIES } from '@/features/categories'
 import type { Income } from '@/types/expense'
 
 type IncomesTabContentProps = {

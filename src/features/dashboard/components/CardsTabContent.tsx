@@ -9,7 +9,7 @@ import { CardBillFormV2 } from '@/components/card-bill-form-v2'
 import { CardBillsListV2 } from '@/components/card-bills-list-v2'
 import { CardSummary } from '@/components/card-summary'
 import { CategoryFilter } from '@/components/category-filter'
-import { CATEGORIES } from '@/types/expense'
+import { CATEGORIES } from '@/features/categories'
 import type { CardBill } from '@/types/expense'
 
 type CardsTabContentProps = {

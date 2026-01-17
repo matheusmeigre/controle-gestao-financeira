@@ -10,7 +10,7 @@ import { ExpenseForm, ExpenseList, ExpenseSummary } from '@/features/expenses'
 import { SubscriptionForm, SubscriptionList, SubscriptionSummary } from '@/features/subscriptions'
 import { CategoryFilter } from '@/components/category-filter'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { CATEGORIES } from '@/types/expense'
+import { CATEGORIES } from '@/features/categories'
 import type { Expense } from '@/types/expense'
 
 type ExpensesTabContentProps = {
