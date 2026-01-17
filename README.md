@@ -1,12 +1,10 @@
-# 💰 Minha Gestão Financeira
+# 💰 Controle de Gastos - Sistema de Gestão Financeira
 
-Aplicação web moderna para controle de gastos pessoais, rendas e faturas de cartão com **autenticação multi-usuário** e **dados privados por conta**.
+> Sistema completo de gestão financeira pessoal desenvolvido com Next.js 14, TypeScript e arquitetura feature-based.
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
-![React](https://img.shields.io/badge/React-19-61dafb?logo=react)
-![Clerk](https://img.shields.io/badge/Auth-Clerk-6C47FF?logo=clerk)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Architecture](https://img.shields.io/badge/Architecture-Feature--Based-green)](./docs/ARQUITETURA_V2.md)
 
 <img width="1915" height="904" alt="image" src="https://github.com/user-attachments/assets/12c6209c-35ad-4169-9dc3-30adec1fba69" />
 
@@ -26,276 +24,205 @@ Aplicação web moderna para controle de gastos pessoais, rendas e faturas de ca
 - ✅ Sessão persistente entre recargas
 - ✅ Segregação total de dados por usuário
 
-### 📊 **Gestão Financeira**
-- 💸 **Gastos Gerais:** Categorize despesas mensais
-- 💳 **Faturas de Cartão:** Divida gastos entre pessoas
-- 💰 **Rendas:** Controle salários e receitas extras
-- 📈 **Balanço Mensal:** Visualize saldo em tempo real
-- 📥 **Exportação:** Baixe dados em Excel (.xlsx)
-
-### 🎨 **Interface**
-- Design responsivo (mobile-first)
-- Tema escuro/claro
-- Componentes Radix UI + shadcn/ui
-- Animações suaves
-
----
-
-## 🚀 Quick Start (5 minutos)
-
-### **Pré-requisitos**
-- Node.js 18+
-- Conta gratuita no [Clerk](https://clerk.com)
-
-### **1. Clone e instale**
-\`\`\`bash
-git clone <seu-repo>
-cd controle-de-gastos
-npm install
-\`\`\`
-
-### **2. Configure o Clerk**
-1. Acesse [dashboard.clerk.com](https://dashboard.clerk.com)
-2. Crie um projeto
-3. **Desabilite** autenticação por telefone (não suporta Brasil):
-   - Vá em **User & Authentication** → **Email, Phone, Username**
-   - Desmarque **Phone number**
-4. **Habilite** Google e Microsoft em "Social Connections"
-5. Copie as chaves em "API Keys"
-
-### **3. Configure variáveis de ambiente**
-\`\`\`bash
-cp .env.local.example .env.local
-\`\`\`
-
-Edite `.env.local`:
-\`\`\`env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_XXXXXXXX
-CLERK_SECRET_KEY=sk_test_XXXXXXXX
-\`\`\`
-
-### **4. Rode o projeto**
-\`\`\`bash
-npm run dev
-\`\`\`
-
-Acesse: **http://localhost:3000** 🎉
-
----
-
-## 📖 Documentação Completa
-
-- **[QUICKSTART.md](./QUICKSTART.md)** - Guia de 5 minutos
-- **[SETUP_AUTH.md](./SETUP_AUTH.md)** - Configuração detalhada do Clerk
-- **[ARQUITETURA.md](./ARQUITETURA.md)** - Diagramas e fluxos técnicos
-- **[IMPLEMENTACAO_COMPLETA.md](./IMPLEMENTACAO_COMPLETA.md)** - Resumo da implementação
-- **[lib/security-checklist.ts](./lib/security-checklist.ts)** - Checklist de segurança
-
----
+- 💳 **Gestão de Cartões de Crédito** - Controle de múltiplos cartões
+- 📄 **Faturas Inteligentes** - Upload e processamento automático (OCR, CSV, OFX)
+- 💸 **Controle de Despesas** - Categorização e acompanhamento
+- 💰 **Gestão de Rendas** - Controle de recebimentos
+- 🔄 **Assinaturas** - Gerenciamento de gastos recorrentes
+- 📊 **Relatórios** - Visualização de gastos por categoria e período
+- 🔐 **Multi-tenant** - Isolamento de dados por usuário (Clerk Auth)
+- 📱 **Responsivo** - Interface adaptável para mobile e desktop
 
 ## 🏗️ Arquitetura
 
-\`\`\`
-┌─────────────┐
-│   Browser   │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────┐
-│  Middleware (Proteção)  │ ✅ Valida autenticação
-└──────┬──────────────────┘
-       │
-       ▼
-┌─────────────────────────┐
-│  Clerk Auth (OAuth 2.0) │ ✅ Google/Microsoft
-└──────┬──────────────────┘
-       │
-       ▼
-┌─────────────────────────┐
-│  Dashboard (React)      │ ✅ Dados segregados
-└──────┬──────────────────┘
-       │
-       ▼
-┌─────────────────────────┐
-│  localStorage (userId)  │ ✅ Chaves únicas
-└─────────────────────────┘
-\`\`\`
+### Feature-Based Architecture
 
-**Leia mais:** [ARQUITETURA.md](./ARQUITETURA.md)
-
----
-
-## 🔒 Segurança
-
-### **Implementado**
-- ✅ OAuth 2.0 (Google, Microsoft)
-- ✅ Tokens JWT gerenciados pelo Clerk
-- ✅ Middleware protegendo rotas
-- ✅ Campo `userId` obrigatório em todos os registros
-- ✅ Filtros de segurança na leitura de dados
-- ✅ Chaves de localStorage isoladas por usuário
-
-### **Score de Segurança**
-\`\`\`
-Autenticação (AuthN):     ✅ 95/100
-Autorização (AuthZ):      ✅ 90/100
-Proteção de Rotas:        ✅ 100/100
-Segregação de Dados:      ✅ 95/100
-Compliance (LGPD/GDPR):   ⚠️ 70/100
-────────────────────────────────────
-TOTAL:                    ✅ 78/100 (BOM)
-\`\`\`
-
-**Leia mais:** [lib/security-checklist.ts](./lib/security-checklist.ts)
-
----
-
-## 🧪 Testando
-
-### **Teste de Segregação**
-1. Faça login com Usuário A
-2. Adicione algumas despesas
-3. Faça logout
-4. Faça login com Usuário B
-5. **Resultado:** Usuário B não vê dados do Usuário A ✅
-
-### **Teste de Proteção de Rotas**
-1. Faça logout
-2. Tente acessar `http://localhost:3000`
-3. **Resultado:** Redirecionado automaticamente para `/sign-in` ✅
-
----
-
-## 📦 Estrutura do Projeto
-
-\`\`\`
-controle-de-gastos/
-├── app/
-│   ├── layout.tsx              # ClerkProvider global
-│   ├── page.tsx                # Dashboard protegido
-│   ├── sign-in/                # Tela de login
-│   └── sign-up/                # Tela de cadastro
-├── components/
-│   ├── user-header.tsx         # Header com logout
-│   ├── welcome-modal.tsx       # Modal de boas-vindas
-│   ├── expense-form.tsx        # Formulários
-│   └── ui/                     # Componentes Radix UI
+```
+src/
+├── features/           # Domínios de negócio isolados
+│   ├── expenses/       # Gestão de despesas
+│   ├── cards/          # Cartões de crédito
+│   ├── invoices/       # Faturas e parsers
+│   ├── incomes/        # Rendas
+│   └── subscriptions/  # Assinaturas
 ├── lib/
-│   ├── user-data.ts            # Helpers de segregação
-│   ├── security-checklist.ts   # Checklist de segurança
-│   └── utils.ts                # Utilidades gerais
-├── types/
-│   └── expense.ts              # Interfaces TypeScript
-├── middleware.ts               # Proteção de rotas
-├── .env.local.example          # Template de config
-└── [DOCS]                      # Documentação
-\`\`\`
+│   └── repositories/   # Repository Pattern
+├── server/             # Server Actions (Next.js)
+└── components/         # UI genérico
+```
 
----
+### Padrões Implementados
 
-## 🛠️ Stack Tecnológico
+- **Repository Pattern**: Abstração da camada de dados
+- **Service Layer**: Lógica de negócio centralizada
+- **Custom Hooks**: Encapsulamento de estado
+- **Barrel Exports**: APIs públicas limpas
+- **Server Actions**: Backend-for-Frontend
 
-### **Frontend**
+## 🚀 Quick Start
+
+### Pré-requisitos
+
+- Node.js 18+
+- npm/yarn/pnpm
+
+### Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/controle-de-gastos.git
+cd controle-de-gastos
+
+# Instale as dependências
+npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env.local
+# Edite .env.local com suas credenciais do Clerk
+
+# Execute em desenvolvimento
+npm run dev
+```
+
+Acesse [http://localhost:3000](http://localhost:3000)
+
+### Configuração do Clerk
+
+1. Crie uma conta em [clerk.com](https://clerk.com)
+2. Crie uma nova aplicação
+3. Copie as chaves para `.env.local`:
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+```
+
+## 📚 Documentação
+
+- **[ARQUITETURA_V2.md](./docs/ARQUITETURA_V2.md)** - Arquitetura completa do sistema
+- **[MIGRATION.md](./docs/MIGRATION.md)** - Guia de migração e onboarding
+- **[CONVENTIONS.md](./docs/CONVENTIONS.md)** - Convenções de código
+- **[tests/README.md](./tests/README.md)** - Guia de testes
+
+## 🛠️ Stack Tecnológica
+
+### Frontend
 - **Next.js 14** (App Router)
-- **React 19** (Client Components)
+- **React 19**
 - **TypeScript 5**
-- **Tailwind CSS 3**
-- **shadcn/ui** + **Radix UI**
+- **TailwindCSS 4**
+- **shadcn/ui** - Componentes
 
-### **Autenticação**
-- **Clerk** (OAuth 2.0, JWT, Session Management)
+### Backend
+- **Next.js Server Actions**
+- **Clerk** - Autenticação
+- **localStorage** - Persistência (migração futura para PostgreSQL)
 
-### **Armazenamento (Atual)**
-- **localStorage** (navegador)
-- ⚠️ *Recomendado para Fase 2: PostgreSQL/Supabase*
+### Testing (Configurado)
+- **Vitest** - Test runner
+- **Testing Library** - Testes de componentes
+- **MSW** - Mock de APIs
 
-### **DevTools**
-- **ESLint** (Linting)
-- **Prettier** (Formatação)
-- **Vercel Analytics** (Métricas)
+### Features Especiais
+- **OCR Service** - Processamento de faturas em PDF
+- **Multi-parser** - Suporte a Nubank, Inter, OFX, QFX
+- **Template Engine** - Templates bancários customizáveis
 
----
+## 📁 Estrutura do Projeto
+
+```
+controle-de-gastos/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   ├── features/               # Features isoladas
+│   │   ├── expenses/
+│   │   │   ├── components/     # UI da feature
+│   │   │   ├── hooks/          # Hooks específicos
+│   │   │   ├── services/       # Lógica de negócio
+│   │   │   ├── types.ts        # Tipos
+│   │   │   └── index.ts        # Barrel export
+│   │   ├── cards/
+│   │   ├── invoices/
+│   │   │   ├── parsers/        # Parsers de faturas
+│   │   │   └── templates/      # Templates bancários
+│   │   └── incomes/
+│   ├── components/             # Componentes genéricos
+│   ├── lib/
+│   │   └── repositories/       # Repository Pattern
+│   ├── server/                 # Server Actions
+│   └── hooks/                  # Hooks genéricos
+├── tests/                      # Testes organizados
+├── docs/                       # Documentação
+└── public/                     # Assets estáticos
+```
+
+## 🧪 Testes
+
+```bash
+# Executar todos os testes
+npm test
+
+# Executar com coverage
+npm test -- --coverage
+
+# Executar testes de uma feature específica
+npm test -- features/expenses
+```
+
+## 📦 Scripts Disponíveis
+
+```bash
+npm run dev          # Desenvolvimento
+npm run build        # Build de produção
+npm run start        # Servidor de produção
+npm run lint         # Linter
+npm test             # Testes
+```
 
 ## 🎯 Roadmap
 
-### **✅ Fase 1 (Atual) - Autenticação Multi-Tenant**
-- [x] Login social (Google/Microsoft)
-- [x] Segregação de dados por usuário
-- [x] Proteção de rotas
-- [x] Interface responsiva
-
-### **🔄 Fase 2 - Banco de Dados Real**
-- [ ] Migração para PostgreSQL
-- [ ] API Routes com Prisma ORM
-- [ ] Row-Level Security (RLS)
-- [ ] Backup automático
-
-### **🚀 Fase 3 - Features Avançadas**
-- [ ] Compartilhamento de despesas (Organizations)
-- [ ] Roles (Admin, User, Viewer)
-- [ ] Webhooks de sincronização
-- [ ] Notificações por email
-
-### **🔐 Fase 4 - Auditoria & Compliance**
-- [ ] Logs de acesso
-- [ ] Histórico de alterações
-- [ ] 2FA (Two-Factor Authentication)
-- [ ] Certificações de segurança
-
----
+- [x] Estrutura feature-based
+- [x] Repository Pattern
+- [x] Service Layer
+- [x] Testes configurados
+- [x] Documentação completa
+- [ ] Migração para PostgreSQL/Supabase
+- [ ] Implementação de tRPC
+- [ ] React Query para cache
+- [ ] SSR para SEO
+- [ ] Storybook
+- [ ] CI/CD com GitHub Actions
 
 ## 🤝 Contribuindo
 
-Este projeto foi desenvolvido para uso pessoal com amigos e família. Contribuições são bem-vindas!
-
-### **Como contribuir**
 1. Fork o projeto
-2. Crie uma branch: `git checkout -b feature/nova-feature`
-3. Commit suas mudanças: `git commit -m 'Add: nova feature'`
-4. Push para a branch: `git push origin feature/nova-feature`
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'feat: Add amazing feature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
----
+### Convenções
 
-## 📄 Licença
+- Use [Conventional Commits](https://www.conventionalcommits.org/)
+- Siga as [convenções do projeto](./docs/CONVENTIONS.md)
+- Adicione testes para novas features
+- Atualize a documentação
 
-Este projeto é de código fechado (privado) para uso pessoal.
+## 📝 Licença
 
----
+Este projeto está sob a licença MIT. Veja [LICENSE](LICENSE) para mais detalhes.
 
-## 👤 Autor
+## 👨‍💻 Autor
 
-**Matheus Meigre**  
-📧 Email: [matheusmeigre@gmail.com]  
-🔗 GitHub: [@matheusmeigre](https://github.com/matheusmeigre)
-
----
+Desenvolvido com ❤️ por [Seu Nome]
 
 ## 🙏 Agradecimentos
 
-- [Clerk](https://clerk.com) - Autenticação simplificada
-- [shadcn/ui](https://ui.shadcn.com) - Componentes de UI
-- [v0.dev](https://v0.dev) - Inspiração de design
-- [Vercel](https://vercel.com) - Hospedagem
+- [Next.js](https://nextjs.org/)
+- [Clerk](https://clerk.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [TailwindCSS](https://tailwindcss.com/)
 
 ---
 
-## 📞 Suporte
-
-Encontrou um bug? Tem uma sugestão?
-
-1. **Documentação:** Leia [SETUP_AUTH.md](./SETUP_AUTH.md)
-2. **Issues:** Abra uma issue neste repositório
-3. **Contato direto:** [matheusmeigre@gmail.com]
-
----
-
-<div align="center">
-
-**🎉 Desenvolvido com ❤️ usando Next.js, TypeScript e Clerk**
-
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Security](https://img.shields.io/badge/security-78%2F100-yellow)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
-
-</div>
+**⭐ Se este projeto te ajudou, considere dar uma estrela!**
