@@ -284,16 +284,16 @@ export function InvoiceImporter({ cardId, month, year, onImportSuccess }: Invoic
                 </div>
                 
                 {metadata && (
-                  <div className="mt-3 space-y-1 text-sm text-green-800">
+                  <div className="mt-3 space-y-1 text-sm">
                     {metadata.bankName && (
                       <p className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs bg-white text-green-800 border-green-200 font-medium">
                           {metadata.bankName}
                         </Badge>
                       </p>
                     )}
                     {metadata.statementPeriod && (
-                      <p>
+                      <p className="text-green-800">
                         <span className="font-medium">Período:</span> {metadata.statementPeriod}
                       </p>
                     )}
