@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt, Home } from 'lucide-react'
+import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt, Home, Check, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoiceRepository } from '@/features/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
@@ -29,6 +31,92 @@ export default function InvoiceDetailPage({
   const [invoice, setInvoice] = useState<Invoice | null>(null)
   const [card, setCard] = useState<CardType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [paidAmount, setPaidAmount] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  
+  // Calcula o status da fatura
+  const getInvoiceStatus = () => {
+    if (!invoice) return 'Pendente'
+    
+    if (invoice.isPaid || invoice.paidAmount >= invoice.totalAmount) {
+      return 'Paga'
+    }
+    
+    const dueDate = new Date(invoice.dueDate)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    dueDate.setHours(0, 0, 0, 0)
+    
+    if (dueDate < today) {
+      return 'Atrasada'
+    }
+    
+    return 'Pendente'
+  }
+  
+  const status = getInvoiceStatus()
+  
+  const handlePaymentUpdate = async () => {
+    if (!user?.id || !invoice) return
+    
+    const amount = parseFloat(paidAmount.replace(/[^\d,]/g, '').replace(',', '.'))
+    
+    if (isNaN(amount) || amount < 0) {
+      alert('Digite um valor válido')
+      return
+    }
+    
+    if (amount > invoice.totalAmount) {
+      if (!confirm('O valor informado é maior que o total da fatura. Deseja continuar?')) {
+        return
+      }
+    }
+    
+    try {
+      setIsSaving(true)
+      const invoiceRepo = new InvoiceRepository()
+      
+      const updatedInvoice = {
+        ...invoice,
+        paidAmount: amount,
+        isPaid: amount >= invoice.totalAmount,
+        updatedAt: new Date(),
+      }
+      
+      await invoiceRepo.update(user.id, invoice.id, updatedInvoice)
+      setInvoice(updatedInvoice)
+      setPaidAmount('')
+    } catch (error) {
+      console.error('Erro ao atualizar pagamento:', error)
+      alert('Erro ao salvar pagamento')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+  
+  const handleMarkAsPaid = async () => {
+    if (!user?.id || !invoice) return
+    
+    try {
+      setIsSaving(true)
+      const invoiceRepo = new InvoiceRepository()
+      
+      const updatedInvoice = {
+        ...invoice,
+        paidAmount: invoice.totalAmount,
+        isPaid: true,
+        updatedAt: new Date(),
+      }
+      
+      await invoiceRepo.update(user.id, invoice.id, updatedInvoice)
+      setInvoice(updatedInvoice)
+    } catch (error) {
+      console.error('Erro ao marcar como paga:', error)
+      alert('Erro ao marcar fatura como paga')
+    } finally {
+      setIsSaving(false)
+    }
+  }
   
   useEffect(() => {
     if (!user?.id) return
@@ -132,8 +220,10 @@ export default function InvoiceDetailPage({
             </p>
           )}
         </div>
-        {invoice.isPaid ? (
+        {status === 'Paga' ? (
           <Badge className="bg-green-500 text-lg px-4 py-2">Paga</Badge>
+        ) : status === 'Atrasada' ? (
+          <Badge className="bg-red-500 text-lg px-4 py-2">Atrasada</Badge>
         ) : (
           <Badge variant="outline" className="text-lg px-4 py-2">Pendente</Badge>
         )}
@@ -176,13 +266,18 @@ export default function InvoiceDetailPage({
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Itens</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Fechamento</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{invoice.items.length}</div>
+            <div className="text-2xl font-bold">
+              {new Date(invoice.closingDate).getDate()}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              transações
+              {new Date(invoice.closingDate).toLocaleDateString('pt-BR', {
+                month: 'short',
+                year: 'numeric'
+              })}
             </p>
           </CardContent>
         </Card>
@@ -206,6 +301,22 @@ export default function InvoiceDetailPage({
         </Card>
       </div>
       
+      {/* Period Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Período da Fatura</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Período vigente:</span>
+            <span className="font-medium">
+              {new Date(invoice.closingDate).toLocaleDateString('pt-BR')} até {new Date(invoice.dueDate).toLocaleDateString('pt-BR')}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+      
       {/* Payment Progress */}
       {invoice.paidAmount > 0 && (
         <Card>
@@ -225,6 +336,65 @@ export default function InvoiceDetailPage({
                 currency: 'BRL'
               }).format(invoice.totalAmount - invoice.paidAmount)}
             </p>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Payment Management */}
+      {!invoice.isPaid && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Gerenciar Pagamento</CardTitle>
+            <CardDescription>
+              Informe o valor pago para atualizar o status da fatura
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-end gap-4">
+              <div className="flex-1">
+                <Label htmlFor="paidAmount">Valor Pago</Label>
+                <Input
+                  id="paidAmount"
+                  type="text"
+                  placeholder="R$ 0,00"
+                  value={paidAmount}
+                  onChange={(e) => setPaidAmount(e.target.value)}
+                  disabled={isSaving}
+                />
+              </div>
+              <Button 
+                onClick={handlePaymentUpdate}
+                disabled={!paidAmount || isSaving}
+              >
+                {isSaving ? 'Salvando...' : 'Atualizar Pagamento'}
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-2 pt-2 border-t">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleMarkAsPaid}
+                disabled={isSaving}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Marcar como Paga (Valor Total)
+              </Button>
+            </div>
+            
+            {status === 'Atrasada' && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-900 dark:text-red-100">
+                    Fatura em Atraso
+                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    O vencimento desta fatura já passou. Realize o pagamento o quanto antes para evitar juros e multas.
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
