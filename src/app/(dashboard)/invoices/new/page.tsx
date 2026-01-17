@@ -9,9 +9,10 @@ import {
   MonthYearPicker, 
   InvoiceImporter, 
   InvoiceDatesDisplay,
-  useInvoiceCreation 
+  useInvoiceCreation,
+  InvoiceService
 } from '@/features/invoices'
-import { createInvoice } from '@/server/actions/invoices'
+import { useUser } from '@clerk/nextjs'
 import type { InvoiceItem } from '@/types/invoice'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,7 @@ import { Calendar } from 'lucide-react'
 
 export default function NewInvoicePage() {
   const router = useRouter()
+  const { user } = useUser()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
@@ -110,6 +112,11 @@ export default function NewInvoicePage() {
     e.preventDefault()
     
     // Validações
+    if (!user?.id) {
+      setError('Usuário não autenticado')
+      return
+    }
+    
     if (!isReadyToCreate) {
       setError('Selecione um cartão válido')
       return
@@ -132,7 +139,10 @@ export default function NewInvoicePage() {
       setIsSubmitting(true)
       setError(null)
       
-      const result = await createInvoice({
+      // Usa InvoiceService diretamente no cliente
+      const invoiceService = new InvoiceService()
+      
+      await invoiceService.createInvoice(user.id, {
         cardId,
         month: extractedDates?.referenceMonth || competency.month,
         year: extractedDates?.referenceYear || competency.year,
@@ -141,14 +151,9 @@ export default function NewInvoicePage() {
         items,
       })
       
-      if (!result.success) {
-        setError(result.error || 'Erro ao criar fatura')
-        return
-      }
-      
       router.push('/invoices')
     } catch (err) {
-      setError('Erro inesperado ao criar fatura')
+      setError(err instanceof Error ? err.message : 'Erro inesperado ao criar fatura')
       console.error(err)
     } finally {
       setIsSubmitting(false)
