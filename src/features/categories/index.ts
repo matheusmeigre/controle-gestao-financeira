@@ -10,3 +10,7 @@ export { FINANCIAL_CATEGORIES } from './types'
 
 // Services
 export { CategoryService, CATEGORIES, INCOME_CATEGORIES, TRANSACTION_CATEGORIES } from './services/category.service'
+
+// Components
+export { CategoryBadge } from './components/CategoryBadge'
+export { CategorySelector } from './components/CategorySelector'

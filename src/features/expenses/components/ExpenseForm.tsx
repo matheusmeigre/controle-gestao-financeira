@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { CurrencyInput } from "@/components/ui/currency-input"
-import { CATEGORIES } from "../types"
+import { CategorySelector, CATEGORIES } from "@/features/categories"
 import { Plus } from "lucide-react"
 
 interface ExpenseFormProps {
@@ -107,18 +107,11 @@ export function ExpenseForm({ onAddExpense }: ExpenseFormProps) {
             <Label htmlFor="category" className="text-sm font-medium text-foreground">
               Categoria
             </Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="h-12 text-base">
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat} className="text-base">
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CategorySelector 
+              value={category} 
+              onChange={setCategory}
+              categories={CATEGORIES}
+            />
           </div>
 
           {["Contas", "Estudos", "Assinaturas"].includes(category) && (
