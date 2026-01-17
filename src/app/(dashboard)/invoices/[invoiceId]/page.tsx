@@ -1,32 +1,80 @@
-import { Suspense } from 'react'
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt, Home } from 'lucide-react'
 import Link from 'next/link'
-import { getInvoice } from '@/server/actions/invoices'
-import { getCard } from '@/server/actions/cards'
+import { useUser } from '@clerk/nextjs'
+import { InvoiceRepository } from '@/features/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import type { Invoice } from '@/features/invoices/types'
+import type { CreditCard as CardType } from '@/features/cards/types'
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-export default async function InvoiceDetailPage({
+const STORAGE_KEY = 'credit_cards'
+
+export default function InvoiceDetailPage({
   params,
 }: {
   params: { invoiceId: string }
 }) {
-  const invoiceResult = await getInvoice(params.invoiceId)
+  const { user } = useUser()
+  const router = useRouter()
+  const [invoice, setInvoice] = useState<Invoice | null>(null)
+  const [card, setCard] = useState<CardType | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   
-  if (!invoiceResult.success || !invoiceResult.data) {
-    notFound()
+  useEffect(() => {
+    if (!user?.id) return
+    
+    const loadData = async () => {
+      try {
+        setIsLoading(true)
+        
+        // Carrega a fatura
+        const invoiceRepo = new InvoiceRepository()
+        const foundInvoice = await invoiceRepo.findById(user.id, params.invoiceId)
+        
+        if (!foundInvoice) {
+          router.push('/invoices')
+          return
+        }
+        
+        setInvoice(foundInvoice)
+        
+        // Carrega o cartão
+        const stored = localStorage.getItem(STORAGE_KEY)
+        if (stored) {
+          const allCards: CardType[] = JSON.parse(stored)
+          const foundCard = allCards.find(c => c.id === foundInvoice.cardId && c.userId === user.id)
+          setCard(foundCard || null)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar fatura:', error)
+        router.push('/invoices')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadData()
+  }, [user?.id, params.invoiceId, router])
+  
+  if (isLoading || !invoice) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-muted-foreground">Carregando fatura...</div>
+        </div>
+      </div>
+    )
   }
-  
-  const invoice = invoiceResult.data
-  const cardResult = await getCard(invoice.cardId)
-  const card = cardResult.success ? cardResult.data : null
   
   const percentage = invoice.totalAmount > 0
     ? (invoice.paidAmount / invoice.totalAmount) * 100
