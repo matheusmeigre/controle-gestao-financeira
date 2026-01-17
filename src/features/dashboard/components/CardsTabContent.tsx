@@ -1,0 +1,62 @@
+/**
+ * CardsTabContent Component
+ * 
+ * Conteúdo da aba de faturas de cartão
+ */
+
+import React from 'react'
+import { CardBillFormV2 } from '@/components/card-bill-form-v2'
+import { CardBillsListV2 } from '@/components/card-bills-list-v2'
+import { CardSummary } from '@/components/card-summary'
+import { CategoryFilter } from '@/components/category-filter'
+import { CATEGORIES } from '@/types/expense'
+import type { CardBill } from '@/types/expense'
+
+type CardsTabContentProps = {
+  categoryFilter: string
+  onCategoryFilterChange: (category: string) => void
+  currentMonthCardBills: CardBill[]
+  filteredCardBills: CardBill[]
+  onAddCardBill: (cardBill: Omit<CardBill, 'id' | 'date' | 'userId'>) => void
+  onUpdateCardBill: (id: string, updates: Partial<CardBill>) => void
+  onDeleteCardBill: (id: string) => void
+}
+
+export function CardsTabContent({
+  categoryFilter,
+  onCategoryFilterChange,
+  currentMonthCardBills,
+  filteredCardBills,
+  onAddCardBill,
+  onUpdateCardBill,
+  onDeleteCardBill,
+}: CardsTabContentProps) {
+  return (
+    <div className="space-y-6 sm:space-y-8">
+      <CardSummary cardBills={currentMonthCardBills} />
+
+      {/* Filtro de categoria */}
+      <div className="flex justify-end">
+        <CategoryFilter
+          categories={CATEGORIES}
+          selectedCategory={categoryFilter}
+          onCategoryChange={onCategoryFilterChange}
+        />
+      </div>
+
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="order-1">
+          <CardBillFormV2 onAddCardBill={onAddCardBill} />
+        </div>
+
+        <div className="order-2">
+          <CardBillsListV2
+            cardBills={filteredCardBills}
+            onDeleteCardBill={onDeleteCardBill}
+            onUpdateCardBill={onUpdateCardBill}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
