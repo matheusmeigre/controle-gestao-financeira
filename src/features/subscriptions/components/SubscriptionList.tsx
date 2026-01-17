@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { CurrencyInput } from "@/components/ui/currency-input"
-import { type Expense } from "@/types/expense"
+import { type Expense } from "@/features/expenses/types"
 import { Edit2, Trash2, Check, X, Calendar, CheckCircle2, Clock, RefreshCw, Power } from "lucide-react"
 
 interface SubscriptionListProps {

@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { Expense } from "@/types/expense"
+import type { Expense } from "@/features/expenses/types"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { Calendar, PieChartIcon } from "lucide-react"
 

@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { CurrencyInput } from "@/components/ui/currency-input"
-import { CATEGORIES } from "@/types/expense"
+import { CATEGORIES } from "../types"
 import { Plus } from "lucide-react"
 
 interface ExpenseFormProps {

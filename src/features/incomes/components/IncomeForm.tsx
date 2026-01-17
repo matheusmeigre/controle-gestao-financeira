@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { CurrencyInput } from "@/components/ui/currency-input"
 import { PlusCircle, DollarSign } from "lucide-react"
-import type { Income } from "@/types/expense"
-import { INCOME_CATEGORIES } from "@/types/expense"
+import type { Income } from "../types"
+import { INCOME_CATEGORIES } from "../types"
 
 interface IncomeFormProps {
   onAddIncome: (income: Omit<Income, "id" | "date">) => void

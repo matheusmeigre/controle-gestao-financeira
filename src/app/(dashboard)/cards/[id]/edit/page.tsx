@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import type { CreditCard } from '@/types/card'
-import { CardEditForm } from '@/components/cards/CardEditForm'
+import { CardEditForm } from '@/features/cards'
 import { Loader2 } from 'lucide-react'
 
 const STORAGE_KEY = 'credit_cards'

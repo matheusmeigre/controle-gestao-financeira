@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { CreditCard as CreditCardIcon, ChevronDown } from 'lucide-react'
-import type { CreditCard } from '@/types/card'
+import type { CreditCard } from '../types'
 import { Label } from '@/components/ui/label'
 
 const STORAGE_KEY = 'credit_cards'

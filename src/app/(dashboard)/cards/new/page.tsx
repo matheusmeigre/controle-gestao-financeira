@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Home } from 'lucide-react'
 import Link from 'next/link'
-import { CardForm } from '@/components/cards/CardForm'
+import { CardForm } from '@/features/cards'
 import { Button } from '@/components/ui/button'
 
 export default function NewCardPage() {

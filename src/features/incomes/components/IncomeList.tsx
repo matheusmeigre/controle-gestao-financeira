@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, DollarSign, Briefcase, TrendingUp, Clock, CheckCircle2 } from "lucide-react"
-import type { Income } from "@/types/expense"
+import type { Income } from "../types"
 import { useToast } from "@/hooks/use-toast"
 
 interface IncomeListProps {

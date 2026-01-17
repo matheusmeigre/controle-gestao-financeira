@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
-import type { CreditCard } from '@/types/card'
+import type { CreditCard } from '../types'
 
 const STORAGE_KEY = 'credit_cards'
 

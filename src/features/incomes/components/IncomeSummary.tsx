@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DollarSign, Briefcase, TrendingUp } from "lucide-react"
-import type { Income } from "@/types/expense"
+import type { Income } from "../types"
 
 interface IncomeSummaryProps {
   incomes: Income[]

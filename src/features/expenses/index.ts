@@ -15,6 +15,8 @@ export type {
   Expense, 
   CreateExpenseInput, 
   UpdateExpenseInput,
-  Category 
+  Category,
+  CardOption,
+  PersonOption
 } from './types'
-export { CATEGORIES } from './types'
+export { CATEGORIES, CARD_OPTIONS, PERSON_OPTIONS } from './types'

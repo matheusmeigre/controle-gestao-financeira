@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { CurrencyInput } from "@/components/ui/currency-input"
-import { type Expense, CATEGORIES, CARD_OPTIONS, PERSON_OPTIONS } from "@/types/expense"
+import { type Expense, CATEGORIES, CARD_OPTIONS, PERSON_OPTIONS } from "../types"
 import { Edit2, Trash2, Check, X, Receipt, CreditCard, User, Calendar, RefreshCw, CheckCircle2, Clock } from "lucide-react"
 
 interface ExpenseListProps {

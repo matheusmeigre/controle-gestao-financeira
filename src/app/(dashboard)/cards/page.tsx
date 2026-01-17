@@ -1,7 +1,7 @@
 import { CreditCard as CreditCardIcon, Plus, Home, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { CardsList } from '@/components/cards/CardsList'
+import { CardsList } from '@/features/cards'
 
 export default function CardsPage() {
   return (
