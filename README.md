@@ -6,7 +6,23 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![Architecture](https://img.shields.io/badge/Architecture-Feature--Based-green)](./docs/ARQUITETURA_V2.md)
 
-## ✨ Funcionalidades
+<img width="1915" height="904" alt="image" src="https://github.com/user-attachments/assets/12c6209c-35ad-4169-9dc3-30adec1fba69" />
+
+<img width="1918" height="905" alt="image" src="https://github.com/user-attachments/assets/763a828d-9ffd-4a3d-aef0-6a0743caaa37" />
+
+
+
+
+---
+
+## ✨ Features
+
+### 🔐 **Autenticação & Segurança**
+- ✅ Login social com **Google** e **Microsoft** (OAuth 2.0)
+- ✅ Sistema **Multi-Tenant**: cada usuário tem ambiente privado
+- ✅ Rotas protegidas automaticamente
+- ✅ Sessão persistente entre recargas
+- ✅ Segregação total de dados por usuário
 
 - 💳 **Gestão de Cartões de Crédito** - Controle de múltiplos cartões
 - 📄 **Faturas Inteligentes** - Upload e processamento automático (OCR, CSV, OFX)
