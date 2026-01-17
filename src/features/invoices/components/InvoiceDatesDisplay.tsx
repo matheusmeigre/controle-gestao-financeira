@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * 📅 Invoice Dates Display Component
  * 
