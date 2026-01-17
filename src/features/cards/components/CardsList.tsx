@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { CreditCard as CreditCardIcon, Plus, Trash2, Eye, Pencil } from 'lucide-react'
+import { CreditCard as CreditCardIcon, Plus, Trash2, Eye, Pencil, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import type { CreditCard } from '../types'
 import { Button } from '@/components/ui/button'
@@ -178,7 +178,7 @@ export function CardsList() {
                   className="h-8 w-8 p-0 bg-white/20 hover:bg-white/30 border-none"
                   title="Ver faturas"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Receipt className="h-4 w-4" />
                 </Button>
               </Link>
               <Button
