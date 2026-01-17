@@ -92,6 +92,25 @@ export class OcrParser implements InvoiceParser {
 
       console.log('[OcrParser] ✅ Sucesso! Transações extraídas:', transactions.length)
 
+      // Calcula mês e ano de referência baseado nas datas
+      let referenceMonth: number | undefined
+      let referenceYear: number | undefined
+      
+      if (ocrResult.data.issuedDate) {
+        referenceMonth = ocrResult.data.issuedDate.getMonth() + 1
+        referenceYear = ocrResult.data.issuedDate.getFullYear()
+      } else if (ocrResult.data.dueDate) {
+        // Se não tem data de emissão, usa o mês anterior ao vencimento
+        const dueDate = ocrResult.data.dueDate
+        referenceMonth = dueDate.getMonth() // Mês anterior
+        referenceYear = dueDate.getFullYear()
+        
+        if (referenceMonth === 0) {
+          referenceMonth = 12
+          referenceYear--
+        }
+      }
+
       // Monta resultado
       const result: ParseResult = {
         success: true,
@@ -100,6 +119,11 @@ export class OcrParser implements InvoiceParser {
           bankName: ocrResult.data.bankName,
           totalAmount: ocrResult.data.totalAmount,
           statementPeriod: this.formatStatementPeriod(ocrResult.data.issuedDate, ocrResult.data.dueDate),
+          // Adiciona datas extraídas
+          closingDate: ocrResult.data.issuedDate?.toISOString(),
+          dueDate: ocrResult.data.dueDate?.toISOString(),
+          referenceMonth,
+          referenceYear,
         },
         errors: [],
       }
