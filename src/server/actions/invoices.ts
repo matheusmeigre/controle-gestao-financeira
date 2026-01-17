@@ -269,7 +269,7 @@ export async function getInvoices(filters?: {
       success: false, 
       error: 'Erro ao buscar faturas' 
     }
-  }Repository.findById(userId, invoice
+  }
 }
 
 export async function getInvoice(invoiceId: string) {
@@ -280,7 +280,7 @@ export async function getInvoice(invoiceId: string) {
       return { success: false, error: 'Não autenticado' }
     }
     
-    const invoice = await invoiceService.getInvoiceById(invoiceId, userId)
+    const invoice = await invoiceRepository.findById(userId, invoiceId)
     
     if (!invoice) {
       return { success: false, error: 'Fatura não encontrada' }
