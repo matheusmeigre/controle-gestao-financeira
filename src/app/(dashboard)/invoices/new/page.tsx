@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Trash2, Loader2, Home, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { CardSelector } from '@/features/cards'
-import { MonthYearPicker, InvoiceImporter } from '@/features/invoices'
+import { 
+  MonthYearPicker, 
+  InvoiceImporter, 
+  InvoiceDatesDisplay,
+  useInvoiceCreation 
+} from '@/features/invoices'
 import { createInvoice } from '@/server/actions/invoices'
 import type { InvoiceItem } from '@/types/invoice'
 import { Button } from '@/components/ui/button'
@@ -18,14 +23,19 @@ export default function NewInvoicePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  // Form state
-  const [cardId, setCardId] = useState('')
-  const [competency, setCompetency] = useState({
-    month: new Date().getMonth() + 1,
-    year: new Date().getFullYear()
-  })
-  const [closingDate, setClosingDate] = useState('')
-  const [dueDate, setDueDate] = useState('')
+  // 🎣 Hook customizado para gerenciar criação de fatura
+  // Calcula automaticamente datas de fechamento e vencimento!
+  const {
+    cardId,
+    setCardId,
+    competency,
+    setCompetency,
+    calculatedDates,
+    competencyDisplay,
+    isReadyToCreate,
+  } = useInvoiceCreation()
+  
+  // Items management
   const [items, setItems] = useState<InvoiceItem[]>([])
   
   // Manual item entry
@@ -72,13 +82,14 @@ export default function NewInvoicePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!cardId) {
-      setError('Selecione um cartão')
+    // Validações
+    if (!isReadyToCreate) {
+      setError('Selecione um cartão válido')
       return
     }
     
-    if (!closingDate || !dueDate) {
-      setError('Preencha as datas de fechamento e vencimento')
+    if (!calculatedDates) {
+      setError('Erro ao calcular datas da fatura')
       return
     }
     
@@ -95,8 +106,8 @@ export default function NewInvoicePage() {
         cardId,
         month: competency.month,
         year: competency.year,
-        closingDate: new Date(closingDate),
-        dueDate: new Date(dueDate),
+        closingDate: calculatedDates.closingDate,
+        dueDate: calculatedDates.dueDate,
         items,
       })
       
@@ -161,38 +172,16 @@ export default function NewInvoicePage() {
               onChange={setCompetency}
               disabled={isSubmitting}
             />
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="closingDate">
-                  Data de Fechamento <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="closingDate"
-                  type="date"
-                  value={closingDate}
-                  onChange={(e) => setClosingDate(e.target.value)}
-                  disabled={isSubmitting}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="dueDate">
-                  Data de Vencimento <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  disabled={isSubmitting}
-                  required
-                />
-              </div>
-            </div>
           </CardContent>
         </Card>
+        
+        {/* ✨ Datas Calculadas Automaticamente */}
+        {calculatedDates && (
+          <InvoiceDatesDisplay 
+            dates={calculatedDates}
+            competencyDisplay={competencyDisplay}
+          />
+        )}
         
         {/* Import */}
         {cardId && (
@@ -335,7 +324,7 @@ export default function NewInvoicePage() {
           </Button>
           <Button
             type="submit"
-            disabled={isSubmitting || items.length === 0}
+            disabled={isSubmitting || !isReadyToCreate || items.length === 0}
             className="flex-1"
           >
             {isSubmitting ? (

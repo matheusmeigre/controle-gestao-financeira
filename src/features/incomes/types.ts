@@ -11,6 +11,10 @@ export interface Income {
   receivedDate: string | null
 }
 
+/**
+ * @deprecated Use INCOME_CATEGORIES from @/features/categories instead
+ * This constant will be removed in a future version
+ */
 export const INCOME_CATEGORIES = [
   "Salário",
   "Freelance",

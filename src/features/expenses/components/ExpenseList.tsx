@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { CurrencyInput } from "@/components/ui/currency-input"
-import { type Expense, CATEGORIES, CARD_OPTIONS, PERSON_OPTIONS } from "../types"
+import { CategoryBadge, CATEGORIES } from "@/features/categories"
+import { type Expense, CARD_OPTIONS, PERSON_OPTIONS } from "../types"
 import { Edit2, Trash2, Check, X, Receipt, CreditCard, User, Calendar, RefreshCw, CheckCircle2, Clock } from "lucide-react"
 
 interface ExpenseListProps {
@@ -282,9 +283,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
                         <span className="text-sm text-muted-foreground font-mono">{formatDate(expense.date)}</span>
-                        <Badge variant="outline" className={`text-xs ${getCategoryColor(expense.category)}`}>
-                          {expense.category}
-                        </Badge>
+                        <CategoryBadge category={expense.category} size="sm" />
                         {expense.status === "pending" && (
                           <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
                             <Clock className="h-3 w-3 mr-1" />

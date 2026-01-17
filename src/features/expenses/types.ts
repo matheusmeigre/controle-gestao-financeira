@@ -13,6 +13,10 @@ export interface Expense {
   notes?: string
 }
 
+/**
+ * @deprecated Use CATEGORIES from @/features/categories instead
+ * This constant will be removed in a future version
+ */
 export const CATEGORIES = [
   "Alimentação",
   "Transporte",

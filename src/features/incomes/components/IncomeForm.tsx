@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { CurrencyInput } from "@/components/ui/currency-input"
 import { PlusCircle, DollarSign } from "lucide-react"
 import type { Income } from "../types"
-import { INCOME_CATEGORIES } from "../types"
+import { CategorySelector, INCOME_CATEGORIES } from "@/features/categories"
 
 interface IncomeFormProps {
   onAddIncome: (income: Omit<Income, "id" | "date">) => void
@@ -89,18 +89,11 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="income-category">Categoria</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger id="income-category">
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {INCOME_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CategorySelector 
+              value={category} 
+              onChange={setCategory}
+              categories={INCOME_CATEGORIES}
+            />
           </div>
 
           <div className="space-y-2">

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { CategoryBadge } from "@/features/categories"
 import { Trash2, DollarSign, Briefcase, TrendingUp, Clock, CheckCircle2 } from "lucide-react"
 import type { Income } from "../types"
 import { useToast } from "@/hooks/use-toast"
@@ -93,6 +94,7 @@ export function IncomeList({ incomes, onDeleteIncome, onMarkAsReceived }: Income
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                       <p className="font-medium text-sm break-words">{income.description}</p>
+                      <CategoryBadge category={income.category} size="sm" />
                       {income.status === "pending" ? (
                         <Badge
                           variant="outline"
