@@ -42,31 +42,31 @@ export function WelcomeModal({ userName, onClose }: WelcomeModalProps) {
 
         <CardContent className="space-y-4">
           <div className="grid gap-3">
-            <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
               <Shield className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-sm">Dados Segregados</p>
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-muted-foreground">
                   Suas finanças são isoladas. Ninguém mais pode ver ou editar seus registros.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
               <TrendingUp className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-sm">Sincronização Automática</p>
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-muted-foreground">
                   Faça login em qualquer dispositivo e seus dados estarão lá.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-muted rounded-lg">
               <Zap className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-sm">Comece Agora</p>
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-muted-foreground">
                   Adicione sua primeira despesa, receita ou fatura de cartão nas abas abaixo.
                 </p>
               </div>
