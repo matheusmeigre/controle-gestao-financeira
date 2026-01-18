@@ -85,10 +85,10 @@ function DocumentModal({
           </p>
         </CardHeader>
 
-        <CardContent className="overflow-hidden p-0 relative" style={{ maxHeight: 'calc(85vh - 180px)' }}>
+        <CardContent className="flex-1 overflow-hidden p-0 relative flex flex-col" style={{ maxHeight: '70vh' }}>
           <div 
             ref={scrollRef}
-            className="h-full overflow-y-scroll p-6 terms-scroll"
+            className="flex-1 overflow-y-auto p-6"
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgb(203 213 225) transparent'
