@@ -5,6 +5,7 @@ import { ArrowLeft, Home } from 'lucide-react'
 import Link from 'next/link'
 import { CardForm } from '@/features/cards'
 import { Button } from '@/components/ui/button'
+import { UserHeader } from '@/components/user-header'
 
 export default function NewCardPage() {
   const router = useRouter()
@@ -14,7 +15,9 @@ export default function NewCardPage() {
   }
   
   return (
-    <div className="container mx-auto py-8 max-w-2xl space-y-6">
+    <>
+      <UserHeader />
+      <div className="container mx-auto py-8 max-w-2xl space-y-6">
       {/* Navegação */}
       <div className="flex items-center gap-2">
         <Link href="/">
@@ -33,6 +36,7 @@ export default function NewCardPage() {
       
       {/* Form */}
       <CardForm onSuccess={handleSuccess} />
-    </div>
+      </div>
+    </>
   )
 }
