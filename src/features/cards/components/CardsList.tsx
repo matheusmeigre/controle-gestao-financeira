@@ -45,6 +45,7 @@ export function CardsList() {
   const [isLoading, setIsLoading] = useState(true)
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set())
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
+  const [menuAnimating, setMenuAnimating] = useState<string | null>(null)
 
   useEffect(() => {
     loadCards()
@@ -119,7 +120,15 @@ export function CardsList() {
 
   const toggleMenu = (cardId: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    setOpenMenuId(openMenuId === cardId ? null : cardId)
+    if (openMenuId === cardId) {
+      setOpenMenuId(null)
+      setMenuAnimating(null)
+    } else {
+      setOpenMenuId(cardId)
+      setMenuAnimating(cardId)
+      // Remove animation state after animation completes
+      setTimeout(() => setMenuAnimating(null), 400)
+    }
   }
 
   if (isLoading) {
@@ -173,14 +182,21 @@ export function CardsList() {
               
               {/* Dropdown Menu */}
               {openMenuId === card.id && (
-                <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div 
+                  className="absolute right-0 mt-1 w-48 origin-top"
+                  style={{
+                    animation: menuAnimating === card.id ? 'flipInX 0.4s ease-out' : 'none',
+                    transformStyle: 'preserve-3d'
+                  }}
+                >
+                  <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       setOpenMenuId(null)
                       router.push(`/cards/${card.id}/edit`)
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 text-slate-700 dark:text-slate-200 transition-colors duration-150"
                   >
                     <Pencil className="h-4 w-4" />
                     Editar cartão
@@ -191,7 +207,7 @@ export function CardsList() {
                       setOpenMenuId(null)
                       router.push(`/invoices?cardId=${card.id}`)
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 text-slate-700 dark:text-slate-200 transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 text-slate-700 dark:text-slate-200 transition-colors duration-150"
                   >
                     <Receipt className="h-4 w-4" />
                     Ver faturas
@@ -205,11 +221,12 @@ export function CardsList() {
                         setOpenMenuId(null)
                       }
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors duration-150"
                   >
                     <Trash2 className="h-4 w-4" />
                     Excluir cartão
                   </button>
+                  </div>
                 </div>
               )}
             </div>
