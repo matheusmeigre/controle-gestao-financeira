@@ -8,6 +8,7 @@ import { InvoiceRepository } from '@/features/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { UserHeader } from '@/components/user-header'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
@@ -60,16 +61,21 @@ export default function InvoicesPage() {
   
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">Carregando faturas...</div>
+      <>
+        <UserHeader />
+        <div className="container mx-auto py-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-muted-foreground">Carregando faturas...</div>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
   
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <>
+      <UserHeader />
+      <div className="container mx-auto py-8 space-y-6">
       {/* Navegação */}
       <div className="flex items-center gap-2">
         <Link href="/">
@@ -200,6 +206,7 @@ export default function InvoicesPage() {
           })}
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }

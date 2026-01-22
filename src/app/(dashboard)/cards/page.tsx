@@ -2,10 +2,13 @@ import { CreditCard as CreditCardIcon, Plus, Home, Receipt } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { CardsList } from '@/features/cards'
+import { UserHeader } from '@/components/user-header'
 
 export default function CardsPage() {
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <>
+      <UserHeader />
+      <div className="container mx-auto py-8 space-y-6">
       {/* Navegação */}
       <div className="flex items-center gap-2">
         <Link href="/">
@@ -40,6 +43,7 @@ export default function CardsPage() {
       
       {/* Cards List */}
       <CardsList />
-    </div>
+      </div>
+    </>
   )
 }
