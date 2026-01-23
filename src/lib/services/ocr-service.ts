@@ -89,10 +89,18 @@ export interface OcrProcessedResult {
 const OCR_API_CONFIG = {
   baseUrl: 'https://ocr-api-leitura-financas.onrender.com',
   endpoint: '/extract',
-  timeout: 90000, // 90 segundos - APIs OCR podem ser lentas
+  healthEndpoint: '/health/ready',
+  timeout: 60000, // 60 segundos para primeira requisição (warm-up)
+  timeoutSubsequent: 30000, // 30 segundos para requisições subsequentes
   minConfidence: 0.7, // Confiança mínima aceitável
   maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxRetries: 2, // Número máximo de tentativas em caso de timeout
+  retryDelay: 2000, // 2 segundos entre tentativas
+  healthCheckTimeout: 5000, // 5 segundos para health check
 } as const
+
+// Contador de requisições para ajustar timeout dinamicamente
+let requestCount = 0
 
 // ====================================
 // 🚀 Serviço Principal
@@ -103,9 +111,13 @@ export class OcrService {
    * Processa um PDF usando a API OCR
    * 
    * @param file - Arquivo PDF para processar
+   * @param options - Opções de processamento (timeout, retries)
    * @returns Resultado processado e normalizado
    */
-  static async processInvoicePdf(file: File): Promise<OcrProcessedResult> {
+  static async processInvoicePdf(
+    file: File,
+    options: { timeout?: number; retries?: number } = {}
+  ): Promise<OcrProcessedResult> {
     try {
       // 1. Validações iniciais
       const validationError = this.validateFile(file)
@@ -118,10 +130,18 @@ export class OcrService {
 
       console.log('[OcrService] Enviando PDF para OCR:', file.name, `(${(file.size / 1024).toFixed(2)} KB)`)
 
-      // 2. Envia para API OCR
-      const rawResponse = await this.callOcrApi(file)
+      // 2. Verifica se API está pronta (health check opcional mas recomendado)
+      const isReady = await this.checkApiHealth()
+      if (!isReady) {
+        console.warn('[OcrService] API OCR não está pronta, aguardando...')
+        // Aguarda 2 segundos e tenta novamente
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
 
-      // 3. Valida resposta com Zod
+      // 3. Envia para API OCR com retry automático
+      const rawResponse = await this.callOcrApiWithRetry(file, options)
+
+      // 4. Valida resposta com Zod
       const validatedResponse = ocrResponseSchema.parse(rawResponse)
 
       // 4. Verifica sucesso na resposta
@@ -195,13 +215,43 @@ export class OcrService {
 
       if (error instanceof Error) {
         // Timeout ou erro de rede
-        if (error.name === 'AbortError') {
+        if (error.name === 'AbortError' || error.message.includes('Timeout')) {
           return {
             success: false,
-            error: 'Timeout: A API OCR demorou muito para responder',
+            error: '⏱️ Tempo esgotado ao processar PDF com OCR',
             warnings: [
-              'A API pode estar sobrecarregada',
-              'Tente novamente em alguns instantes',
+              'A API OCR pode estar fazendo warm-up (primeira requisição é mais lenta)',
+              'Já foi feita retry automática, mas todas as tentativas falharam',
+              'Sugestões:',
+              '  • Aguarde 30 segundos e tente novamente',
+              '  • Verifique sua conexão com a internet',
+              '  • Tente com um PDF menor se possível',
+            ],
+          }
+        }
+
+        // Erro de conexão
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          return {
+            success: false,
+            error: '🌐 Erro de conexão com a API OCR',
+            warnings: [
+              'Não foi possível conectar à API OCR',
+              'Verifique sua conexão com a internet',
+              'A API pode estar temporariamente indisponível',
+            ],
+          }
+        }
+
+        // Erro HTTP da API
+        if (error.message.includes('API OCR retornou erro')) {
+          return {
+            success: false,
+            error: error.message,
+            warnings: [
+              'A API rejeitou o arquivo',
+              'Verifique se o PDF está corrompido ou em formato válido',
+              'Tente exportar o PDF novamente do aplicativo do banco',
             ],
           }
         }
@@ -244,16 +294,115 @@ export class OcrService {
   }
 
   /**
-   * Chama a API OCR com tratamento de timeout
+   * Verifica se a API OCR está pronta para processar requisições
+   * Usa o endpoint /health/ready implementado na API
    */
-  private static async callOcrApi(file: File): Promise<unknown> {
+  private static async checkApiHealth(): Promise<boolean> {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), OCR_API_CONFIG.healthCheckTimeout)
+
+      const response = await fetch(`${OCR_API_CONFIG.baseUrl}${OCR_API_CONFIG.healthEndpoint}`, {
+        method: 'GET',
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      // 200 = pronto, 503 = carregando
+      if (response.status === 200) {
+        console.log('[OcrService] ✅ API OCR está pronta')
+        return true
+      } else if (response.status === 503) {
+        console.log('[OcrService] ⏳ API OCR ainda está carregando...')
+        return false
+      }
+
+      return false
+
+    } catch (error) {
+      console.warn('[OcrService] Não foi possível verificar health da API:', error)
+      // Se health check falhar, assume que está disponível e deixa o erro acontecer na requisição principal
+      return true
+    }
+  }
+
+  /**
+   * Chama a API OCR com retry automático em caso de timeout
+   * 
+   * @param file - Arquivo PDF para processar
+   * @param options - Opções de timeout e retries
+   * @returns Resposta da API
+   */
+  private static async callOcrApiWithRetry(
+    file: File,
+    options: { timeout?: number; retries?: number } = {}
+  ): Promise<unknown> {
+    // Define timeout baseado no número de requisições (primeira é mais lenta)
+    const isFirstRequest = requestCount === 0
+    const defaultTimeout = isFirstRequest ? OCR_API_CONFIG.timeout : OCR_API_CONFIG.timeoutSubsequent
+    
+    const timeout = options.timeout ?? defaultTimeout
+    const maxRetries = options.retries ?? OCR_API_CONFIG.maxRetries
+
+    let lastError: Error | null = null
+    
+    // Tenta até maxRetries vezes
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          console.log(`[OcrService] Tentativa ${attempt + 1}/${maxRetries + 1} após falha...`)
+          await new Promise(resolve => setTimeout(resolve, OCR_API_CONFIG.retryDelay))
+        }
+
+        const response = await this.callOcrApi(file, timeout)
+        
+        // Sucesso! Incrementa contador
+        requestCount++
+        return response
+
+      } catch (error) {
+        lastError = error as Error
+
+        // Se é timeout e ainda tem tentativas, continua
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.warn(`[OcrService] ⏱️ Timeout na tentativa ${attempt + 1}/${maxRetries + 1}`)
+          
+          if (attempt < maxRetries) {
+            console.log('[OcrService] Tentando novamente...')
+            continue
+          }
+        }
+
+        // Se não é timeout ou acabaram as tentativas, lança erro
+        throw error
+      }
+    }
+
+    // Se chegou aqui, todas as tentativas falharam
+    throw new Error(
+      `OCR falhou após ${maxRetries + 1} tentativas. ` +
+      `Última falha: ${lastError?.message || 'Erro desconhecido'}. ` +
+      `A API pode estar sobrecarregada, tente novamente em alguns instantes.`
+    )
+  }
+
+  /**
+   * Chama a API OCR com tratamento de timeout
+   * 
+   * @param file - Arquivo para enviar
+   * @param timeout - Tempo máximo de espera em ms
+   */
+  private static async callOcrApi(file: File, timeout: number): Promise<unknown> {
     // Cria FormData
     const formData = new FormData()
     formData.append('file', file)
 
     // Cria AbortController para timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), OCR_API_CONFIG.timeout)
+    const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+    console.log(`[OcrService] ⏱️ Timeout configurado para ${timeout / 1000}s`)
 
     try {
       const response = await fetch(`${OCR_API_CONFIG.baseUrl}${OCR_API_CONFIG.endpoint}`, {
@@ -285,6 +434,15 @@ export class OcrService {
 
     } catch (error) {
       clearTimeout(timeoutId)
+      
+      // Melhora mensagem de erro para timeout
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(
+          `Timeout: A API OCR não respondeu em ${timeout / 1000} segundos. ` +
+          `Isso pode acontecer na primeira requisição enquanto a API faz warm-up.`
+        )
+      }
+      
       throw error
     }
   }
