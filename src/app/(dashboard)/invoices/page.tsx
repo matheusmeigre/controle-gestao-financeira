@@ -1,14 +1,16 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Receipt, Plus, Filter, Home, CreditCard } from 'lucide-react'
+import { Receipt, Plus, Filter, Home, CreditCard, Trash2, Mail } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoiceRepository } from '@/features/invoices'
+import { deleteInvoice } from '@/server/actions/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { UserHeader } from '@/components/user-header'
+import { useToast } from '@/hooks/use-toast'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
@@ -21,9 +23,12 @@ const STORAGE_KEY = 'credit_cards'
 
 export default function InvoicesPage() {
   const { user } = useUser()
+  const { toast } = useToast()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [cards, setCards] = useState<CardType[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   
   useEffect(() => {
     if (!user?.id) return
@@ -57,6 +62,46 @@ export default function InvoicesPage() {
   const getCardName = (cardId: string) => {
     const card = cards.find(c => c.id === cardId)
     return card ? `${card.nickname} (•••• ${card.last4Digits})` : 'Cartão desconhecido'
+  }
+  
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    setDeletingId(invoiceId)
+    
+    try {
+      const result = await deleteInvoice(invoiceId)
+      
+      if (result.success) {
+        // Remove do estado local
+        setInvoices(prev => prev.filter(inv => inv.id !== invoiceId))
+        
+        toast({
+          title: 'Fatura excluída',
+          description: 'A fatura foi excluída com sucesso.',
+        })
+      } else {
+        toast({
+          title: 'Erro ao excluir',
+          description: result.error || 'Não foi possível excluir a fatura.',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro ao excluir',
+        description: 'Ocorreu um erro inesperado.',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeletingId(null)
+      setConfirmDelete(null)
+    }
+  }
+  
+  const handleSendEmail = () => {
+    toast({
+      title: '🚧 Em construção',
+      description: 'A funcionalidade de envio por email está em desenvolvimento e será disponibilizada em breve.',
+    })
   }
   
   if (isLoading) {
@@ -132,9 +177,12 @@ export default function InvoicesPage() {
               ? (invoice.paidAmount / invoice.totalAmount) * 100
               : 0
             
+            const isDeleting = deletingId === invoice.id
+            const showConfirm = confirmDelete === invoice.id
+            
             return (
-              <Link key={invoice.id} href={`/invoices/${invoice.id}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Card key={invoice.id} className="hover:shadow-lg transition-shadow relative">
+                <Link href={`/invoices/${invoice.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div>
@@ -200,8 +248,71 @@ export default function InvoicesPage() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
-              </Link>
+                </Link>
+                
+                {/* Action Buttons */}
+                <CardContent className="pt-0">
+                  {showConfirm ? (
+                    <div className="space-y-2">
+                      <p className="text-sm text-destructive font-medium text-center">
+                        Confirmar exclusão?
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleDeleteInvoice(invoice.id)
+                          }}
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? 'Excluindo...' : 'Sim, excluir'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setConfirmDelete(null)
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleSendEmail()
+                        }}
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Enviar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          setConfirmDelete(invoice.id)
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )
           })}
         </div>

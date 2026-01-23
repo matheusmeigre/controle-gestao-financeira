@@ -249,17 +249,17 @@ export async function getInvoices(filters?: {
     }
     
     // Usa InvoiceRepository para buscar faturas
-    let userInvoices = await invoiceRepository.findByUser(userId)
+    let userInvoices = await invoiceRepository.findAll(userId)
     
     // Aplica filtros
     if (filters?.cardId) {
-      userInvoices = userInvoices.filter(inv => inv.cardId === filters.cardId)
+      userInvoices = userInvoices.filter((inv: Invoice) => inv.cardId === filters.cardId)
     }
     if (filters?.month) {
-      userInvoices = userInvoices.filter(inv => inv.month === filters.month)
+      userInvoices = userInvoices.filter((inv: Invoice) => inv.month === filters.month)
     }
     if (filters?.year) {
-      userInvoices = userInvoices.filter(inv => inv.year === filters.year)
+      userInvoices = userInvoices.filter((inv: Invoice) => inv.year === filters.year)
     }
     
     return { success: true, data: userInvoices }
@@ -328,7 +328,7 @@ export async function removeInvoiceItem(invoiceId: string, itemId: string) {
     }
     
     // Usa InvoiceService para remover item
-    await invoiceService.removeInvoiceItem(userId, { invoiceId, itemId })
+    await invoiceService.removeInvoiceItem(userId, invoiceId, itemId)
     
     revalidatePath(`/invoices/${invoiceId}`)
     
@@ -373,3 +373,34 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
     }
   }
 }
+
+/**
+ * Deleta uma fatura permanentemente
+ */
+export async function deleteInvoice(invoiceId: string) {
+  try {
+    const { userId } = await auth()
+    
+    if (!userId) {
+      return { success: false, error: 'Não autenticado' }
+    }
+    
+    // Usa InvoiceService para deletar
+    const deleted = await invoiceService.deleteInvoice(userId, invoiceId)
+    
+    if (!deleted) {
+      return { success: false, error: 'Fatura não encontrada' }
+    }
+    
+    revalidatePath('/invoices')
+    
+    return { success: true }
+  } catch (error) {
+    console.error('[deleteInvoice] Error:', error)
+    return { 
+      success: false, 
+      error: 'Erro ao excluir fatura' 
+    }
+  }
+}
+
