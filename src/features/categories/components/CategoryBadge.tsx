@@ -69,14 +69,14 @@ export function CategoryBadge({
     <Badge 
       variant={variant}
       className={cn(
-        'inline-flex items-center font-medium rounded-full transition-all',
+        'inline-flex items-start font-medium rounded-full transition-all',
         variant === 'default' && config.color,
         sizeClasses[size],
         className
       )}
     >
-      {showIcon && <Icon className={iconSizes[size]} />}
-      <span>{category}</span>
+      {showIcon && <Icon className={cn(iconSizes[size], 'shrink-0 mt-0.5')} />}
+      <span className="break-words leading-tight">{category}</span>
     </Badge>
   )
 }

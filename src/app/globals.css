@@ -164,3 +164,32 @@
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* Dropdown Menu Flip Animation */
+@keyframes flipInX {
+  0% {
+    transform: perspective(400px) rotateX(-90deg);
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotateX(10deg);
+  }
+  70% {
+    transform: perspective(400px) rotateX(-5deg);
+  }
+  100% {
+    transform: perspective(400px) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes flipOutX {
+  0% {
+    transform: perspective(400px) rotateX(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(400px) rotateX(90deg);
+    opacity: 0;
+  }
+}
