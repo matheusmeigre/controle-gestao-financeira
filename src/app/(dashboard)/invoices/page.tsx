@@ -5,7 +5,6 @@ import { Receipt, Plus, Filter, Home, CreditCard, Trash2, Mail } from 'lucide-re
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoiceRepository } from '@/features/invoices'
-import { deleteInvoice } from '@/server/actions/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -65,27 +64,48 @@ export default function InvoicesPage() {
   }
   
   const handleDeleteInvoice = async (invoiceId: string) => {
+    console.log('[handleDeleteInvoice] Iniciando exclusão:', invoiceId)
     setDeletingId(invoiceId)
     
     try {
-      const result = await deleteInvoice(invoiceId)
+      // Verifica autenticação
+      if (!user?.id) {
+        toast({
+          title: 'Erro ao excluir',
+          description: 'Usuário não autenticado.',
+          variant: 'destructive',
+        })
+        return
+      }
       
-      if (result.success) {
-        // Remove do estado local
-        setInvoices(prev => prev.filter(inv => inv.id !== invoiceId))
+      // Deleta do localStorage diretamente (client-side)
+      const invoiceRepo = new InvoiceRepository()
+      const deleted = await invoiceRepo.delete(user.id, invoiceId)
+      
+      console.log('[handleDeleteInvoice] Resultado da exclusão:', deleted)
+      
+      if (deleted) {
+        console.log('[handleDeleteInvoice] Sucesso! Atualizando UI...')
+        
+        // Recarrega os dados
+        const updatedInvoices = await invoiceRepo.findAll(user.id)
+        console.log('[handleDeleteInvoice] Faturas após reload:', updatedInvoices.length)
+        setInvoices(updatedInvoices)
         
         toast({
           title: 'Fatura excluída',
           description: 'A fatura foi excluída com sucesso.',
         })
       } else {
+        console.error('[handleDeleteInvoice] Fatura não encontrada')
         toast({
           title: 'Erro ao excluir',
-          description: result.error || 'Não foi possível excluir a fatura.',
+          description: 'Fatura não encontrada.',
           variant: 'destructive',
         })
       }
     } catch (error) {
+      console.error('[handleDeleteInvoice] Exceção:', error)
       toast({
         title: 'Erro ao excluir',
         description: 'Ocorreu um erro inesperado.',

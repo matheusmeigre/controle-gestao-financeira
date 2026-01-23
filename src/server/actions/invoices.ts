@@ -379,14 +379,21 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
  */
 export async function deleteInvoice(invoiceId: string) {
   try {
+    console.log('[deleteInvoice] Iniciando exclusão:', invoiceId)
+    
     const { userId } = await auth()
     
     if (!userId) {
+      console.log('[deleteInvoice] Usuário não autenticado')
       return { success: false, error: 'Não autenticado' }
     }
     
+    console.log('[deleteInvoice] UserId:', userId)
+    
     // Usa InvoiceService para deletar
     const deleted = await invoiceService.deleteInvoice(userId, invoiceId)
+    
+    console.log('[deleteInvoice] Resultado da exclusão:', deleted)
     
     if (!deleted) {
       return { success: false, error: 'Fatura não encontrada' }
@@ -394,6 +401,7 @@ export async function deleteInvoice(invoiceId: string) {
     
     revalidatePath('/invoices')
     
+    console.log('[deleteInvoice] Fatura excluída com sucesso')
     return { success: true }
   } catch (error) {
     console.error('[deleteInvoice] Error:', error)
