@@ -6,7 +6,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Receipt, CreditCard, DollarSign, Wallet } from 'lucide-react'
+import { Receipt, CreditCard, DollarSign, Wallet, Target } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 
@@ -50,17 +50,30 @@ export function MainNavigation({ activeTab, onTabChange }: MainNavigationProps) 
         </TabsList>
       </Tabs>
 
-      {/* Botão de Gestão de Cartões */}
-      <Link href="/cards" className="w-full sm:w-auto">
-        <Button
-          variant="outline"
-          className="w-full flex items-center justify-center gap-2 h-10"
-        >
-          <Wallet className="h-4 w-4" />
-          <span className="hidden sm:inline">Gestão de Cartões</span>
-          <span className="sm:hidden">Cartões</span>
-        </Button>
-      </Link>
+      {/* Botões de Ações Rápidas */}
+      <div className="flex gap-2 w-full sm:w-auto">
+        <Link href="/planning" className="flex-1 sm:flex-initial">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 h-10"
+          >
+            <Target className="h-4 w-4" />
+            <span className="hidden sm:inline">Planejamento</span>
+            <span className="sm:hidden">Planos</span>
+          </Button>
+        </Link>
+
+        <Link href="/cards" className="flex-1 sm:flex-initial">
+          <Button
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 h-10"
+          >
+            <Wallet className="h-4 w-4" />
+            <span className="hidden sm:inline">Gestão de Cartões</span>
+            <span className="sm:hidden">Cartões</span>
+          </Button>
+        </Link>
+      </div>
     </div>
   )
 }

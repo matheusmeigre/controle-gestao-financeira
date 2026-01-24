@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Receipt, Plus, Filter, Home, CreditCard, Trash2, Mail } from 'lucide-react'
+import { Receipt, Plus, Filter, Home, CreditCard, Trash2, Mail, Target } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoiceRepository } from '@/features/invoices'
@@ -147,6 +147,12 @@ export default function InvoicesPage() {
           <Button variant="ghost" size="sm">
             <Home className="mr-2 h-4 w-4" />
             Início
+          </Button>
+        </Link>
+        <Link href="/planning">
+          <Button variant="ghost" size="sm">
+            <Target className="mr-2 h-4 w-4" />
+            Planejamento
           </Button>
         </Link>
         <Link href="/cards">
