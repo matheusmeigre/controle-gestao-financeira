@@ -1,4 +1,4 @@
-import { CreditCard as CreditCardIcon, Plus, Home, Receipt } from 'lucide-react'
+import { CreditCard as CreditCardIcon, Plus, Home, Receipt, Target } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { CardsList } from '@/features/cards'
@@ -15,6 +15,12 @@ export default function CardsPage() {
           <Button variant="ghost" size="sm">
             <Home className="mr-2 h-4 w-4" />
             Início
+          </Button>
+        </Link>
+        <Link href="/planning">
+          <Button variant="ghost" size="sm">
+            <Target className="mr-2 h-4 w-4" />
+            Planejamento
           </Button>
         </Link>
         <Link href="/invoices">

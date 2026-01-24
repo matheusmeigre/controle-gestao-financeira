@@ -9,6 +9,7 @@ import { WelcomeModal } from '@/components/welcome-modal'
 import { TermsAcceptanceModal } from '@/components/terms-acceptance-modal'
 import { Footer } from '@/components/footer'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { PlanningAlerts } from '@/features/planning'
 import {
   DashboardHeader,
   MainNavigation,
@@ -90,6 +91,11 @@ export default function HomePage() {
             expenses={currentMonthData.expenses}
             cardBills={currentMonthData.cardBills}
           />
+        </div>
+
+        {/* Planning Alerts */}
+        <div className="mb-4 sm:mb-6">
+          <PlanningAlerts />
         </div>
 
         {/* Export Manager */}
