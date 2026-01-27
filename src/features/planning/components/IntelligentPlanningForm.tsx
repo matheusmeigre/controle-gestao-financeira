@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { CategorySelector } from './CategorySelector'
@@ -131,11 +132,11 @@ export function IntelligentPlanningForm({
 
   if (!context) {
     return (
-      <Card className="p-8">
-        <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </div>
-      </Card>
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
     )
   }
 
@@ -151,50 +152,46 @@ export function IntelligentPlanningForm({
 
       {/* BLOCO 2: Contexto Financeiro (Read-Only) */}
       {category && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2"> Seu Contexto Financeiro</h3>
-            <p className="text-sm text-muted-foreground">
-              Entenda sua situação atual antes de planejar
-            </p>
-          </div>
-          <FinancialContextDisplay context={context} />
-        </div>
+        <FinancialContextDisplay context={context} />
       )}
 
       {/* BLOCO 3: Dados Básicos do Planejamento */}
       {category && (
-        <Card className="p-6 space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Dados do Planejamento</h3>
-            <p className="text-sm text-muted-foreground">
-              Defina os parâmetros do seu objetivo
-            </p>
+        <div className="space-y-6 max-w-2xl">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-xs uppercase tracking-wide text-muted-foreground">
+              O que você está planejando?
+            </Label>
+            <Input
+              id="name"
+              placeholder="ex: Reserva de emergência"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="text-xl h-14 transition-all duration-150 focus:ring-2"
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="name">Nome do Planejamento *</Label>
-              <Input
-                id="name"
-                placeholder="Ex: Viagem para Paris em Julho"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="targetAmount" className="text-xs uppercase tracking-wide text-muted-foreground">
+              Quanto você precisa economizar por mês?
+            </Label>
+            <CurrencyInput
+              id="targetAmount"
+              placeholder="0,00"
+              value={targetAmount}
+              onChange={setTargetAmount}
+              className="text-4xl font-mono h-20 transition-all duration-150 focus:ring-2"
+            />
+            {targetAmount > 0 && simulation && (
+              <p className="text-sm text-muted-foreground">
+                {simulation.incomePercentage.toFixed(0)}% da sua renda livre
+              </p>
+            )}
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="targetAmount">Valor Total Necessário *</Label>
-              <CurrencyInput
-                id="targetAmount"
-                placeholder="0,00"
-                value={targetAmount}
-                onChange={setTargetAmount}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currentAmount">Quanto já tem guardado?</Label>
+              <Label htmlFor="currentAmount" className="text-sm">Quanto já tem guardado?</Label>
               <CurrencyInput
                 id="currentAmount"
                 placeholder="0,00"
@@ -204,7 +201,7 @@ export function IntelligentPlanningForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="startDate">Data de Início</Label>
+              <Label htmlFor="startDate" className="text-sm">Data de Início</Label>
               <DatePicker
                 id="startDate"
                 value={startDate}
@@ -214,7 +211,7 @@ export function IntelligentPlanningForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="targetDate">Data Objetivo *</Label>
+              <Label htmlFor="targetDate" className="text-sm">Data Objetivo *</Label>
               <DatePicker
                 id="targetDate"
                 value={targetDate}
@@ -224,159 +221,103 @@ export function IntelligentPlanningForm({
               />
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* BLOCO 3.5: Campos Dinâmicos por Categoria */}
-      {category && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">
+      {category && categoryData && Object.keys(categoryData).length > 0 && (
+        <div className="space-y-4 max-w-2xl">
+          <div className="border-t border-border pt-6">
+            <h4 className="text-sm font-semibold mb-4">
               {category === 'travel' && 'Detalhes da Viagem'}
               {category === 'purchase' && 'Detalhes da Compra'}
               {category === 'emergency_reserve' && 'Configuração da Reserva'}
               {category === 'exorbitant_expense' && 'Justificativa e Planejamento'}
               {!['travel', 'purchase', 'emergency_reserve', 'exorbitant_expense'].includes(category) && 'Detalhes'}
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Informações específicas desta categoria
-            </p>
+            </h4>
+            <DynamicCategoryFields
+              category={category}
+              data={categoryData}
+              onChange={setCategoryData}
+            />
           </div>
-          <DynamicCategoryFields
-            category={category}
-            data={categoryData}
-            onChange={setCategoryData}
-          />
         </div>
       )}
 
       {/* BLOCO 4: Simulação em Tempo Real */}
       {simulation && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Simulação Financeira</h3>
-            <p className="text-sm text-muted-foreground">
-              Cálculos em tempo real
-            </p>
-          </div>
-          <PlanningSimulationDisplay
-            simulation={simulation}
-            targetAmount={targetAmount}
-            currentAmount={currentAmount}
-          />
-        </div>
+        <PlanningSimulationDisplay
+          simulation={simulation}
+          targetAmount={targetAmount}
+          currentAmount={currentAmount}
+        />
       )}
 
       {/* BLOCO 5: Impacto no Orçamento */}
       {simulation && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Impacto no Orçamento</h3>
-            <p className="text-sm text-muted-foreground">
-              Comparação da sua situação atual e futura
-            </p>
-          </div>
-          <BudgetImpactDisplay
-            currentContext={context}
-            monthlyRequired={simulation.monthlyRequired}
-            planningName={name || 'este planejamento'}
-          />
-        </div>
+        <BudgetImpactDisplay
+          currentContext={context}
+          monthlyRequired={simulation.monthlyRequired}
+          planningName={name || 'este planejamento'}
+        />
       )}
 
       {/* BLOCO 6: Alertas Inteligentes */}
       {alerts.length > 0 && (
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Alertas e Recomendações</h3>
-            <p className="text-sm text-muted-foreground">
-              Análise inteligente do planejamento
-            </p>
-          </div>
-          <IntelligentAlertsDisplay alerts={alerts} />
-        </div>
+        <IntelligentAlertsDisplay alerts={alerts} />
       )}
 
-      {/* BLOCO 7: Confirmação Consciente */}
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Confirmação</h3>
-            <p className="text-sm text-muted-foreground">
-              Resumo do planejamento
-            </p>
-          </div>
-
-          {/* Resumo */}
-          {simulation && (
-            <div className="bg-muted rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Valor Mensal</span>
-                <Badge variant="outline">
+      {/* BLOCO 7: Confirmação (Sticky Footer) */}
+      {simulation && (
+        <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border p-6 -mx-4 mt-12">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground">Pronto para criar</p>
+              <p className="text-lg font-semibold">{name || 'Novo planejamento'}</p>
+              <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                <span className="font-mono">
                   {simulation.monthlyRequired.toLocaleString('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
-                  })}
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Impacto na Renda</span>
-                <Badge variant="outline">{simulation.incomePercentage.toFixed(0)}%</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Viabilidade</span>
-                <Badge className={simulation.isViable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                  {simulation.isViable ? '✓ Viável' : '✗ Inviável'}
-                </Badge>
+                  })}/mês
+                </span>
+                <span>•</span>
+                <span>{simulation.incomePercentage.toFixed(0)}% da renda</span>
+                <span>•</span>
+                <span className={simulation.isViable ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                  {simulation.isViable ? 'Viável' : 'Atenção'}
+                </span>
               </div>
             </div>
-          )}
-
-          {/* Botões */}
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              className="flex-1"
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              className="flex-1"
-              disabled={!canSubmit || isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {isEditing ? 'Atualizar Planejamento' : 'Criar Planejamento'}
-                </>
-              )}
-            </Button>
+            
+            <div className="flex gap-3">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={onCancel}
+                className="min-w-[100px]"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!canSubmit || isSubmitting}
+                className="min-w-[160px] h-12 text-base transition-all duration-150"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    Salvando...
+                  </div>
+                ) : (
+                  'Criar Planejamento'
+                )}
+              </Button>
+            </div>
           </div>
-
-          {!canSubmit && (
-            <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted rounded p-3">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div>
-                {!name && <p>Preencha o nome do planejamento</p>}
-                {!category && <p>Selecione uma categoria</p>}
-                {!targetAmount && <p>Informe o valor total necessário</p>}
-                {!targetDate && <p>Defina a data objetivo</p>}
-                {hasBlockingAlerts(alerts) && <p>Resolva os alertas críticos antes de continuar</p>}
-              </div>
-            </div>
-          )}
         </div>
-      </Card>
+      )}
     </div>
   )
 }

@@ -24,7 +24,7 @@ export default function NewPlanningPage() {
   return (
     <>
       <UserHeader />
-      <div className="container mx-auto py-8 space-y-6 px-4">
+      <div className="container mx-auto py-8 space-y-8 px-4">
         {/* Navegação */}
         <Link href="/planning" prefetch={true}>
           <Button variant="ghost" size="sm">
@@ -33,11 +33,11 @@ export default function NewPlanningPage() {
           </Button>
         </Link>
 
-        {/* Header */}
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold">Novo Planejamento Financeiro</h1>
-          <p className="text-muted-foreground mt-2">
-            Sistema inteligente de planejamento com simulações em tempo real e análise contextual
+        {/* Header Minimalista */}
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl font-semibold">Novo Planejamento</h1>
+          <p className="text-muted-foreground mt-1">
+            Defina seu objetivo e veja simulações em tempo real
           </p>
         </div>
 

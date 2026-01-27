@@ -30,6 +30,7 @@ export function PlanningSummary() {
           title="Total de Planejamentos"
           value={summary.total}
           icon={Target}
+          formatAsNumber
         />
 
         <StatCard
@@ -37,6 +38,7 @@ export function PlanningSummary() {
           value={summary.inProgress}
           icon={TrendingUp}
           variant="default"
+          formatAsNumber
         />
 
         <StatCard
@@ -44,13 +46,14 @@ export function PlanningSummary() {
           value={summary.completed}
           icon={CheckCircle2}
           variant="success"
+          formatAsNumber
         />
 
         <StatCard
           title="Meta Total"
-          value={formatCurrency(summary.totalTargetAmount)}
+          value={summary.totalTargetAmount}
           icon={Target}
-          variant="default"
+          variant="highlight"
         />
       </div>
     )
