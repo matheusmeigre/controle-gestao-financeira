@@ -41,20 +41,16 @@ export function IncomesTabContent({
           onCategoryChange={onCategoryFilterChange}
         />
       </div>
-
-      <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="order-1">
-          <IncomeForm onAddIncome={onAddIncome} />
-        </div>
-
-        <div className="order-2">
-          <IncomeList
-            incomes={filteredIncomes}
-            onDeleteIncome={onDeleteIncome}
-            onMarkAsReceived={onMarkIncomeAsReceived}
-          />
-        </div>
+      
+      <div className="bg-muted/50 border border-dashed rounded-lg p-4 text-sm text-muted-foreground">
+        💡 <strong>Dica:</strong> Use o botão <strong>+</strong> no canto inferior direito para adicionar novas receitas rapidamente.
       </div>
+
+      <IncomeList
+        incomes={filteredIncomes}
+        onDeleteIncome={onDeleteIncome}
+        onMarkAsReceived={onMarkIncomeAsReceived}
+      />
     </div>
   )
 }

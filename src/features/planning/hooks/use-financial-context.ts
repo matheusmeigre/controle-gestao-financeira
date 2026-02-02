@@ -22,14 +22,14 @@ export function invalidateFinancialContextCache() {
 }
 
 /**
- * Hook para obter contexto financeiro completo do usu\u00e1rio
+ * Hook para obter contexto financeiro completo do usuário
  * 
  * Este hook calcula automaticamente:
- * - Renda mensal e m\u00e9dia
- * - Gastos fixos e vari\u00e1veis
+ * - Renda mensal e média
+ * - Gastos fixos e variáveis
  * - Planejamentos ativos e seus compromissos
- * - Renda livre dispon\u00edvel
- * - N\u00edvel de risco financeiro
+ * - Renda livre disponível
+ * - Nível de risco financeiro
  */
 export function useFinancialContext() {
   const { user } = useUser()
@@ -91,7 +91,7 @@ export function useFinancialContext() {
         .filter((exp: any) => exp.isRecurring || exp.category === 'Assinaturas')
         .reduce((sum: number, exp: any) => sum + exp.amount, 0)
 
-      // Gastos vari\u00e1veis do m\u00eas atual
+      // Gastos variáveis do mês atual
       const currentMonthExpenses = expenses.filter((exp: any) => {
         const date = new Date(exp.date)
         return date.getMonth() === currentMonth && 
