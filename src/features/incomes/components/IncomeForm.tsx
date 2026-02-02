@@ -24,21 +24,45 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
   const [type, setType] = useState<"salary" | "extra">("salary")
   const [category, setCategory] = useState("")
   const [isReceived, setIsReceived] = useState(false)
+  const [salaryMonth, setSalaryMonth] = useState("")
+  const [salaryPeriod, setSalaryPeriod] = useState("")
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!description.trim() || amount <= 0 || !category) {
-      return
+    // Validação especial para salário
+    if (type === 'salary') {
+      if (amount <= 0 || !salaryMonth) {
+        alert('Preencha o valor e o mês do salário')
+        return
+      }
+    } else {
+      if (!description.trim() || amount <= 0 || !category) {
+        return
+      }
     }
 
     const currentDate = new Date().toISOString()
+    
+    // Gera descrição automática para salário
+    let finalDescription = description.trim()
+    if (type === 'salary') {
+      const [year, month] = salaryMonth.split('-')
+      const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+      const monthName = monthNames[parseInt(month) - 1]
+      
+      finalDescription = `Salário - ${monthName}/${year}`
+      if (salaryPeriod) {
+        finalDescription += ` (${salaryPeriod})`
+      }
+    }
 
     onAddIncome({
-      description: description.trim(),
+      description: finalDescription,
       amount,
       type,
-      category,
+      category: category || 'Outros',
       status: isReceived ? "received" : "pending",
       registrationDate: currentDate,
       receivedDate: isReceived ? currentDate : null,
@@ -50,6 +74,8 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
     setType("salary")
     setCategory("")
     setIsReceived(false)
+    setSalaryMonth("")
+    setSalaryPeriod("")
   }
 
   return (
@@ -75,26 +101,58 @@ export function IncomeForm({ onAddIncome }: IncomeFormProps) {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="income-description">Descrição</Label>
-            <Input
-              id="income-description"
-              type="text"
-              placeholder={type === "salary" ? "Ex: Salário mensal" : "Ex: Freelance, Aluguel, Venda"}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
+          {/* Campos condicionais para Salário */}
+          {type === 'salary' ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="salary-month">Mês do Salário *</Label>
+                <Input
+                  id="salary-month"
+                  type="month"
+                  value={salaryMonth}
+                  onChange={(e) => setSalaryMonth(e.target.value)}
+                  max="9999-12"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="salary-period">Período de Vigência (Opcional)</Label>
+                <Input
+                  id="salary-period"
+                  placeholder="Ex: 01/02 - 28/02"
+                  value={salaryPeriod}
+                  onChange={(e) => setSalaryPeriod(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Informe o período da folha de pagamento, se aplicável
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="income-description">Descrição</Label>
+                <Input
+                  id="income-description"
+                  type="text"
+                  placeholder="Ex: Freelance, Aluguel, Venda"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="income-category">Categoria</Label>
-            <CategorySelector 
-              value={category} 
-              onChange={setCategory}
-              categories={INCOME_CATEGORIES}
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="income-category">Categoria</Label>
+                <CategorySelector 
+                  value={category} 
+                  onChange={setCategory}
+                  categories={INCOME_CATEGORIES}
+                />
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="income-amount">Valor</Label>

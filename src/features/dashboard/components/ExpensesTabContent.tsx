@@ -82,37 +82,31 @@ export function ExpensesTabContent({
       </div>
 
       {subTab === 'general' ? (
-        <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-          <div className="order-1">
-            <ExpenseForm onAddExpense={onAddExpense} />
+        <div className="space-y-4">
+          <div className="bg-muted/50 border border-dashed rounded-lg p-4 text-sm text-muted-foreground">
+            💡 <strong>Dica:</strong> Use o botão <strong>+</strong> no canto inferior direito para adicionar novas despesas rapidamente.
           </div>
-
-          <div className="order-2">
-            <ExpenseList
-              expenses={filteredGeneralExpenses}
-              onUpdateExpense={onUpdateExpense}
-              onDeleteExpense={onDeleteExpense}
-            />
-          </div>
+          
+          <ExpenseList
+            expenses={filteredGeneralExpenses}
+            onUpdateExpense={onUpdateExpense}
+            onDeleteExpense={onDeleteExpense}
+          />
         </div>
       ) : (
-        <>
+        <div className="space-y-4">
           <SubscriptionSummary subscriptions={filteredSubscriptions} />
-
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-            <div className="order-1">
-              <SubscriptionForm onAddSubscription={onAddExpense} />
-            </div>
-
-            <div className="order-2">
-              <SubscriptionList
-                subscriptions={filteredSubscriptions}
-                onUpdateSubscription={onUpdateExpense}
-                onDeleteSubscription={onDeleteExpense}
-              />
-            </div>
+          
+          <div className="bg-muted/50 border border-dashed rounded-lg p-4 text-sm text-muted-foreground">
+            💡 <strong>Dica:</strong> Use o botão <strong>+</strong> no canto inferior direito para adicionar novas assinaturas.
           </div>
-        </>
+
+          <SubscriptionList
+            subscriptions={filteredSubscriptions}
+            onUpdateSubscription={onUpdateExpense}
+            onDeleteSubscription={onDeleteExpense}
+          />
+        </div>
       )}
     </div>
   )

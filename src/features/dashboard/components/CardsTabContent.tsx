@@ -43,20 +43,16 @@ export function CardsTabContent({
           onCategoryChange={onCategoryFilterChange}
         />
       </div>
-
-      <div className="grid gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="order-1">
-          <CardBillFormV2 onAddCardBill={onAddCardBill} />
-        </div>
-
-        <div className="order-2">
-          <CardBillsListV2
-            cardBills={filteredCardBills}
-            onDeleteCardBill={onDeleteCardBill}
-            onUpdateCardBill={onUpdateCardBill}
-          />
-        </div>
+      
+      <div className="bg-muted/50 border border-dashed rounded-lg p-4 text-sm text-muted-foreground">
+        💡 <strong>Dica:</strong> Use o botão <strong>+</strong> no canto inferior direito para adicionar novas faturas de cartão.
       </div>
+
+      <CardBillsListV2
+        cardBills={filteredCardBills}
+        onDeleteCardBill={onDeleteCardBill}
+        onUpdateCardBill={onUpdateCardBill}
+      />
     </div>
   )
 }
