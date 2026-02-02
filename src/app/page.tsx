@@ -15,6 +15,7 @@ import {
   FloatingActionButton,
   MobileLayout,
   MobileContainer,
+  DesktopNavigation,
   type NavigationTab 
 } from '@/components/mobile'
 import { CurrentBalanceCard, ProjectedBalanceCard } from '@/components/balance'
@@ -113,6 +114,9 @@ export default function HomePage() {
       <UserHeader />
 
       <MobileContainer>
+        {/* Desktop Navigation - Only visible on desktop */}
+        <DesktopNavigation activeTab={activeNav} onTabChange={setActiveNav} />
+        
         {/* 🏠 HOME VIEW */}
         {activeNav === 'home' && (
           <>
