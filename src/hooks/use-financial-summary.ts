@@ -9,24 +9,27 @@
 
 import { useMemo } from 'react'
 import type { Expense, Income, CardBill } from '@/types/expense'
+import type { Invoice } from '@/features/invoices/types'
 import { calculateFinancialSummary, type FinancialSummary } from '@/lib/financial-calculations'
 
 interface UseFinancialSummaryProps {
   incomes: Income[]
   expenses: Expense[]
   cardBills: CardBill[]
+  invoices?: Invoice[] // Adicionado suporte opcional para Invoices
 }
 
 export function useFinancialSummary({
   incomes,
   expenses,
   cardBills,
+  invoices = [], // Valor padrão: array vazio
 }: UseFinancialSummaryProps): FinancialSummary {
   
   // Memoiza cálculo para evitar reprocessamento desnecessário
   const summary = useMemo(() => {
-    return calculateFinancialSummary(incomes, expenses, cardBills)
-  }, [incomes, expenses, cardBills])
+    return calculateFinancialSummary(incomes, expenses, cardBills, invoices)
+  }, [incomes, expenses, cardBills, invoices])
   
   return summary
 }

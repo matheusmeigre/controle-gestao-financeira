@@ -8,6 +8,8 @@
 import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import type { Expense, CardBill, Income } from '@/types/expense'
+import type { Invoice } from '@/features/invoices/types'
+import { InvoiceRepository } from '@/features/invoices'
 import * as DashboardService from '../services/dashboard.service'
 
 export type DashboardFilters = {
@@ -28,6 +30,7 @@ export function useDashboardData() {
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [cardBills, setCardBills] = useState<CardBill[]>([])
   const [incomes, setIncomes] = useState<Income[]>([])
+  const [invoices, setInvoices] = useState<Invoice[]>([]) // Adicionado suporte para invoices
 
   // State de filtros
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -50,6 +53,21 @@ export function useDashboardData() {
     setExpenses(data.expenses)
     setCardBills(data.cardBills)
     setIncomes(data.incomes)
+    
+    // Carrega invoices do repositório
+    const loadInvoices = async () => {
+      try {
+        const invoiceRepo = new InvoiceRepository()
+        const userInvoices = await invoiceRepo.findAll(user.id)
+        
+        // Carrega todas as faturas (não filtra por mês para permitir visualização no extrato)
+        setInvoices(userInvoices)
+      } catch (error) {
+        console.error('Erro ao carregar invoices:', error)
+      }
+    }
+    
+    loadInvoices()
   }, [user?.id])
 
   // 💾 Salvar dados no localStorage quando mudarem
@@ -146,6 +164,7 @@ export function useDashboardData() {
     expenses,
     cardBills,
     incomes,
+    invoices, // Adicionado invoices ao retorno
     currentMonthData,
 
     // Filtered data

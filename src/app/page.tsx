@@ -44,6 +44,7 @@ export default function HomePage() {
     expenses,
     cardBills,
     incomes,
+    invoices, // Adicionado invoices
     currentMonthData,
     filteredGeneralExpenses,
     filteredSubscriptions,
@@ -73,6 +74,7 @@ export default function HomePage() {
     incomes: currentMonthData.incomes,
     expenses: currentMonthData.expenses,
     cardBills: currentMonthData.cardBills,
+    invoices, // Inclui invoices nos cálculos
   })
 
   // Loading state
@@ -278,6 +280,7 @@ export default function HomePage() {
                   }
                   currentMonthCardBills={currentMonthData.cardBills}
                   filteredCardBills={filteredCardBills}
+                  invoices={invoices}
                   onAddCardBill={addCardBill}
                   onUpdateCardBill={updateCardBill}
                   onDeleteCardBill={deleteCardBill}
@@ -307,6 +310,7 @@ export default function HomePage() {
             expenses={expenses}
             incomes={incomes}
             cardBills={cardBills}
+            invoices={invoices}
           />
         )}
 
