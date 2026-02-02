@@ -7,6 +7,7 @@
  */
 
 import type { Expense, Income, CardBill } from '@/types/expense'
+import type { Invoice } from '@/features/invoices/types'
 
 /**
  * Resultado do cálculo financeiro
@@ -27,6 +28,7 @@ export interface FinancialSummary {
     generalExpenses: { paid: number; expected: number }
     subscriptions: { paid: number; expected: number }
     cardBills: { paid: number; expected: number }
+    invoices: { paid: number; expected: number } // Adicionado suporte para Invoices
     incomes: { received: number; expected: number }
     pendingExpenses: number
     pendingIncomes: number
@@ -41,11 +43,13 @@ export interface FinancialSummary {
  * 2. Projeção = Todas Rendas Previstas - Todas Despesas Previstas
  * 3. Assinaturas inativas não entram nos cálculos
  * 4. Status determina se entra no Saldo Atual ou apenas na Projeção
+ * 5. Faturas (Invoices) são consideradas separadamente de CardBills
  */
 export function calculateFinancialSummary(
   incomes: Income[],
   expenses: Expense[],
-  cardBills: CardBill[]
+  cardBills: CardBill[],
+  invoices: Invoice[] = [] // Adicionado parâmetro opcional para Invoices
 ): FinancialSummary {
   
   // 🟢 RECEITAS
@@ -80,17 +84,23 @@ export function calculateFinancialSummary(
   const expectedSubscriptions = activeSubscriptions
     .reduce((sum, exp) => sum + exp.amount, 0)
   
-  // 💳 FATURAS DE CARTÃO
-  // Nota: CardBills não têm status, então tratamos como "esperadas"
-  // Se quiser adicionar status às faturas, ajuste o type CardBill
+  // 💳 FATURAS DE CARTÃO (CardBills - sistema antigo)
   const paidCardBills = 0 // TODO: Adicionar status às faturas se necessário
   
   const expectedCardBills = cardBills
     .reduce((sum, bill) => sum + bill.totalAmount, 0)
   
-  // 📊 TOTALIZAÇÕES
-  const paidExpenses = paidGeneralExpenses + paidSubscriptions + paidCardBills
-  const totalExpectedExpenses = expectedGeneralExpenses + expectedSubscriptions + expectedCardBills
+  // 📇 FATURAS DE CARTÃO (Invoices - sistema novo integrado com gerenciamento de cartões)
+  const paidInvoices = invoices
+    .filter(invoice => invoice.isPaid)
+    .reduce((sum, invoice) => sum + invoice.paidAmount, 0)
+  
+  const expectedInvoices = invoices
+    .reduce((sum, invoice) => sum + invoice.totalAmount, 0)
+  
+  // 📊 TOTALIZAÇÕES (inclui tanto CardBills quanto Invoices)
+  const paidExpenses = paidGeneralExpenses + paidSubscriptions + paidCardBills + paidInvoices
+  const totalExpectedExpenses = expectedGeneralExpenses + expectedSubscriptions + expectedCardBills + expectedInvoices
   const pendingExpenses = totalExpectedExpenses - paidExpenses
   
   // 💰 SALDO ATUAL (Regime de Caixa)
@@ -120,6 +130,10 @@ export function calculateFinancialSummary(
       cardBills: {
         paid: paidCardBills,
         expected: expectedCardBills,
+      },
+      invoices: {
+        paid: paidInvoices,
+        expected: expectedInvoices,
       },
       incomes: {
         received: receivedIncomes,

@@ -25,11 +25,13 @@ import {
 } from 'recharts'
 import { TrendingUp, TrendingDown, DollarSign, Calendar } from 'lucide-react'
 import type { Expense, Income, CardBill } from '@/types/expense'
+import type { Invoice } from '@/features/invoices/types'
 
 interface FinancialReportsViewProps {
   expenses: Expense[]
   incomes: Income[]
   cardBills: CardBill[]
+  invoices?: Invoice[] // Adicionado suporte opcional para invoices
 }
 
 type MonthlyData = {
@@ -42,7 +44,8 @@ type MonthlyData = {
 export function FinancialReportsView({ 
   expenses, 
   incomes, 
-  cardBills 
+  cardBills,
+  invoices = [] // Valor padrão: array vazio
 }: FinancialReportsViewProps) {
   
   // Processa dados para os últimos 6 meses
@@ -64,7 +67,7 @@ export function FinancialReportsView({
       })
       const totalIncomes = monthIncomes.reduce((sum, income) => sum + income.amount, 0)
       
-      // Calcula saídas (despesas pagas + faturas)
+      // Calcula saídas (despesas pagas + faturas de cardBills + invoices pagas)
       const monthExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date)
         const expenseKey = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`
@@ -79,7 +82,14 @@ export function FinancialReportsView({
       })
       const totalCardBills = monthCardBills.reduce((sum, bill) => sum + bill.totalAmount, 0)
       
-      const totalSaidas = totalExpenses + totalCardBills
+      // Adiciona invoices (faturas do módulo de cartões)
+      const monthInvoices = invoices.filter(invoice => {
+        const invoiceKey = `${invoice.year}-${String(invoice.month).padStart(2, '0')}`
+        return invoiceKey === monthKey && invoice.isPaid
+      })
+      const totalInvoices = monthInvoices.reduce((sum, invoice) => sum + invoice.paidAmount, 0)
+      
+      const totalSaidas = totalExpenses + totalCardBills + totalInvoices
       const saldo = totalIncomes - totalSaidas
       
       data.push({
@@ -91,7 +101,7 @@ export function FinancialReportsView({
     }
     
     return data
-  }, [expenses, incomes, cardBills])
+  }, [expenses, incomes, cardBills, invoices])
   
   // Calcula acumulado
   const cumulativeData = useMemo(() => {

@@ -2,6 +2,7 @@
 export { InvoiceImporter } from './components/InvoiceImporter'
 export { MonthYearPicker } from './components/MonthYearPicker'
 export { InvoiceDatesDisplay } from './components/InvoiceDatesDisplay'
+export { InvoicesList, InvoiceEditModal } from './components'
 
 // Hooks (Client-side only - do NOT import in Server Actions)
 export { useInvoiceCreation } from './hooks/useInvoiceCreation'
