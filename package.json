@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .next node_modules",
     "setup": "npm install && echo '✅ Dependências instaladas! Agora configure o .env.local (veja QUICKSTART.md)'",

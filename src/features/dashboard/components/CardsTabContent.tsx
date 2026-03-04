@@ -168,8 +168,8 @@ export function CardsTabContent({
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Suas faturas de cartão estão sendo gerenciadas no módulo de <Link href="/cards" className="underline font-medium">Cartões</Link>. 
-            Clique em "Gerenciar Faturas" acima para editar e dividir os valores entre pessoas.
+            Suas faturas de cartão estão sendo gerenciadas no módulo de <Link href="/cards" className="underline font-medium">Cartões</Link>.
+            Clique em &quot;Gerenciar Faturas&quot; acima para editar e dividir os valores entre pessoas.
           </AlertDescription>
         </Alert>
       )}

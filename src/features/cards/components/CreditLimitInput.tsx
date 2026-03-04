@@ -22,6 +22,7 @@ export function CreditLimitInput({ value, onChange, disabled }: CreditLimitInput
   
   useEffect(() => {
     if (value !== undefined && !isEditing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRangeValue(value)
       setInputValue(value.toString())
     } else if (value === undefined && !isEditing) {

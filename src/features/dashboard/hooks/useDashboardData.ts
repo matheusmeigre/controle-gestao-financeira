@@ -50,6 +50,7 @@ export function useDashboardData() {
     if (!user?.id) return
 
     const data = DashboardService.loadDashboardData(user.id)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setExpenses(data.expenses)
     setCardBills(data.cardBills)
     setIncomes(data.incomes)

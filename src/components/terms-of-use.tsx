@@ -16,7 +16,7 @@ export function TermsOfUse() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">1. Aceitação dos Termos</h2>
           <p className="text-muted-foreground">
-            Ao acessar e utilizar o aplicativo <span className="font-semibold">Meu Controle Financeiro</span> ("Aplicativo"), 
+            Ao acessar e utilizar o aplicativo <span className="font-semibold">Meu Controle Financeiro</span> (&quot;Aplicativo&quot;), 
             você concorda em cumprir e estar vinculado a estes Termos de Uso. Se você não concorda com qualquer parte 
             destes termos, não deve utilizar este Aplicativo.
           </p>
@@ -85,7 +85,7 @@ export function TermsOfUse() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">6. Limitação de Responsabilidade</h2>
           <p className="text-muted-foreground font-semibold">
-            O Aplicativo é fornecido "como está" e "conforme disponível", sem garantias de qualquer tipo.
+            O Aplicativo é fornecido &quot;como está&quot; e &quot;conforme disponível&quot;, sem garantias de qualquer tipo.
           </p>
           <p className="text-muted-foreground">
             O desenvolvedor NÃO se responsabiliza por:

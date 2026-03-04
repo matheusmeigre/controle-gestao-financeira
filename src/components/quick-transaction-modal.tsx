@@ -77,14 +77,7 @@ export function QuickTransactionModal({
     salaryPeriod: '', // Período opcional (ex: "01/02 - 28/02")
   })
   
-  // Reset forms when modal opens
-  useEffect(() => {
-    if (open) {
-      resetForms()
-    }
-  }, [open])
-  
-  const resetForms = () => {
+  function resetForms() {
     setExpenseForm({
       description: '',
       amount: '',
@@ -104,6 +97,14 @@ export function QuickTransactionModal({
       salaryPeriod: '',
     })
   }
+
+  // Reset forms when modal opens
+  useEffect(() => {
+    if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      resetForms()
+    }
+  }, [open])
   
   const handleAddExpense = () => {
     if (!expenseForm.description || !expenseForm.amount || !expenseForm.category) {

@@ -16,8 +16,8 @@ export function PrivacyPolicy() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">1. Introdução</h2>
           <p className="text-muted-foreground">
-            Esta Política de Privacidade descreve como o <span className="font-semibold">Meu Controle Financeiro</span> ("nós", 
-            "nosso" ou "Aplicativo") coleta, usa, armazena e protege suas informações pessoais e dados financeiros, 
+            Esta Política de Privacidade descreve como o <span className="font-semibold">Meu Controle Financeiro</span> (&quot;nós&quot;,
+            &quot;nosso&quot; ou &quot;Aplicativo&quot;) coleta, usa, armazena e protege suas informações pessoais e dados financeiros, 
             em conformidade com a <span className="font-semibold">Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018)</span>.
           </p>
           <p className="text-muted-foreground font-semibold">
@@ -263,7 +263,7 @@ export function PrivacyPolicy() {
           <p className="text-muted-foreground">
             Podemos atualizar esta Política de Privacidade periodicamente para refletir mudanças em nossas práticas 
             ou por razões legais. Notificaremos você sobre alterações significativas através do Aplicativo ou por e-mail. 
-            A data da "Última atualização" no topo desta política indica quando foi modificada pela última vez.
+            A data da &quot;Última atualização&quot; no topo desta política indica quando foi modificada pela última vez.
           </p>
         </section>
 

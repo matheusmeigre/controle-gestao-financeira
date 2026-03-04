@@ -21,6 +21,7 @@ export function useWelcomeFlow() {
     const hasAcceptedTerms = localStorage.getItem(termsKey)
 
     if (!hasAcceptedTerms) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowTermsModal(true)
     } else {
       // Só mostra welcome se já aceitou os termos

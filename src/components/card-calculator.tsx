@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Plus, Delete as Delete2, ArrowRight, Trash2, DivideIcon, Users } from 'lucide-react'
+import { Calculator, Plus, Delete as Delete2, ArrowRight, Trash2, DivideIcon, Users, Minus } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { CurrencyInput } from "@/components/ui/currency-input"
@@ -26,6 +26,80 @@ export function CardCalculator({ onApplyTotal }: CardCalculatorProps) {
 
   const [splitMethod, setSplitMethod] = useState<"total" | "equal" | "custom">("total")
   const [splitPeople, setSplitPeople] = useState<{ name: string; amount: number }[]>([{ name: "", amount: 0 }])
+
+  function handleCalculatorNumber(num: string) {
+    if (shouldResetDisplay) {
+      setCalculatorDisplay(num)
+      setShouldResetDisplay(false)
+    } else {
+      setCalculatorDisplay(calculatorDisplay === "0" ? num : calculatorDisplay + num)
+    }
+  }
+
+  function handleCalculatorDecimal() {
+    if (shouldResetDisplay) {
+      setCalculatorDisplay("0.")
+      setShouldResetDisplay(false)
+    } else if (!calculatorDisplay.includes(".")) {
+      setCalculatorDisplay(calculatorDisplay + ".")
+    }
+  }
+
+  const performOperation = (prev: number, current: number, op: string): number => {
+    switch (op) {
+      case "+":
+        return prev + current
+      case "-":
+        return prev - current
+      case "×":
+        return prev * current
+      case "÷":
+        return current !== 0 ? prev / current : 0
+      default:
+        return current
+    }
+  }
+
+  function handleCalculatorOperation(op: string) {
+    const currentNum = Number.parseFloat(calculatorDisplay)
+
+    if (calculatorValue !== null && operation && !shouldResetDisplay) {
+      const result = performOperation(calculatorValue, currentNum, operation)
+      setCalculatorDisplay(result.toString())
+      setCalculatorValue(result)
+    } else {
+      setCalculatorValue(currentNum)
+    }
+
+    setOperation(op)
+    setShouldResetDisplay(true)
+  }
+
+  function handleCalculatorEquals() {
+    if (calculatorValue !== null && operation) {
+      const currentNum = Number.parseFloat(calculatorDisplay)
+      const result = performOperation(calculatorValue, currentNum, operation)
+      setCalculatorDisplay(result.toString())
+      setCalculatorValue(null)
+      setOperation(null)
+      setShouldResetDisplay(true)
+    }
+  }
+
+  function handleCalculatorClear() {
+    setCalculatorDisplay("0")
+    setCalculatorValue(null)
+    setOperation(null)
+    setShouldResetDisplay(false)
+  }
+
+  function handleCalculatorBackspace() {
+    if (calculatorDisplay.length > 1) {
+      setCalculatorDisplay(calculatorDisplay.slice(0, -1))
+    } else {
+      setCalculatorDisplay("0")
+    }
+  }
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -63,80 +137,6 @@ export function CardCalculator({ onApplyTotal }: CardCalculatorProps) {
     window.addEventListener("keydown", handleKeyPress)
     return () => window.removeEventListener("keydown", handleKeyPress)
   }, [isExpanded, activeTab, calculatorDisplay, calculatorValue, operation, shouldResetDisplay])
-
-  const handleCalculatorNumber = (num: string) => {
-    if (shouldResetDisplay) {
-      setCalculatorDisplay(num)
-      setShouldResetDisplay(false)
-    } else {
-      setCalculatorDisplay(calculatorDisplay === "0" ? num : calculatorDisplay + num)
-    }
-  }
-
-  const handleCalculatorDecimal = () => {
-    if (shouldResetDisplay) {
-      setCalculatorDisplay("0.")
-      setShouldResetDisplay(false)
-    } else if (!calculatorDisplay.includes(".")) {
-      setCalculatorDisplay(calculatorDisplay + ".")
-    }
-  }
-
-  const handleCalculatorOperation = (op: string) => {
-    const currentNum = Number.parseFloat(calculatorDisplay)
-
-    if (calculatorValue !== null && operation && !shouldResetDisplay) {
-      const result = performOperation(calculatorValue, currentNum, operation)
-      setCalculatorDisplay(result.toString())
-      setCalculatorValue(result)
-    } else {
-      setCalculatorValue(currentNum)
-    }
-
-    setOperation(op)
-    setShouldResetDisplay(true)
-  }
-
-  const performOperation = (prev: number, current: number, op: string): number => {
-    switch (op) {
-      case "+":
-        return prev + current
-      case "-":
-        return prev - current
-      case "×":
-        return prev * current
-      case "÷":
-        return current !== 0 ? prev / current : 0
-      default:
-        return current
-    }
-  }
-
-  const handleCalculatorEquals = () => {
-    if (calculatorValue !== null && operation) {
-      const currentNum = Number.parseFloat(calculatorDisplay)
-      const result = performOperation(calculatorValue, currentNum, operation)
-      setCalculatorDisplay(result.toString())
-      setCalculatorValue(null)
-      setOperation(null)
-      setShouldResetDisplay(true)
-    }
-  }
-
-  const handleCalculatorClear = () => {
-    setCalculatorDisplay("0")
-    setCalculatorValue(null)
-    setOperation(null)
-    setShouldResetDisplay(false)
-  }
-
-  const handleCalculatorBackspace = () => {
-    if (calculatorDisplay.length > 1) {
-      setCalculatorDisplay(calculatorDisplay.slice(0, -1))
-    } else {
-      setCalculatorDisplay("0")
-    }
-  }
 
   const addPurchaseFromCalculator = () => {
     if (!currentDesc.trim()) {
