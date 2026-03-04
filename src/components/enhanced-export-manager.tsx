@@ -156,11 +156,9 @@ export function EnhancedExportManager({ expenses, cardBills, incomes }: Enhanced
         row++
       })
 
-      // Add chart
-      const chart = trendsSheet.addImage({
-        base64: '',  // Would need actual chart generation
-        editAs: 'oneCell',
-      })
+      // Add chart (placeholder - requires actual chart image data)
+      // const imageId = workbook.addImage({ base64: '...', extension: 'png' })
+      // trendsSheet.addImage(imageId, 'A1:E10')
 
       trendsSheet.columns = [
         { width: 15 },

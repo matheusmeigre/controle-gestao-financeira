@@ -11,6 +11,8 @@ export interface Expense {
   dueDate?: string // Data de vencimento para Contas, Estudos e Assinaturas
   isActive?: boolean // Indica se a assinatura está ativa (apenas para categoria Assinaturas)
   notes?: string // Observações/descrição adicional (opcional)
+  cardName?: string // Cartão de crédito (categoria Cartão)
+  personName?: string // Pessoa relacionada (categoria Cartão)
 }
 
 export interface CardBill {
@@ -22,6 +24,7 @@ export interface CardBill {
   description: string
   divisions: PersonDivision[]
   items?: CardBillItem[] // Itens categorizados da fatura
+  divisionByPerson?: Record<string, number> // Divisão calculada por pessoa
 }
 
 export interface PersonDivision {

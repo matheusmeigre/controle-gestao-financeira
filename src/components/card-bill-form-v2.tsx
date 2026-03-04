@@ -151,7 +151,7 @@ export function CardBillFormV2({ onAddCardBill }: CardBillFormV2Props) {
     setItems([])
     setNewItem({
       description: "",
-      amount: "",
+      amount: 0,
       category: "",
       personName: ""
     })

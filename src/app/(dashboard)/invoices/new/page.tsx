@@ -14,6 +14,7 @@ import {
 } from '@/features/invoices'
 import { useUser } from '@clerk/nextjs'
 import type { InvoiceItem } from '@/types/invoice'
+import type { CalculatedDates } from '@/features/invoices/utils/invoice-dates.utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -146,8 +147,8 @@ export default function NewInvoicePage() {
         cardId,
         month: extractedDates?.referenceMonth || competency.month,
         year: extractedDates?.referenceYear || competency.year,
-        closingDate: datesToUse.closingDate,
-        dueDate: datesToUse.dueDate,
+        closingDate: datesToUse.closingDate instanceof Date ? datesToUse.closingDate : new Date(datesToUse.closingDate),
+        dueDate: datesToUse.dueDate instanceof Date ? datesToUse.dueDate : new Date(datesToUse.dueDate),
         items,
       })
       
@@ -238,7 +239,7 @@ export default function NewInvoicePage() {
             </CardHeader>
             <CardContent>
               <InvoiceDatesDisplay 
-                dates={extractedDates || calculatedDates}
+                dates={(extractedDates || calculatedDates) as CalculatedDates}
                 competencyDisplay={competencyDisplay}
               />
             </CardContent>

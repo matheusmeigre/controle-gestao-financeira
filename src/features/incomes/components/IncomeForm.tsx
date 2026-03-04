@@ -15,7 +15,7 @@ import type { Income } from "../types"
 import { CategorySelector, INCOME_CATEGORIES } from "@/features/categories"
 
 interface IncomeFormProps {
-  onAddIncome: (income: Omit<Income, "id" | "date">) => void
+  onAddIncome: (income: Omit<Income, "id" | "date" | "userId">) => void
 }
 
 export function IncomeForm({ onAddIncome }: IncomeFormProps) {

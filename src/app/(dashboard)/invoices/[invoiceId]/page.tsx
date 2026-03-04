@@ -83,7 +83,7 @@ export default function InvoiceDetailPage({
         updatedAt: new Date(),
       }
       
-      await invoiceRepo.update(user.id, invoice.id, updatedInvoice)
+      await invoiceRepo.update(user.id, invoice.id!, updatedInvoice)
       setInvoice(updatedInvoice)
       setPaidAmount('')
     } catch (error) {
@@ -108,7 +108,7 @@ export default function InvoiceDetailPage({
         updatedAt: new Date(),
       }
       
-      await invoiceRepo.update(user.id, invoice.id, updatedInvoice)
+      await invoiceRepo.update(user.id, invoice.id!, updatedInvoice)
       setInvoice(updatedInvoice)
     } catch (error) {
       console.error('Erro ao marcar como paga:', error)

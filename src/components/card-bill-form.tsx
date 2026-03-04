@@ -14,7 +14,7 @@ import { CreditCard, Plus, Minus, Receipt } from 'lucide-react'
 import { CardCalculator } from "./card-calculator"
 
 interface CardBillFormProps {
-  onAddCardBill: (cardBill: Omit<CardBill, "id" | "date">) => void
+  onAddCardBill: (cardBill: Omit<CardBill, "id" | "date" | "userId">) => void
 }
 
 export function CardBillForm({ onAddCardBill }: CardBillFormProps) {

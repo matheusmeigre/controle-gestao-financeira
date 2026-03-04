@@ -11,6 +11,8 @@ export interface Expense {
   dueDate?: string
   isActive?: boolean
   notes?: string
+  cardName?: string
+  personName?: string
 }
 
 /**

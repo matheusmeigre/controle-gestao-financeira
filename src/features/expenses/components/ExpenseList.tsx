@@ -79,7 +79,7 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
     setEditingId(null)
     setEditForm({ 
       description: "", 
-      amount: "", 
+      amount: 0, 
       category: "", 
       cardName: "", 
       personName: "",

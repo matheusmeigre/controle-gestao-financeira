@@ -49,7 +49,7 @@ export function LocationInput({
   const [showSuggestions, setShowSuggestions] = React.useState(false)
   const [useManualEntry, setUseManualEntry] = React.useState(!enableAutocomplete)
 
-  const debounceRef = React.useRef<NodeJS.Timeout>()
+  const debounceRef = React.useRef<NodeJS.Timeout | undefined>(undefined)
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   // Atualiza input quando value externo muda

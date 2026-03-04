@@ -54,10 +54,10 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
     setEditForm({
       cardName: bill.cardName,
       description: bill.description || "",
-      items: bill.items.map((item, idx) => ({ ...item, tempId: `existing-${idx}` })),
+      items: (bill.items || []).map((item, idx) => ({ ...item, tempId: `existing-${idx}` })),
       newItem: {
         description: "",
-        amount: "",
+        amount: 0,
         category: "",
         personName: ""
       }
@@ -72,7 +72,7 @@ export function CardBillsListV2({ cardBills, onDeleteCardBill, onUpdateCardBill 
       items: [],
       newItem: {
         description: "",
-        amount: "",
+        amount: 0,
         category: "",
         personName: ""
       }

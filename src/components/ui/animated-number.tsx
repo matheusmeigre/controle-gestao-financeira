@@ -16,8 +16,8 @@ export function AnimatedNumber({
   className = ''
 }: AnimatedNumberProps) {
   const nodeRef = useRef<HTMLSpanElement>(null)
-  const frameRef = useRef<number>()
-  const startTimeRef = useRef<number>()
+  const frameRef = useRef<number | undefined>(undefined)
+  const startTimeRef = useRef<number | undefined>(undefined)
   const startValueRef = useRef<number>(0)
 
   useEffect(() => {

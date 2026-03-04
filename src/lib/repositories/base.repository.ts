@@ -4,7 +4,7 @@
  * Facilita migração futura para banco de dados
  */
 
-export abstract class BaseRepository<T extends { id: string; userId: string }> {
+export abstract class BaseRepository<T extends { id?: string; userId: string }> {
   protected key: string
 
   constructor(key: string) {
