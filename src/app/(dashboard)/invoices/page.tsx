@@ -62,6 +62,29 @@ export default function InvoicesPage() {
     loadData()
   }, [user?.id, toast])
   
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    if (!user?.id) return
+
+    try {
+      const invoiceRepo = new InvoiceRepository()
+      await invoiceRepo.delete(user.id, invoiceId)
+
+      setInvoices(prev => prev.filter(inv => inv.id !== invoiceId))
+
+      toast({
+        title: 'Fatura excluída',
+        description: 'A fatura foi removida com sucesso.',
+      })
+    } catch (error) {
+      console.error('Erro ao excluir fatura:', error)
+      toast({
+        title: 'Erro ao excluir',
+        description: 'Não foi possível excluir a fatura.',
+        variant: 'destructive',
+      })
+    }
+  }
+
   const handleUpdateInvoice = async (invoiceId: string, updates: Partial<Invoice>) => {
     if (!user?.id) return
     
@@ -193,6 +216,7 @@ export default function InvoicesPage() {
             invoices={invoices}
             cards={cards}
             onUpdateInvoice={handleUpdateInvoice}
+            onDeleteInvoice={handleDeleteInvoice}
           />
         )}
       </div>

@@ -1,10 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Receipt, ChevronDown, ChevronUp, Edit2, Users, Calendar, CreditCard as CreditCardIcon, DollarSign } from 'lucide-react'
+import { Receipt, ChevronDown, ChevronUp, Edit2, Users, Calendar, CreditCard as CreditCardIcon, DollarSign, Trash2, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import type { Invoice } from '../types'
 import type { CreditCard } from '@/features/cards/types'
 import { InvoiceEditModal } from './InvoiceEditModal'
@@ -13,6 +21,7 @@ interface InvoicesListProps {
   invoices: Invoice[]
   cards: CreditCard[]
   onUpdateInvoice: (invoiceId: string, updates: Partial<Invoice>) => Promise<void>
+  onDeleteInvoice?: (invoiceId: string) => Promise<void>
 }
 
 const MONTHS = [
@@ -20,9 +29,10 @@ const MONTHS = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListProps) {
+export function InvoicesList({ invoices, cards, onUpdateInvoice, onDeleteInvoice }: InvoicesListProps) {
   const [expandedInvoices, setExpandedInvoices] = useState<Set<string>>(new Set())
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
+  const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null)
 
   const toggleExpanded = (invoiceId: string) => {
     const newExpanded = new Set(expandedInvoices)
@@ -219,6 +229,15 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListP
                             <Edit2 className="h-3 w-3 mr-1" />
                             Editar
                           </Button>
+                          {onDeleteInvoice && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setDeletingInvoice(invoice)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
                         </div>
 
                         {/* Itens expandidos */}
@@ -274,6 +293,38 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListP
           }}
         />
       )}
+
+      {/* Modal de confirmação de exclusão */}
+      <Dialog open={!!deletingInvoice} onOpenChange={(open) => { if (!open) setDeletingInvoice(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Excluir Fatura
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir esta fatura? Todos os itens serão removidos permanentemente e essa ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeletingInvoice(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (deletingInvoice?.id && onDeleteInvoice) {
+                  await onDeleteInvoice(deletingInvoice.id)
+                  setDeletingInvoice(null)
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
