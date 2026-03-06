@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Receipt, Home, CreditCard, Target, Plus, Info } from 'lucide-react'
+import { Receipt, Home, CreditCard, Target, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoiceRepository, InvoicesList } from '@/features/invoices'
@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { UserHeader } from '@/components/user-header'
 import { useToast } from '@/hooks/use-toast'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
@@ -150,23 +149,14 @@ export default function InvoicesPage() {
           </Link>
         </div>
 
-        {/* Informação sobre faturas */}
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            As faturas são geradas automaticamente quando você registra compras no <Link href="/cards" className="underline font-medium">gerenciamento de cartões</Link>. 
-            Aqui você pode visualizar os detalhes, marcar como paga e dividir os valores entre pessoas.
-          </AlertDescription>
-        </Alert>
-
-        {/* Cards info */}
+        {/* Sem cartões — precisa cadastrar antes */}
         {cards.length === 0 && (
           <Card className="border-dashed border-2">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-xl font-semibold mb-2">Nenhum cartão cadastrado</h3>
               <p className="text-muted-foreground text-center mb-6 max-w-md">
-                Cadastre seus cartões de crédito para começar a gerenciar faturas automaticamente.
+                Para criar uma fatura é necessário ter pelo menos um cartão cadastrado.
               </p>
               <Link href="/cards/new">
                 <Button>
@@ -177,9 +167,28 @@ export default function InvoicesPage() {
             </CardContent>
           </Card>
         )}
-        
+
+        {/* Tem cartões mas sem faturas */}
+        {cards.length > 0 && invoices.length === 0 && (
+          <Card className="border-dashed border-2">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <Receipt className="h-12 w-12 text-muted-foreground mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Nenhuma fatura ainda</h3>
+              <p className="text-muted-foreground text-center mb-6 max-w-md">
+                Crie sua primeira fatura para registrar os gastos do cartão.
+              </p>
+              <Link href="/invoices/new">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar Primeira Fatura
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Lista de faturas */}
-        {cards.length > 0 && (
+        {cards.length > 0 && invoices.length > 0 && (
           <InvoicesList
             invoices={invoices}
             cards={cards}
