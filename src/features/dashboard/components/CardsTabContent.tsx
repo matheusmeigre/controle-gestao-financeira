@@ -203,14 +203,22 @@ export function CardsTabContent({
           <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">Nenhuma fatura de cartão registrada</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Gerencie seus cartões e suas faturas serão exibidas aqui automaticamente
+            Crie uma fatura para um cartão cadastrado ou gerencie seus cartões
           </p>
-          <Link href="/cards">
-            <Button>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Gerenciar Cartões
-            </Button>
-          </Link>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link href="/invoices/new">
+              <Button>
+                <Receipt className="mr-2 h-4 w-4" />
+                Nova Fatura
+              </Button>
+            </Link>
+            <Link href="/cards">
+              <Button variant="outline">
+                <CreditCard className="mr-2 h-4 w-4" />
+                Gerenciar Cartões
+              </Button>
+            </Link>
+          </div>
         </div>
       )}
     </div>

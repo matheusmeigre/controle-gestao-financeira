@@ -225,14 +225,13 @@ export default function HomePage() {
           </>
         )}
 
-        {/* Reports View */}
-        {activeNav === 'reports' && (
+        {/* Invoices View */}
+        {activeNav === 'invoices' && (
           <div>
-            <h2 className="text-xl font-bold mb-4">Relatórios</h2>
+            <h2 className="text-xl font-bold mb-4">Faturas</h2>
             <p className="text-muted-foreground text-sm">
-              Em breve: gráficos e análises financeiras detalhadas.
+              Gerencie as faturas dos seus cartões de crédito.
             </p>
-            {/* TODO: Adicionar componentes de relatórios/gráficos */}
           </div>
         )}
 

@@ -31,8 +31,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { TrendingDown, TrendingUp, CreditCard, X } from 'lucide-react'
+import { TrendingDown, TrendingUp, CreditCard, X, ExternalLink } from 'lucide-react'
 import { CATEGORIES, INCOME_CATEGORIES } from '@/types/expense'
+import Link from 'next/link'
 import type { Expense, Income } from '@/types/expense'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
@@ -192,14 +193,18 @@ export function QuickTransactionModal({
           <div className="px-4 pb-4 overflow-y-auto max-h-[calc(85vh-140px)]">
             <Tabs value={activeType} onValueChange={(v) => setActiveType(v as TransactionType)}>
               {/* Tab Selector */}
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="expense" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="expense" className="flex items-center gap-1.5">
                   <TrendingDown className="w-4 h-4" />
                   <span>Despesa</span>
                 </TabsTrigger>
-                <TabsTrigger value="income" className="flex items-center gap-2">
+                <TabsTrigger value="income" className="flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4" />
                   <span>Receita</span>
+                </TabsTrigger>
+                <TabsTrigger value="card" className="flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4" />
+                  <span>Fatura</span>
                 </TabsTrigger>
               </TabsList>
               
@@ -375,16 +380,40 @@ export function QuickTransactionModal({
                   </div>
                 </div>
               </TabsContent>
+
+              {/* Fatura Tab — redirects to dedicated form */}
+              <TabsContent value="card" className="mt-2">
+                <div className="flex flex-col items-center justify-center py-8 text-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950/30 flex items-center justify-center">
+                    <CreditCard className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base mb-1">Fatura de Cart\u00e3o</h3>
+                    <p className="text-sm text-muted-foreground max-w-xs">
+                      Faturas possuem um formul\u00e1rio dedicado com suporte a importa\u00e7\u00e3o de arquivo e m\u00faltiplos itens.
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
             </Tabs>
           </div>
-          
+
           <DrawerFooter className="border-t">
-            <Button 
-              onClick={activeType === 'expense' ? handleAddExpense : handleAddIncome}
-              className="w-full h-12 text-base font-semibold"
-            >
-              {activeType === 'expense' ? 'Adicionar Despesa' : 'Adicionar Receita'}
-            </Button>
+            {activeType !== 'card' ? (
+              <Button
+                onClick={activeType === 'expense' ? handleAddExpense : handleAddIncome}
+                className="w-full h-12 text-base font-semibold"
+              >
+                {activeType === 'expense' ? 'Adicionar Despesa' : 'Adicionar Receita'}
+              </Button>
+            ) : (
+              <Link href="/invoices/new" onClick={() => onOpenChange(false)} className="w-full">
+                <Button className="w-full h-12 text-base font-semibold gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Criar Nova Fatura
+                </Button>
+              </Link>
+            )}
             <DrawerClose asChild>
               <Button variant="outline" className="w-full">
                 Cancelar

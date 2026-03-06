@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Receipt, Home, CreditCard, Target, Info } from 'lucide-react'
+import { Receipt, Home, CreditCard, Target, Plus, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoiceRepository, InvoicesList } from '@/features/invoices'
@@ -132,14 +132,22 @@ export default function InvoicesPage() {
         </div>
         
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Receipt className="h-8 w-8" />
-            Faturas de Cartão
-          </h1>
-          <p className="text-muted-foreground">
-            Visualize e gerencie as faturas dos seus cartões cadastrados
-          </p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Receipt className="h-8 w-8" />
+              Faturas de Cartão
+            </h1>
+            <p className="text-muted-foreground">
+              Visualize e gerencie as faturas dos seus cartões cadastrados
+            </p>
+          </div>
+          <Link href="/invoices/new">
+            <Button className="gap-2 shrink-0">
+              <Plus className="h-4 w-4" />
+              Nova Fatura
+            </Button>
+          </Link>
         </div>
 
         {/* Informação sobre faturas */}
