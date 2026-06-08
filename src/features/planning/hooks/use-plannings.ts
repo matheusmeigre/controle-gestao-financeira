@@ -23,7 +23,6 @@ import type {
   PlanningIndicators,
 } from '../types'
 
-// Mantém apenas o service para métodos de computação pura (calculateIndicators, getSummary, etc.)
 const planningService = new PlanningService()
 
 export function usePlannings(filters?: PlanningFilters) {
@@ -43,7 +42,6 @@ export function usePlannings(filters?: PlanningFilters) {
 
       let data = (res.data as Planning[]) ?? []
 
-      // Aplica filtros localmente se fornecidos
       if (filters) {
         if (filters.status) data = data.filter((p) => p.status === filters.status)
         if (filters.category) data = data.filter((p) => p.category === filters.category)
@@ -61,62 +59,73 @@ export function usePlannings(filters?: PlanningFilters) {
 
   useEffect(() => { loadPlannings() }, [loadPlannings])
 
+  // ─── Escritas com atualização otimista (sem re-leitura) ──────────────
+
   const createPlanning = useCallback(async (input: CreatePlanningInput) => {
     const res = await serverCreatePlanning(input)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
+    setPlannings(prev => [res.data as Planning, ...prev])
     return res.data as Planning
-  }, [loadPlannings])
+  }, [])
 
   const updatePlanning = useCallback(async (input: UpdatePlanningInput) => {
     const res = await serverUpdatePlanning(input)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
+    setPlannings(prev => prev.map(p => p.id === input.id ? (res.data as Planning) : p))
     return res.data as Planning
-  }, [loadPlannings])
+  }, [])
 
   const deletePlanningFn = useCallback(async (id: string) => {
     const res = await serverDeletePlanning(id)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
+    setPlannings(prev => prev.filter(p => p.id !== id))
     return true
-  }, [loadPlannings])
+  }, [])
 
   const addAmount = useCallback(async (planningId: string, amount: number) => {
-    const current = plannings.find((p) => p.id === planningId)
-    if (!current) throw new Error('Planejamento não encontrado')
-    const res = await serverUpdatePlanning({
-      id: planningId,
-      currentAmount: current.currentAmount + amount,
-    })
+    const res = await serverUpdatePlanning({ id: planningId, currentAmount: amount })
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
+    setPlannings(prev => prev.map(p => p.id === planningId ? (res.data as Planning) : p))
     return res.data as Planning
-  }, [plannings, loadPlannings])
+  }, [])
 
   const linkExpense = useCallback(async (planningId: string, expenseId: string, expenseAmount: number) => {
     const res = await linkExpenseToPlan(planningId, expenseId, expenseAmount)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
-  }, [loadPlannings])
+    setPlannings(prev => prev.map(p => {
+      if (p.id !== planningId) return p
+      return {
+        ...p,
+        linkedExpenseIds: [...p.linkedExpenseIds, expenseId],
+        currentAmount: p.currentAmount + expenseAmount,
+      }
+    }))
+  }, [])
 
   const unlinkExpense = useCallback(async (planningId: string, expenseId: string, expenseAmount: number) => {
     const res = await unlinkExpenseFromPlan(planningId, expenseId, expenseAmount)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
-  }, [loadPlannings])
+    setPlannings(prev => prev.map(p => {
+      if (p.id !== planningId) return p
+      return {
+        ...p,
+        linkedExpenseIds: p.linkedExpenseIds.filter(id => id !== expenseId),
+        currentAmount: Math.max(0, p.currentAmount - expenseAmount),
+      }
+    }))
+  }, [])
 
   const markAsCompleted = useCallback(async (planningId: string) => {
     const res = await markPlanningAsCompleted(planningId)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
-  }, [loadPlannings])
+    setPlannings(prev => prev.map(p => p.id === planningId ? { ...p, status: 'completed' as const } : p))
+  }, [])
 
   const markAsCancelled = useCallback(async (planningId: string) => {
     const res = await markPlanningAsCancelled(planningId)
     if (!res.success) throw new Error(res.error)
-    await loadPlannings()
-  }, [loadPlannings])
+    setPlannings(prev => prev.map(p => p.id === planningId ? { ...p, status: 'cancelled' as const } : p))
+  }, [])
 
   return {
     plannings, loading, error, refresh: loadPlannings,

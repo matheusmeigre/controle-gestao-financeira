@@ -144,7 +144,6 @@ export async function linkExpenseToPlan(planningId: string, expenseId: string, e
     } as Partial<Planning>)
 
     revalidatePath('/planning')
-    revalidatePath('/')
     return { success: true }
   } catch (error) {
     console.error('[linkExpenseToPlan] Error:', error)
@@ -170,7 +169,6 @@ export async function unlinkExpenseFromPlan(planningId: string, expenseId: strin
     } as Partial<Planning>)
 
     revalidatePath('/planning')
-    revalidatePath('/')
     return { success: true }
   } catch (error) {
     console.error('[unlinkExpenseFromPlan] Error:', error)
