@@ -8,6 +8,7 @@
 
 import type { Expense, Income, CardBill } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
+import { getMyPortion, hasPersonSplit } from '@/features/invoices/utils/invoice-split.utils'
 
 /**
  * Resultado do cálculo financeiro
@@ -28,7 +29,12 @@ export interface FinancialSummary {
     generalExpenses: { paid: number; expected: number }
     subscriptions: { paid: number; expected: number }
     cardBills: { paid: number; expected: number }
-    invoices: { paid: number; expected: number } // Adicionado suporte para Invoices
+    invoices: {
+      paid: number
+      expected: number          // Minha parte (após divisão por pessoa)
+      totalBeforeSplit: number  // Total bruto de todas as faturas
+      hasSplit: boolean         // Indica se há faturas com divisão ativa
+    }
     incomes: { received: number; expected: number }
     pendingExpenses: number
     pendingIncomes: number
@@ -95,8 +101,17 @@ export function calculateFinancialSummary(
     .filter(invoice => invoice.isPaid)
     .reduce((sum, invoice) => sum + invoice.paidAmount, 0)
   
-  const expectedInvoices = invoices
+  // Total bruto de todas as faturas (antes de considerar divisão por pessoa)
+  const totalInvoicesBeforeSplit = invoices
     .reduce((sum, invoice) => sum + invoice.totalAmount, 0)
+
+  // Verifica se alguma fatura tem divisão por pessoa ativa
+  const invoicesHaveSplit = invoices.some(invoice => hasPersonSplit(invoice))
+
+  // Apenas a minha parte: soma getMyPortion de cada fatura
+  // Se não há divisão em nenhuma fatura, retorna o total bruto (sem alteração)
+  const expectedInvoices = invoices
+    .reduce((sum, invoice) => sum + getMyPortion(invoice), 0)
   
   // 📊 TOTALIZAÇÕES (inclui tanto CardBills quanto Invoices)
   const paidExpenses = paidGeneralExpenses + paidSubscriptions + paidCardBills + paidInvoices
@@ -134,6 +149,8 @@ export function calculateFinancialSummary(
       invoices: {
         paid: paidInvoices,
         expected: expectedInvoices,
+        totalBeforeSplit: totalInvoicesBeforeSplit,
+        hasSplit: invoicesHaveSplit,
       },
       incomes: {
         received: receivedIncomes,

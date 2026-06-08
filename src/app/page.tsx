@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { ExportManager } from '@/components/export-manager'
 import { EnhancedExportManager } from '@/components/enhanced-export-manager'
@@ -22,6 +23,7 @@ import {
 } from '@/components/mobile'
 import { CurrentBalanceCard, ProjectedBalanceCard } from '@/components/balance'
 import { QuickTransactionModal } from '@/components/quick-transaction-modal'
+import { InvoiceSelectModal } from '@/components/invoice-select-modal'
 import { FinancialReportsView } from '@/components/financial-reports-view'
 import { useFinancialSummary } from '@/hooks/use-financial-summary'
 import { InvoicesList } from '@/features/invoices'
@@ -51,6 +53,9 @@ export default function HomePage() {
   // Navigation state
   const [activeNav, setActiveNav] = useState<NavigationTab>('home')
   const [showQuickAdd, setShowQuickAdd] = useState(false)
+  const [showInvoiceSelect, setShowInvoiceSelect] = useState(false)
+
+  const router = useRouter()
 
   // Dashboard data
   const {
@@ -132,6 +137,13 @@ export default function HomePage() {
         onAddCardBill={addCardBill}
       />
 
+      <InvoiceSelectModal
+        open={showInvoiceSelect}
+        onOpenChange={setShowInvoiceSelect}
+        invoices={invoices}
+        cards={cards}
+      />
+
       <UserHeader />
 
       <MobileContainer>
@@ -186,8 +198,14 @@ export default function HomePage() {
                   </span>
                 </button>
 
-                <Link
-                  href="/invoices/new"
+                <button
+                  onClick={() => {
+                    if (invoices.length === 0) {
+                      router.push('/invoices/new')
+                    } else {
+                      setShowInvoiceSelect(true)
+                    }
+                  }}
                   className="flex flex-col items-center gap-2 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-950/40 transition-colors active:scale-95"
                 >
                   <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
@@ -196,8 +214,7 @@ export default function HomePage() {
                   <span className="text-xs font-medium text-blue-700 dark:text-blue-400">
                     Fatura
                   </span>
-                </Link>
-              </div>
+                </button>              </div>
             </section>
 
             {/* ─── Resumo do Mês ─── */}

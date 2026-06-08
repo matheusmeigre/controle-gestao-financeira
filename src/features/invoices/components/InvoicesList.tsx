@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Receipt, ChevronDown, ChevronUp, Edit2, Users, Calendar, CreditCard as CreditCardIcon, DollarSign, Trash2, AlertTriangle } from 'lucide-react'
+import { Receipt, ChevronDown, ChevronUp, Edit2, Calendar, CreditCard as CreditCardIcon, DollarSign, Trash2, AlertTriangle, User } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +16,12 @@ import {
 import type { Invoice } from '../types'
 import type { CreditCard } from '@/features/cards/types'
 import { InvoiceEditModal } from './InvoiceEditModal'
+import {
+  hasPersonSplit,
+  getPersonDivisions,
+  getPersonFromNotes,
+  getPersonColor,
+} from '../utils/invoice-split.utils'
 
 interface InvoicesListProps {
   invoices: Invoice[]
@@ -201,9 +207,34 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice, onDeleteInvoice
                           </div>
                         </div>
 
+                        {/* Divisão por pessoa (resumo compacto) */}
+                        {hasPersonSplit(invoice) && (() => {
+                          const divisions = getPersonDivisions(invoice)
+                          return (
+                            <div className="pt-2 border-t space-y-1.5">
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                Divisão por pessoa
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {Object.entries(divisions).map(([person, amount]) => (
+                                  <div
+                                    key={person}
+                                    className={`inline-flex flex-col items-start px-2 py-1 rounded-md border text-xs ${getPersonColor(person)}`}
+                                  >
+                                    <span className="font-semibold leading-tight">{person}</span>
+                                    <span className="font-bold text-[11px]">
+                                      {formatCurrency(amount)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        })()}
+
                         {/* Botões de ação */}
-                        <div className="flex gap-2 pt-2 border-t">
-                          <Button
+                        <div className="flex gap-2 pt-2 border-t">                          <Button
                             size="sm"
                             variant="outline"
                             className="flex-1"
@@ -247,27 +278,40 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice, onDeleteInvoice
                               Itens da fatura
                             </p>
                             <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                              {invoice.items.map(item => (
-                                <div 
-                                  key={item.id} 
-                                  className="flex items-start justify-between gap-2 p-2 bg-muted/50 rounded text-xs"
-                                >
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-medium truncate">{item.description}</p>
-                                    <p className="text-muted-foreground text-[10px]">
-                                      {formatDate(item.date)} • {item.category}
-                                    </p>
-                                    {item.installment && (
+                              {invoice.items.map(item => {
+                                  const person = getPersonFromNotes(item.notes)
+                                  const showBadge = hasPersonSplit(invoice)
+                                  return (
+                                  <div 
+                                    key={item.id} 
+                                    className="flex items-start justify-between gap-2 p-2 bg-muted/50 rounded text-xs"
+                                  >
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium truncate">{item.description}</p>
                                       <p className="text-muted-foreground text-[10px]">
-                                        Parcela {item.installment}
+                                        {formatDate(item.date)} • {item.category}
                                       </p>
-                                    )}
+                                      {item.installment && (
+                                        <p className="text-muted-foreground text-[10px]">
+                                          Parcela {item.installment}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                      <span className="font-semibold whitespace-nowrap">
+                                        {formatCurrency(item.amount)}
+                                      </span>
+                                      {showBadge && (
+                                        <span
+                                          className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${getPersonColor(person)}`}
+                                        >
+                                          {person}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <span className="font-semibold whitespace-nowrap">
-                                    {formatCurrency(item.amount)}
-                                  </span>
-                                </div>
-                              ))}
+                                  )
+                                })}
                             </div>
                           </div>
                         )}
