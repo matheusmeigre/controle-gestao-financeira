@@ -56,53 +56,39 @@ export async function migrateFromLocalStorage(payload: MigrationPayload): Promis
   const invRepo = new SupabaseInvoiceRepository()
   const planRepo = new SupabasePlanningRepository()
 
-  // Despesas
-  for (const item of payload.expenses) {
-    try {
-      await expRepo.create(userId, { ...item, userId })
-      migrated.expenses++
-    } catch { /* ignora duplicatas */ }
+  // Processa itens em paralelo com batch de 20 para evitar rate limit
+  const migrateBatch = async <T>(
+    items: T[],
+    createFn: (item: T) => Promise<unknown>
+  ): Promise<number> => {
+    if (items.length === 0) return 0
+    let count = 0
+    const BATCH_SIZE = 20
+    for (let i = 0; i < items.length; i += BATCH_SIZE) {
+      const batch = items.slice(i, i + BATCH_SIZE)
+      const results = await Promise.allSettled(
+        batch.map((item) => createFn(item))
+      )
+      count += results.filter((r) => r.status === 'fulfilled').length
+    }
+    return count
   }
 
-  // Receitas
-  for (const item of payload.incomes) {
-    try {
-      await incRepo.create(userId, { ...item, userId })
-      migrated.incomes++
-    } catch { /* ignora duplicatas */ }
-  }
+  const results = await Promise.all([
+    migrateBatch(payload.expenses, (item) => expRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.incomes, (item) => incRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.cards, (item) => cardRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.cardBills, (item) => billRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.invoices, (item) => invRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.plannings, (item) => planRepo.create(userId, { ...item, userId })),
+  ])
 
-  // Cartões
-  for (const item of payload.cards) {
-    try {
-      await cardRepo.create(userId, { ...item, userId })
-      migrated.cards++
-    } catch { /* ignora duplicatas */ }
-  }
-
-  // Card Bills legados
-  for (const item of payload.cardBills) {
-    try {
-      await billRepo.create(userId, { ...item, userId })
-      migrated.cardBills++
-    } catch { /* ignora duplicatas */ }
-  }
-
-  // Faturas (Invoice + invoice_items)
-  for (const item of payload.invoices) {
-    try {
-      await invRepo.create(userId, { ...item, userId })
-      migrated.invoices++
-    } catch { /* ignora duplicatas */ }
-  }
-
-  // Planejamentos
-  for (const item of payload.plannings) {
-    try {
-      await planRepo.create(userId, { ...item, userId })
-      migrated.plannings++
-    } catch { /* ignora duplicatas */ }
-  }
+  migrated.expenses = results[0]
+  migrated.incomes = results[1]
+  migrated.cards = results[2]
+  migrated.cardBills = results[3]
+  migrated.invoices = results[4]
+  migrated.plannings = results[5]
 
   return { success: true, migrated, errors }
 }
