@@ -3,17 +3,10 @@
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { parseInvoiceFile } from '@/features/invoices/parsers'
-import { InvoiceService } from '@/features/invoices'
-import { InvoiceRepository } from '@/features/invoices/services/invoice.repository'
+import { SupabaseInvoiceRepository } from '@/features/invoices/services/invoice.supabase.repository'
 import type { Invoice, InvoiceItem, CreateInvoiceInput, AddInvoiceItemInput } from '@/features/invoices/types'
 
-/**
- * Server Actions para gerenciamento de faturas
- * Refatorado para usar InvoiceService da feature
- */
-
-const invoiceService = new InvoiceService()
-const invoiceRepository = new InvoiceRepository()
+const invoiceRepository = new SupabaseInvoiceRepository()
 
 /**
  * ====================================
@@ -103,18 +96,26 @@ export async function processInvoiceUpload(formData: FormData) {
       }
     }
     
-    // 3️⃣ Log de processamento
+    // 3️⃣ Validação server-side de tipo de arquivo (VULN-07)
     const fileExtension = file.name.split('.').pop()?.toLowerCase()
-    console.log('='.repeat(60))
-    console.log(`[processInvoiceUpload] 📄 Novo upload`)
-    console.log(`├─ Arquivo: ${file.name}`)
-    console.log(`├─ Tipo: ${file.type}`)
-    console.log(`├─ Extensão: .${fileExtension}`)
-    console.log(`├─ Tamanho: ${(file.size / 1024).toFixed(2)} KB`)
-    console.log(`├─ Cartão: ${cardId}`)
-    console.log(`└─ Competência: ${month.toString().padStart(2, '0')}/${year}`)
-    console.log('='.repeat(60))
-    
+    const ALLOWED_EXTENSIONS = ['pdf', 'csv', 'ofx', 'qfx']
+    if (!fileExtension || !ALLOWED_EXTENSIONS.includes(fileExtension)) {
+      return {
+        success: false,
+        error: `Tipo de arquivo não suportado: .${fileExtension ?? 'desconhecido'}. Use PDF, CSV, OFX ou QFX.`,
+      }
+    }
+
+    // Validação de UUID do cardId (VULN-08)
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!UUID_REGEX.test(cardId)) {
+      return { success: false, error: 'ID do cartão inválido.' }
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[processInvoiceUpload] arquivo=${file.name} ext=${fileExtension} card=${cardId} ${month}/${year}`)
+    }
+
     // 4️⃣ Processamento do arquivo com parser factory
     // O factory irá automaticamente escolher o melhor parser:
     // - PDFs: Tenta OCR primeiro, depois fallback para regex
@@ -124,9 +125,6 @@ export async function processInvoiceUpload(formData: FormData) {
     
     // 5️⃣ Tratamento de falha no parsing
     if (!parseResult.success) {
-      console.log(`[processInvoiceUpload] ❌ Falha no parsing`)
-      console.log(`└─ Erros:`, parseResult.errors)
-      
       return { 
         success: false, 
         error: 'Não foi possível processar o arquivo',
@@ -136,8 +134,6 @@ export async function processInvoiceUpload(formData: FormData) {
     
     // 6️⃣ Validação de transações extraídas
     if (!parseResult.transactions || parseResult.transactions.length === 0) {
-      console.log(`[processInvoiceUpload] ⚠️ Nenhuma transação encontrada`)
-      
       return {
         success: false,
         error: 'Nenhuma transação encontrada no arquivo',
@@ -176,16 +172,11 @@ export async function processInvoiceUpload(formData: FormData) {
       hasExtractedDates: !!(parseResult.metadata?.closingDate && parseResult.metadata?.dueDate),
     }
     
-    // 9️⃣ Log de sucesso
-    const processingTime = Date.now() - startTime
-    console.log(`[processInvoiceUpload] ✅ Sucesso!`)
-    console.log(`├─ Transações: ${items.length}`)
-    console.log(`├─ Total: R$ ${metadata.totalAmount?.toFixed(2) || '0.00'}`)
-    console.log(`├─ Banco: ${metadata.bankName || 'N/A'}`)
-    console.log(`├─ Data Fechamento: ${parseResult.metadata?.closingDate || 'não extraída'}`)
-    console.log(`├─ Data Vencimento: ${parseResult.metadata?.dueDate || 'não extraída'}`)
-    console.log(`└─ Tempo: ${processingTime}ms`)
-    console.log('='.repeat(60))
+    // 9️⃣ Log de sucesso (apenas em desenvolvimento)
+    if (process.env.NODE_ENV === 'development') {
+      const processingTime = Date.now() - startTime
+      console.log(`[processInvoiceUpload] ✅ ${items.length} transações em ${processingTime}ms`)
+    }
     
     // 🔟 Retorno estruturado
     return { 
@@ -216,129 +207,115 @@ export async function processInvoiceUpload(formData: FormData) {
 export async function createInvoice(input: CreateInvoiceInput) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    // Verifica se já existe fatura para este cartão+competência
+    const existing = await invoiceRepository.findByCardAndPeriod(
+      userId, input.cardId, input.month, input.year
+    )
+    if (existing) {
+      return { success: false, error: 'Já existe uma fatura para este cartão nesta competência' }
     }
-    
-    // Usa o InvoiceService para criar a fatura
-    const result = await invoiceService.createInvoice(userId, input)
-    
+
+    const totalAmount = (input as Invoice).items?.reduce((s, i) => s + i.amount, 0) ?? 0
+    const invoiceData: Invoice = {
+      ...(input as Invoice),
+      id: crypto.randomUUID(),
+      userId,
+      totalAmount,
+      paidAmount: 0,
+      isPaid: false,
+      items: (input as Invoice).items ?? [],
+    }
+
+    const data = await invoiceRepository.create(userId, invoiceData)
     revalidatePath('/invoices')
-    
-    return { success: true, data: result }
+    return { success: true, data }
   } catch (error) {
     console.error('[createInvoice] Error:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Erro ao criar fatura'
-    }
+    return { success: false, error: error instanceof Error ? error.message : 'Erro ao criar fatura' }
   }
 }
 
-export async function getInvoices(filters?: {
-  cardId?: string
-  month?: number
-  year?: number
-}) {
+export async function getInvoices(filters?: { cardId?: string; month?: number; year?: number }) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // Usa InvoiceRepository para buscar faturas
-    let userInvoices = await invoiceRepository.findAll(userId)
-    
-    // Aplica filtros
-    if (filters?.cardId) {
-      userInvoices = userInvoices.filter((inv: Invoice) => inv.cardId === filters.cardId)
-    }
-    if (filters?.month) {
-      userInvoices = userInvoices.filter((inv: Invoice) => inv.month === filters.month)
-    }
-    if (filters?.year) {
-      userInvoices = userInvoices.filter((inv: Invoice) => inv.year === filters.year)
-    }
-    
-    return { success: true, data: userInvoices }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    let data = await invoiceRepository.findAll(userId)
+    if (filters?.cardId) data = data.filter((inv) => inv.cardId === filters.cardId)
+    if (filters?.month) data = data.filter((inv) => inv.month === filters.month)
+    if (filters?.year) data = data.filter((inv) => inv.year === filters.year)
+
+    return { success: true, data }
   } catch (error) {
     console.error('[getInvoices] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao buscar faturas' 
-    }
+    return { success: false, error: 'Erro ao buscar faturas' }
   }
 }
 
 export async function getInvoice(invoiceId: string) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    const invoice = await invoiceRepository.findById(userId, invoiceId)
-    
-    if (!invoice) {
-      return { success: false, error: 'Fatura não encontrada' }
-    }
-    
-    return { success: true, data: invoice }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    const data = await invoiceRepository.findById(userId, invoiceId)
+    if (!data) return { success: false, error: 'Fatura não encontrada' }
+    return { success: true, data }
   } catch (error) {
     console.error('[getInvoice] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao buscar fatura' 
-    }
+    return { success: false, error: 'Erro ao buscar fatura' }
   }
 }
 
 export async function addInvoiceItem(input: AddInvoiceItemInput) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    const invoice = await invoiceRepository.findById(userId, input.invoiceId)
+    if (!invoice) return { success: false, error: 'Fatura não encontrada' }
+
+    const newItem: InvoiceItem = {
+      ...input.item,
+      id: crypto.randomUUID(),
+      invoiceId: input.invoiceId,
+      createdAt: new Date(),
     }
-    
-    // Usa InvoiceService para adicionar item
-    const result = await invoiceService.addInvoiceItem(userId, input)
-    
+    const updatedItems = [...invoice.items, newItem]
+    const totalAmount = updatedItems.reduce((s, i) => s + i.amount, 0)
+
+    await invoiceRepository.update(userId, input.invoiceId, {
+      items: updatedItems,
+      totalAmount,
+    })
+
     revalidatePath(`/invoices/${input.invoiceId}`)
-    
-    return { success: true, data: result }
+    return { success: true, data: newItem }
   } catch (error) {
     console.error('[addInvoiceItem] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao adicionar item à fatura' 
-    }
+    return { success: false, error: 'Erro ao adicionar item à fatura' }
   }
 }
 
 export async function removeInvoiceItem(invoiceId: string, itemId: string) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // Usa InvoiceService para remover item
-    await invoiceService.removeInvoiceItem(userId, invoiceId, itemId)
-    
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    const invoice = await invoiceRepository.findById(userId, invoiceId)
+    if (!invoice) return { success: false, error: 'Fatura não encontrada' }
+
+    const updatedItems = invoice.items.filter((i) => i.id !== itemId)
+    const totalAmount = updatedItems.reduce((s, i) => s + i.amount, 0)
+
+    await invoiceRepository.update(userId, invoiceId, { items: updatedItems, totalAmount })
+
     revalidatePath(`/invoices/${invoiceId}`)
-    
     return { success: true }
   } catch (error) {
     console.error('[removeInvoiceItem] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao remover item da fatura' 
-    }
+    return { success: false, error: 'Erro ao remover item da fatura' }
   }
 }
 
@@ -349,11 +326,20 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
     if (!userId) {
       return { success: false, error: 'Não autenticado' }
     }
+
+    // Busca a fatura para obter o totalAmount (VULN-05: fix isPaid logic)
+    const existing = await invoiceRepository.findById(userId, invoiceId)
+    if (!existing) {
+      return { success: false, error: 'Fatura não encontrada' }
+    }
+
+    if (paidAmount < 0) {
+      return { success: false, error: 'Valor pago não pode ser negativo' }
+    }
     
-    // Usa InvoiceRepository para atualizar pagamento
     const invoice = await invoiceRepository.update(userId, invoiceId, {
       paidAmount,
-      isPaid: paidAmount >= 0,
+      isPaid: paidAmount >= existing.totalAmount,
       updatedAt: new Date()
     })
     
@@ -379,29 +365,19 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
  */
 export async function deleteInvoice(invoiceId: string) {
   try {
-    console.log('[deleteInvoice] Iniciando exclusão:', invoiceId)
-    
     const { userId } = await auth()
     
     if (!userId) {
-      console.log('[deleteInvoice] Usuário não autenticado')
       return { success: false, error: 'Não autenticado' }
     }
     
-    console.log('[deleteInvoice] UserId:', userId)
-    
-    // Usa InvoiceService para deletar
-    const deleted = await invoiceService.deleteInvoice(userId, invoiceId)
-    
-    console.log('[deleteInvoice] Resultado da exclusão:', deleted)
+    const deleted = await invoiceRepository.delete(userId, invoiceId)
     
     if (!deleted) {
       return { success: false, error: 'Fatura não encontrada' }
     }
     
     revalidatePath('/invoices')
-    
-    console.log('[deleteInvoice] Fatura excluída com sucesso')
     return { success: true }
   } catch (error) {
     console.error('[deleteInvoice] Error:', error)

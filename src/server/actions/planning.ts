@@ -2,58 +2,30 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
+import { SupabasePlanningRepository } from '@/features/planning/services/planning.supabase.repository'
 import type { 
   Planning, 
   CreatePlanningInput, 
   UpdatePlanningInput,
-  PlanningSummary,
-  PlanningFilters 
 } from '@/features/planning/types'
 
-/**
- * Server Actions para gerenciamento de planejamentos financeiros
- * 
- * Arquitetura:
- * - Validação de autenticação
- * - Lógica no client (localStorage)
- * - Revalidação de cache quando necessário
- */
+const repo = new SupabasePlanningRepository()
 
 export async function createPlanning(input: CreatePlanningInput) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
 
-    // Validações básicas
-    if (!input.name?.trim()) {
-      return { success: false, error: 'Nome do planejamento é obrigatório' }
-    }
+    if (!input.name?.trim()) return { success: false, error: 'Nome é obrigatório' }
+    if (input.targetAmount <= 0) return { success: false, error: 'Valor alvo deve ser maior que zero' }
+    if ((input.currentAmount || 0) < 0) return { success: false, error: 'Valor atual não pode ser negativo' }
 
-    if (input.targetAmount <= 0) {
-      return { success: false, error: 'Valor alvo deve ser maior que zero' }
-    }
-
-    if ((input.currentAmount || 0) < 0) {
-      return { success: false, error: 'Valor atual não pode ser negativo' }
-    }
-
-    // Validação de datas
     const startDate = new Date(input.startDate)
-    if (isNaN(startDate.getTime())) {
-      return { success: false, error: 'Data de início inválida' }
-    }
-
+    if (isNaN(startDate.getTime())) return { success: false, error: 'Data de início inválida' }
     if (input.targetDate) {
       const targetDate = new Date(input.targetDate)
-      if (isNaN(targetDate.getTime())) {
-        return { success: false, error: 'Data alvo inválida' }
-      }
-      if (targetDate <= startDate) {
-        return { success: false, error: 'Data alvo deve ser posterior à data de início' }
-      }
+      if (isNaN(targetDate.getTime())) return { success: false, error: 'Data alvo inválida' }
+      if (targetDate <= startDate) return { success: false, error: 'Data alvo deve ser posterior à data de início' }
     }
 
     const newPlanning: Planning = {
@@ -77,217 +49,161 @@ export async function createPlanning(input: CreatePlanningInput) {
       updatedAt: new Date(),
     }
 
+    const data = await repo.create(userId, newPlanning)
     revalidatePath('/planning')
-    return { success: true, data: newPlanning }
+    return { success: true, data }
   } catch (error) {
     console.error('[createPlanning] Error:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Erro ao criar planejamento' 
-    }
+    return { success: false, error: error instanceof Error ? error.message : 'Erro ao criar planejamento' }
   }
 }
 
 export async function updatePlanning(input: UpdatePlanningInput) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+    if (!input.id) return { success: false, error: 'ID é obrigatório' }
 
-    if (!input.id) {
-      return { success: false, error: 'ID do planejamento é obrigatório' }
-    }
-
-    // Validações
-    if (input.targetAmount !== undefined && input.targetAmount <= 0) {
+    if (input.targetAmount !== undefined && input.targetAmount <= 0)
       return { success: false, error: 'Valor alvo deve ser maior que zero' }
-    }
-
-    if (input.currentAmount !== undefined && input.currentAmount < 0) {
+    if (input.currentAmount !== undefined && input.currentAmount < 0)
       return { success: false, error: 'Valor atual não pode ser negativo' }
-    }
-
-    if (input.name !== undefined && !input.name.trim()) {
+    if (input.name !== undefined && !input.name.trim())
       return { success: false, error: 'Nome não pode ser vazio' }
-    }
 
-    const updatedData = {
-      ...input,
-      updatedAt: new Date(),
-    }
-
+    const data = await repo.update(userId, input.id, { ...input, updatedAt: new Date() } as Partial<Planning>)
     revalidatePath('/planning')
-    return { success: true, data: updatedData }
+    return { success: true, data }
   } catch (error) {
     console.error('[updatePlanning] Error:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Erro ao atualizar planejamento' 
-    }
+    return { success: false, error: error instanceof Error ? error.message : 'Erro ao atualizar planejamento' }
   }
 }
 
 export async function deletePlanning(planningId: string) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+    if (!planningId) return { success: false, error: 'ID é obrigatório' }
 
-    if (!planningId) {
-      return { success: false, error: 'ID do planejamento é obrigatório' }
-    }
-
+    await repo.delete(userId, planningId)
     revalidatePath('/planning')
-    return { success: true, planningId }
+    return { success: true }
   } catch (error) {
     console.error('[deletePlanning] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao deletar planejamento' 
-    }
+    return { success: false, error: 'Erro ao deletar planejamento' }
   }
 }
 
 export async function getPlannings() {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
 
-    // O cliente irá buscar os planejamentos do localStorage
-    return { success: true, userId }
+    const data = await repo.findAll(userId)
+    return { success: true, data }
   } catch (error) {
     console.error('[getPlannings] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao buscar planejamentos' 
-    }
+    return { success: false, error: 'Erro ao buscar planejamentos' }
   }
 }
 
 export async function getPlanning(planningId: string) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
+    if (!planningId) return { success: false, error: 'ID é obrigatório' }
 
-    if (!planningId) {
-      return { success: false, error: 'ID do planejamento é obrigatório' }
-    }
-
-    // O cliente irá buscar o planejamento do localStorage
-    return { success: true, userId }
+    const data = await repo.findById(userId, planningId)
+    if (!data) return { success: false, error: 'Planejamento não encontrado' }
+    return { success: true, data }
   } catch (error) {
     console.error('[getPlanning] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao buscar planejamento' 
-    }
+    return { success: false, error: 'Erro ao buscar planejamento' }
   }
 }
 
 export async function linkExpenseToPlan(planningId: string, expenseId: string, expenseAmount: number) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
 
-    if (!planningId || !expenseId) {
-      return { success: false, error: 'IDs são obrigatórios' }
-    }
+    const planning = await repo.findById(userId, planningId)
+    if (!planning) return { success: false, error: 'Planejamento não encontrado' }
 
-    if (expenseAmount < 0) {
-      return { success: false, error: 'Valor do gasto inválido' }
-    }
+    if (planning.linkedExpenseIds.includes(expenseId))
+      return { success: false, error: 'Despesa já vinculada' }
+
+    const updatedIds = [...planning.linkedExpenseIds, expenseId]
+    const updatedAmount = planning.currentAmount + expenseAmount
+
+    await repo.update(userId, planningId, {
+      linkedExpenseIds: updatedIds,
+      currentAmount: updatedAmount,
+      updatedAt: new Date(),
+    } as Partial<Planning>)
 
     revalidatePath('/planning')
     revalidatePath('/')
-    return { success: true, planningId, expenseId, expenseAmount }
+    return { success: true }
   } catch (error) {
     console.error('[linkExpenseToPlan] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao vincular gasto ao planejamento' 
-    }
+    return { success: false, error: 'Erro ao vincular gasto' }
   }
 }
 
 export async function unlinkExpenseFromPlan(planningId: string, expenseId: string, expenseAmount: number) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
 
-    if (!planningId || !expenseId) {
-      return { success: false, error: 'IDs são obrigatórios' }
-    }
+    const planning = await repo.findById(userId, planningId)
+    if (!planning) return { success: false, error: 'Planejamento não encontrado' }
+
+    const updatedIds = planning.linkedExpenseIds.filter((id) => id !== expenseId)
+    const updatedAmount = Math.max(0, planning.currentAmount - expenseAmount)
+
+    await repo.update(userId, planningId, {
+      linkedExpenseIds: updatedIds,
+      currentAmount: updatedAmount,
+      updatedAt: new Date(),
+    } as Partial<Planning>)
 
     revalidatePath('/planning')
     revalidatePath('/')
-    return { success: true, planningId, expenseId, expenseAmount }
+    return { success: true }
   } catch (error) {
     console.error('[unlinkExpenseFromPlan] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao desvincular gasto do planejamento' 
-    }
+    return { success: false, error: 'Erro ao desvincular gasto' }
   }
 }
 
 export async function markPlanningAsCompleted(planningId: string) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
 
-    if (!planningId) {
-      return { success: false, error: 'ID do planejamento é obrigatório' }
-    }
-
+    await repo.update(userId, planningId, { status: 'completed', updatedAt: new Date() } as Partial<Planning>)
     revalidatePath('/planning')
-    return { success: true, planningId, status: 'completed' }
+    return { success: true }
   } catch (error) {
     console.error('[markPlanningAsCompleted] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao marcar planejamento como completo' 
-    }
+    return { success: false, error: 'Erro ao marcar planejamento' }
   }
 }
 
 export async function markPlanningAsCancelled(planningId: string) {
   try {
     const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
+    if (!userId) return { success: false, error: 'Não autenticado' }
 
-    if (!planningId) {
-      return { success: false, error: 'ID do planejamento é obrigatório' }
-    }
-
+    await repo.update(userId, planningId, { status: 'cancelled', updatedAt: new Date() } as Partial<Planning>)
     revalidatePath('/planning')
-    return { success: true, planningId, status: 'cancelled' }
+    return { success: true }
   } catch (error) {
     console.error('[markPlanningAsCancelled] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao marcar planejamento como cancelado' 
-    }
+    return { success: false, error: 'Erro ao marcar planejamento' }
   }
 }
+
+

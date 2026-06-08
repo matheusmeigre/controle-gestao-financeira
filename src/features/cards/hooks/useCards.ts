@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useUser } from '@clerk/nextjs'
 import type { CreditCard } from '../types'
-
-const STORAGE_KEY = 'credit_cards'
+import { getCards, createCard, updateCard, deleteCard } from '@/server/actions/cards'
 
 export function useCards() {
   const { user } = useUser()
   const [cards, setCards] = useState<CreditCard[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [, startTransition] = useTransition()
 
   useEffect(() => {
     if (!user) {
@@ -17,37 +17,17 @@ export function useCards() {
       return
     }
 
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const allCards: CreditCard[] = JSON.parse(stored)
-        // Filtrar apenas os cartões do usuário atual
-        const userCards = allCards.filter(
-          card => card.userId === user.id && card.isActive
-        )
-        setCards(userCards)
-      }
-    } catch (error) {
-      console.error('Error loading cards:', error)
-    } finally {
-      setIsLoading(false)
-    }
+    setIsLoading(true)
+    getCards()
+      .then((res) => {
+        if (res.success) setCards(res.data as CreditCard[])
+      })
+      .catch((err) => console.error('Error loading cards:', err))
+      .finally(() => setIsLoading(false))
   }, [user])
 
   const saveCards = (updatedCards: CreditCard[]) => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      const allCards: CreditCard[] = stored ? JSON.parse(stored) : []
-      
-      // Remove os cartões antigos do usuário atual e adiciona os novos
-      const otherUsersCards = allCards.filter(card => card.userId !== user?.id)
-      const newAllCards = [...otherUsersCards, ...updatedCards]
-      
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newAllCards))
-      setCards(updatedCards)
-    } catch (error) {
-      console.error('Error saving cards:', error)
-    }
+    setCards(updatedCards)
   }
 
   return {

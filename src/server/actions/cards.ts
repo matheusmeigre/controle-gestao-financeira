@@ -2,31 +2,43 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { CardService } from '@/features/cards'
+import { SupabaseCardRepository } from '@/features/cards/services/card.supabase.repository'
 import type { CreditCard, CreateCreditCardInput, UpdateCreditCardInput } from '@/features/cards/types'
 
-/**
- * Server Actions para gerenciamento de cartões de crédito
- * Refatorado para usar CardService da feature
- * 
- * PRIVACY BY DESIGN: Nunca armazene número completo ou CVV
- */
+const repo = new SupabaseCardRepository()
 
-const cardService = new CardService()
+export async function getCards() {
+  const { userId } = await auth()
+  if (!userId) return { success: false as const, error: 'Não autenticado' }
+  try {
+    const data = await repo.findActive(userId)
+    return { success: true as const, data }
+  } catch (e) {
+    return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao buscar cartões' }
+  }
+}
+
+export async function getCard(cardId: string) {
+  const { userId } = await auth()
+  if (!userId) return { success: false as const, error: 'Não autenticado' }
+  try {
+    const data = await repo.findById(userId, cardId)
+    if (!data) return { success: false as const, error: 'Cartão não encontrado' }
+    return { success: true as const, data }
+  } catch (e) {
+    return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao buscar cartão' }
+  }
+}
 
 export async function createCard(input: CreateCreditCardInput) {
+  const { userId } = await auth()
+  if (!userId) return { success: false as const, error: 'Não autenticado' }
+
+  if (!/^\d{4}$/.test(input.last4Digits)) {
+    return { success: false as const, error: 'Últimos 4 dígitos inválidos' }
+  }
+
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // Validação adicional
-    if (!/^\d{4}$/.test(input.last4Digits)) {
-      return { success: false, error: 'Últimos 4 dígitos inválidos' }
-    }
-    
     const newCard: CreditCard = {
       id: crypto.randomUUID(),
       userId,
@@ -35,91 +47,34 @@ export async function createCard(input: CreateCreditCardInput) {
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-    
-    // Retorna o cartão para ser salvo no localStorage pelo cliente
-    return { success: true, data: newCard }
-  } catch (error) {
-    console.error('[createCard] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao criar cartão. Tente novamente.' 
-    }
-  }
-}
-
-export async function getCards() {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // O cliente irá buscar os cartões do localStorage
-    // Esta função existe apenas para validar autenticação
-    return { success: true, data: [], userId }
-  } catch (error) {
-    console.error('[getCards] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao buscar cartões' 
-    }
-  }
-}
-
-export async function getCard(cardId: string) {
-  try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // O cliente irá buscar o cartão do localStorage
-    return { success: true, userId }
-  } catch (error) {
-    console.error('[getCard] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao buscar cartão' 
-    }
+    const data = await repo.create(userId, newCard)
+    revalidatePath('/cards')
+    return { success: true as const, data }
+  } catch (e) {
+    return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao criar cartão' }
   }
 }
 
 export async function updateCard(input: UpdateCreditCardInput) {
+  const { userId } = await auth()
+  if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // O cliente irá atualizar no localStorage
-    return { success: true, data: input, userId }
-  } catch (error) {
-    console.error('[updateCard] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao atualizar cartão' 
-    }
+    const data = await repo.update(userId, input.id!, input as Partial<CreditCard>)
+    revalidatePath('/cards')
+    return { success: true as const, data }
+  } catch (e) {
+    return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao atualizar cartão' }
   }
 }
 
 export async function deleteCard(cardId: string) {
+  const { userId } = await auth()
+  if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
-      return { success: false, error: 'Não autenticado' }
-    }
-    
-    // O cliente irá deletar do localStorage
-    return { success: true, userId }
-  } catch (error) {
-    console.error('[deleteCard] Error:', error)
-    return { 
-      success: false, 
-      error: 'Erro ao deletar cartão' 
-    }
+    await repo.softDelete(userId, cardId)
+    revalidatePath('/cards')
+    return { success: true as const }
+  } catch (e) {
+    return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao excluir cartão' }
   }
 }
