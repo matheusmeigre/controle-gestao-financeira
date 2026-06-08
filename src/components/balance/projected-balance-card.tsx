@@ -115,6 +115,24 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
               -{formatCurrency(totalExpectedExpenses)}
             </span>
           </div>
+
+          {/* Nota discreta de divisão de fatura por pessoa */}
+          {details.invoices.hasSplit && (
+            <div className="border-t pt-1.5 mt-1 space-y-1">
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-muted-foreground">Faturas (minha parte):</span>
+                <span className="font-medium text-red-600/80 dark:text-red-500/80">
+                  -{formatCurrency(details.invoices.expected)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-[11px]">
+                <span className="text-muted-foreground">Total bruto faturas:</span>
+                <span className="text-muted-foreground/70">
+                  {formatCurrency(details.invoices.totalBeforeSplit)}
+                </span>
+              </div>
+            </div>
+          )}
           
           {/* Valores Pendentes */}
           {hasPending && (
