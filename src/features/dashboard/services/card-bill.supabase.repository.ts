@@ -29,8 +29,7 @@ export class SupabaseCardBillRepository extends SupabaseBaseRepository<CardBill>
   }
 
   async findByMonth(userId: string, yearMonth: string): Promise<CardBill[]> {
-    const { createSupabaseServerClient } = await import('@/lib/supabase/server')
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { data, error } = await supabase
       .from('card_bills')
       .select('*')

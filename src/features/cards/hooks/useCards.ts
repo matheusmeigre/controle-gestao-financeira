@@ -9,15 +9,10 @@ export function useCards() {
   const { user } = useUser()
   const [cards, setCards] = useState<CreditCard[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [, startTransition] = useTransition()
 
   useEffect(() => {
-    if (!user) {
-      setIsLoading(false)
-      return
-    }
+    if (!user) return
 
-    setIsLoading(true)
     getCards()
       .then((res) => {
         if (res.success) setCards(res.data as CreditCard[])
@@ -26,13 +21,9 @@ export function useCards() {
       .finally(() => setIsLoading(false))
   }, [user])
 
-  const saveCards = (updatedCards: CreditCard[]) => {
-    setCards(updatedCards)
-  }
-
   return {
     cards,
     isLoading,
-    setCards: saveCards,
+    setCards,
   }
 }

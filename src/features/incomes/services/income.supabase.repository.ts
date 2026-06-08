@@ -40,8 +40,7 @@ export class SupabaseIncomeRepository extends SupabaseBaseRepository<Income> {
   }
 
   async findByMonth(userId: string, yearMonth: string): Promise<Income[]> {
-    const { createSupabaseServerClient } = await import('@/lib/supabase/server')
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { data, error } = await supabase
       .from('incomes')
       .select('*')

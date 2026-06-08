@@ -19,8 +19,14 @@ export abstract class SupabaseBaseRepository<T extends { id?: string; userId: st
   /** Converte camelCase do app para snake_case do Supabase */
   protected abstract toRow(item: Partial<T>): Record<string, unknown>
 
-  async findAll(userId: string): Promise<T[]> {
+  protected client() {
     const supabase = createSupabaseServerClient()
+    if (!supabase) throw new Error('[Supabase] Client not initialized — missing environment variables')
+    return supabase
+  }
+
+  async findAll(userId: string): Promise<T[]> {
+    const supabase = this.client()
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
@@ -32,7 +38,7 @@ export abstract class SupabaseBaseRepository<T extends { id?: string; userId: st
   }
 
   async findById(userId: string, id: string): Promise<T | null> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
@@ -45,7 +51,7 @@ export abstract class SupabaseBaseRepository<T extends { id?: string; userId: st
   }
 
   async create(userId: string, item: T): Promise<T> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const row = {
       ...this.toRow(item),
       user_id: userId,
@@ -62,7 +68,7 @@ export abstract class SupabaseBaseRepository<T extends { id?: string; userId: st
   }
 
   async update(userId: string, id: string, updates: Partial<T>): Promise<T | null> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const row = this.toRow(updates)
 
     const { data, error } = await (supabase.from(this.tableName) as any)
@@ -77,7 +83,7 @@ export abstract class SupabaseBaseRepository<T extends { id?: string; userId: st
   }
 
   async delete(userId: string, id: string): Promise<boolean> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { error, count } = await supabase
       .from(this.tableName)
       .delete({ count: 'exact' })
@@ -89,7 +95,7 @@ export abstract class SupabaseBaseRepository<T extends { id?: string; userId: st
   }
 
   async deleteAll(userId: string): Promise<void> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { error } = await supabase
       .from(this.tableName)
       .delete()

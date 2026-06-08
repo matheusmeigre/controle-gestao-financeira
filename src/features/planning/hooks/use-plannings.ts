@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { PlanningService } from '../services/planning.service'
 import {
@@ -158,13 +158,10 @@ export function usePlanningIndicators(planning: Planning | null): PlanningIndica
 
 export function usePlanningSummary() {
   const { plannings, loading, error, refresh } = usePlannings()
-  const [summary, setSummary] = useState<PlanningSummary | null>(null)
 
-  useEffect(() => {
-    if (!loading && plannings.length >= 0) {
-      // Calcula summary localmente dos dados carregados
-      setSummary(planningService.calculateSummaryFromData(plannings))
-    }
+  const summary = useMemo<PlanningSummary | null>(() => {
+    if (loading) return null
+    return planningService.calculateSummaryFromData(plannings)
   }, [plannings, loading])
 
   return { summary, loading, error, refresh }

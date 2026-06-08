@@ -47,8 +47,7 @@ export class SupabasePlanningRepository extends SupabaseBaseRepository<Planning>
   }
 
   async findByStatus(userId: string, status: Planning['status']): Promise<Planning[]> {
-    const { createSupabaseServerClient } = await import('@/lib/supabase/server')
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { data, error } = await supabase
       .from('plannings')
       .select('*')

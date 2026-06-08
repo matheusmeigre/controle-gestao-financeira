@@ -1,5 +1,4 @@
 import { SupabaseBaseRepository } from '@/lib/repositories/supabase-base.repository'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
 import type { Expense } from '@/features/expenses/types'
 
 export class SupabaseExpenseRepository extends SupabaseBaseRepository<Expense> {
@@ -42,7 +41,7 @@ export class SupabaseExpenseRepository extends SupabaseBaseRepository<Expense> {
   }
 
   async findByMonth(userId: string, yearMonth: string): Promise<Expense[]> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { data, error } = await supabase
       .from('expenses')
       .select('*')

@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState, useEffect, useTransition, useCallback } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useUser } from '@clerk/nextjs'
 import type { Expense, CardBill, Income } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
@@ -56,56 +56,69 @@ export function useDashboardData() {
     incomeCategory: 'all',
   })
 
+  const [error, setError] = useState<string | null>(null)
+
   const [tabs, setTabs] = useState<DashboardTabs>({
     main: 'expenses',
     expenseSubTab: 'general',
   })
 
   // ─── Carregamento inicial via Server Actions ────────────────────────
-  const loadData = useCallback(async () => {
-    if (!user?.id) return
-
-    // Expenses
-    const expRes = await getExpenses()
-    if (expRes.success) setExpenses(expRes.data as Expense[])
-
-    // Incomes
-    const incRes = await getIncomes()
-    if (incRes.success) setIncomes(incRes.data as Income[])
-
-    // Invoices
-    const invRes = await getInvoices()
-    if (invRes.success) setInvoices(invRes.data as Invoice[])
-
-    // Card bills — ainda via localStorage enquanto não há migration completa
-    const cardBillsData = loadUserData<CardBill>('cardBills', user.id)
-    setCardBills(cardBillsData)
-  }, [user?.id])
-
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    if (!user?.id) return
+    ;(async () => {
+      const [expRes, incRes, invRes] = await Promise.all([
+        getExpenses(),
+        getIncomes(),
+        getInvoices(),
+      ])
+      if (expRes.success) setExpenses(expRes.data as Expense[])
+      if (incRes.success) setIncomes(incRes.data as Income[])
+      if (invRes.success) setInvoices(invRes.data as Invoice[])
+
+      // Card bills — ainda via localStorage
+      const cardBillsData = loadUserData<CardBill>('cardBills', user.id)
+      setCardBills(cardBillsData)
+    })()
+  }, [user?.id])
 
   // ─── Actions para despesas ───────────────────────────────────────────
   const addExpense = (expense: Omit<Expense, 'id' | 'date' | 'userId'>) => {
     if (!user?.id) return
+    setError(null)
     startTransition(async () => {
       const result = await serverCreateExpense(expense)
-      if (result.success && result.data) setExpenses((prev) => [result.data as Expense, ...prev])
+      if (result.success) {
+        if (result.data) setExpenses((prev) => [result.data as Expense, ...prev])
+      } else {
+        setError(result.error)
+      }
     })
   }
 
   const handleUpdateExpense = (id: string, updates: Partial<Expense>) => {
+    if (!user?.id) return
+    setError(null)
     startTransition(async () => {
       const result = await serverUpdateExpense({ ...updates, id } as Expense & { id: string })
-      if (result.success) setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)))
+      if (result.success) {
+        setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)))
+      } else {
+        setError(result.error)
+      }
     })
   }
 
   const handleDeleteExpense = (id: string) => {
+    if (!user?.id) return
+    setError(null)
     startTransition(async () => {
-      await serverDeleteExpense(id)
-      setExpenses((prev) => prev.filter((e) => e.id !== id))
+      const result = await serverDeleteExpense(id)
+      if (result.success) {
+        setExpenses((prev) => prev.filter((e) => e.id !== id))
+      } else {
+        setError(result.error)
+      }
     })
   }
 
@@ -139,27 +152,44 @@ export function useDashboardData() {
   // ─── Actions para rendas ─────────────────────────────────────────────
   const addIncome = (income: Omit<Income, 'id' | 'date' | 'userId'>) => {
     if (!user?.id) return
+    setError(null)
     startTransition(async () => {
       const result = await serverCreateIncome({ ...income, date: new Date().toISOString().split('T')[0] })
-      if (result.success && result.data) setIncomes((prev) => [result.data as Income, ...prev])
+      if (result.success) {
+        if (result.data) setIncomes((prev) => [result.data as Income, ...prev])
+      } else {
+        setError(result.error)
+      }
     })
   }
 
   const handleDeleteIncome = (id: string) => {
+    if (!user?.id) return
+    setError(null)
     startTransition(async () => {
-      await serverDeleteIncome(id)
-      setIncomes((prev) => prev.filter((i) => i.id !== id))
+      const result = await serverDeleteIncome(id)
+      if (result.success) {
+        setIncomes((prev) => prev.filter((i) => i.id !== id))
+      } else {
+        setError(result.error)
+      }
     })
   }
 
   const handleMarkIncomeAsReceived = (id: string) => {
+    if (!user?.id) return
+    setError(null)
     startTransition(async () => {
-      await serverMarkIncomeAsReceived(id)
-      setIncomes((prev) =>
-        prev.map((i) =>
-          i.id === id ? { ...i, status: 'received' as const, receivedDate: new Date().toISOString() } : i
+      const result = await serverMarkIncomeAsReceived(id)
+      if (result.success) {
+        setIncomes((prev) =>
+          prev.map((i) =>
+            i.id === id ? { ...i, status: 'received' as const, receivedDate: new Date().toISOString() } : i
+          )
         )
-      )
+      } else {
+        setError(result.error)
+      }
     })
   }
 
@@ -182,7 +212,7 @@ export function useDashboardData() {
   return {
     expenses, cardBills, incomes, invoices, currentMonthData,
     filteredGeneralExpenses, filteredSubscriptions, filteredCardBills, filteredIncomes,
-    filters, setFilters, tabs, setTabs,
+    filters, setFilters, tabs, setTabs, error,
     addExpense, updateExpense: handleUpdateExpense, deleteExpense: handleDeleteExpense,
     addCardBill, updateCardBill: handleUpdateCardBill, deleteCardBill: handleDeleteCardBill,
     addIncome, deleteIncome: handleDeleteIncome, markIncomeAsReceived: handleMarkIncomeAsReceived,

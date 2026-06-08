@@ -35,8 +35,7 @@ export class SupabaseCardRepository extends SupabaseBaseRepository<CreditCard> {
   }
 
   async findActive(userId: string): Promise<CreditCard[]> {
-    const { createSupabaseServerClient } = await import('@/lib/supabase/server')
-    const supabase = createSupabaseServerClient()
+    const supabase = this.client()
     const { data, error } = await supabase
       .from('credit_cards')
       .select('*')

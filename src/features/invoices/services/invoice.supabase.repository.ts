@@ -1,4 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/supabase/types'
 import type { Invoice, InvoiceItem } from '@/features/invoices/types'
 
 /**
@@ -9,6 +11,12 @@ import type { Invoice, InvoiceItem } from '@/features/invoices/types'
  * compatibilidade total com services e hooks existentes.
  */
 export class SupabaseInvoiceRepository {
+  private getClient() {
+    const supabase = createSupabaseServerClient()
+    if (!supabase) throw new Error('[SupabaseInvoiceRepository] Client not initialized — missing environment variables')
+    return supabase
+  }
+
   private toInvoiceItem(row: Record<string, unknown>): InvoiceItem {
     return {
       id: row.id as string,
@@ -42,7 +50,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async findAll(userId: string): Promise<Invoice[]> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     const { data, error } = await supabase
       .from('invoices')
       .select('*, invoice_items(*)')
@@ -60,7 +68,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async findById(userId: string, id: string): Promise<Invoice | null> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     const { data, error } = await supabase
       .from('invoices')
       .select('*, invoice_items(*)')
@@ -77,7 +85,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async findByCard(userId: string, cardId: string): Promise<Invoice[]> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     const { data, error } = await supabase
       .from('invoices')
       .select('*, invoice_items(*)')
@@ -100,7 +108,7 @@ export class SupabaseInvoiceRepository {
     month: number,
     year: number
   ): Promise<Invoice | null> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     const { data, error } = await supabase
       .from('invoices')
       .select('*, invoice_items(*)')
@@ -119,7 +127,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async findByPeriod(userId: string, month: number, year: number): Promise<Invoice[]> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     const { data, error } = await supabase
       .from('invoices')
       .select('*, invoice_items(*)')
@@ -136,7 +144,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async create(userId: string, invoice: Invoice): Promise<Invoice> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     const invoiceId = invoice.id ?? crypto.randomUUID()
 
     const { error: invError } = await (supabase.from('invoices') as any).insert({
@@ -181,7 +189,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async update(userId: string, id: string, updates: Partial<Invoice>): Promise<Invoice | null> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
 
     // Monta apenas os campos que foram passados
     const row: Record<string, unknown> = {}
@@ -234,7 +242,7 @@ export class SupabaseInvoiceRepository {
   }
 
   async delete(userId: string, id: string): Promise<boolean> {
-    const supabase = createSupabaseServerClient()
+    const supabase = this.getClient()
     // invoice_items são deletados em cascade pelo banco
     const { error, count } = await supabase
       .from('invoices')
