@@ -56,7 +56,7 @@ export async function migrateFromLocalStorage(payload: MigrationPayload): Promis
   const invRepo = new SupabaseInvoiceRepository()
   const planRepo = new SupabasePlanningRepository()
 
-  // Processa itens em paralelo com batch de 20 para evitar rate limit
+  // Processa itens em batch de 20 (evita rate limit)
   const migrateBatch = async <T>(
     items: T[],
     createFn: (item: T) => Promise<unknown>
@@ -74,21 +74,50 @@ export async function migrateFromLocalStorage(payload: MigrationPayload): Promis
     return count
   }
 
-  const results = await Promise.all([
+  // Normaliza IDs para UUID — cartões do localStorage podem ter IDs nao-UUID
+  const normalizeId = (id: string): string => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return uuidRegex.test(id) ? id : crypto.randomUUID()
+  }
+
+  const cardIdMap = new Map<string, string>()
+
+  // 1. Cartões primeiro (invoices tem FK para credit_cards)
+  for (const card of payload.cards) {
+    try {
+      const newId = normalizeId(card.id ?? '')
+      cardIdMap.set(card.id ?? '', newId)
+      await cardRepo.create(userId, { ...card, id: newId, userId })
+      migrated.cards++
+    } catch { /* ignora duplicatas */ }
+  }
+
+  // 2. Faturas (dependem de credit_cards pelo card_id)
+  for (const inv of payload.invoices) {
+    try {
+      const newCardId = cardIdMap.get(inv.cardId) ?? normalizeId(inv.cardId)
+      await invRepo.create(userId, {
+        ...inv,
+        id: normalizeId(inv.id ?? ''),
+        cardId: newCardId,
+        userId,
+      })
+      migrated.invoices++
+    } catch { /* ignora duplicatas */ }
+  }
+
+  // Demais entidades são independentes — rodam em paralelo
+  const rest = await Promise.all([
     migrateBatch(payload.expenses, (item) => expRepo.create(userId, { ...item, userId })),
     migrateBatch(payload.incomes, (item) => incRepo.create(userId, { ...item, userId })),
-    migrateBatch(payload.cards, (item) => cardRepo.create(userId, { ...item, userId })),
     migrateBatch(payload.cardBills, (item) => billRepo.create(userId, { ...item, userId })),
-    migrateBatch(payload.invoices, (item) => invRepo.create(userId, { ...item, userId })),
     migrateBatch(payload.plannings, (item) => planRepo.create(userId, { ...item, userId })),
   ])
 
-  migrated.expenses = results[0]
-  migrated.incomes = results[1]
-  migrated.cards = results[2]
-  migrated.cardBills = results[3]
-  migrated.invoices = results[4]
-  migrated.plannings = results[5]
+  migrated.expenses = rest[0]
+  migrated.incomes = rest[1]
+  migrated.cardBills = rest[2]
+  migrated.plannings = rest[3]
 
   return { success: true, migrated, errors }
 }
