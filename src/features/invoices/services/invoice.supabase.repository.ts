@@ -205,18 +205,17 @@ export class SupabaseInvoiceRepository {
         ? updates.dueDate.toISOString().split('T')[0]
         : updates.dueDate
 
+    // Update invoice
     if (Object.keys(row).length > 0) {
       const { error } = await (supabase.from('invoices') as any)
         .update(row)
         .eq('user_id', userId)
         .eq('id', id)
-
       if (error) throw new Error(`[invoices] update: ${error.message}`)
     }
 
-    // Se items foram passados — substitui completamente
+    // Substitui items — delete + insert
     if (updates.items !== undefined) {
-      // Deleta os itens antigos
       await supabase.from('invoice_items').delete().eq('invoice_id', id)
 
       if (updates.items.length > 0) {
@@ -233,12 +232,15 @@ export class SupabaseInvoiceRepository {
           notes: item.notes ?? null,
         }))
 
-      const { error: itemsError } = await (supabase.from('invoice_items') as any).insert(itemRows)
+        const { error: itemsError } = await (supabase.from('invoice_items') as any).insert(itemRows)
         if (itemsError) throw new Error(`[invoice_items] update: ${itemsError.message}`)
       }
+
+      // findById apenas quando items mudaram (precisa da lista atualizada)
+      return this.findById(userId, id)
     }
 
-    return this.findById(userId, id)
+    return null
   }
 
   async delete(userId: string, id: string): Promise<boolean> {

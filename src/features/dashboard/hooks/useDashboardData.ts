@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import type { Expense, CardBill, Income } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
@@ -43,7 +43,6 @@ export type DashboardTabs = {
 
 export function useDashboardData() {
   const { user } = useUser()
-  const [, startTransition] = useTransition()
 
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [cardBills, setCardBills] = useState<CardBill[]>([])
@@ -86,12 +85,22 @@ export function useDashboardData() {
   const addExpense = (expense: Omit<Expense, 'id' | 'date' | 'userId'>) => {
     if (!user?.id) return
     setError(null)
-    startTransition(async () => {
-      const result = await serverCreateExpense(expense)
-      if (result.success) {
-        if (result.data) setExpenses((prev) => [result.data as Expense, ...prev])
+    const optimisticId = crypto.randomUUID()
+    const optimistic: Expense = {
+      ...expense as Expense,
+      id: optimisticId,
+      userId: user.id,
+      date: new Date().toISOString().split('T')[0],
+    }
+    setExpenses((prev) => [optimistic, ...prev])
+    serverCreateExpense(expense).then((result) => {
+      if (result.success && result.data) {
+        setExpenses((prev) =>
+          prev.map((e) => (e.id === optimisticId ? (result.data as Expense) : e))
+        )
       } else {
-        setError(result.error)
+        setExpenses((prev) => prev.filter((e) => e.id !== optimisticId))
+        setError(result.error ?? 'Erro ao criar despesa')
       }
     })
   }
@@ -99,12 +108,12 @@ export function useDashboardData() {
   const handleUpdateExpense = (id: string, updates: Partial<Expense>) => {
     if (!user?.id) return
     setError(null)
-    startTransition(async () => {
-      const result = await serverUpdateExpense({ ...updates, id } as Expense & { id: string })
-      if (result.success) {
-        setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)))
-      } else {
-        setError(result.error)
+    const prev = expenses
+    setExpenses((prev) => prev.map((e) => (e.id === id ? { ...e, ...updates } : e)))
+    serverUpdateExpense({ ...updates, id } as Expense & { id: string }).then((result) => {
+      if (!result.success) {
+        setExpenses(prev)
+        setError(result.error ?? 'Erro ao atualizar despesa')
       }
     })
   }
@@ -112,12 +121,12 @@ export function useDashboardData() {
   const handleDeleteExpense = (id: string) => {
     if (!user?.id) return
     setError(null)
-    startTransition(async () => {
-      const result = await serverDeleteExpense(id)
-      if (result.success) {
-        setExpenses((prev) => prev.filter((e) => e.id !== id))
-      } else {
-        setError(result.error)
+    const prev = expenses
+    setExpenses((prev) => prev.filter((e) => e.id !== id))
+    serverDeleteExpense(id).then((result) => {
+      if (!result.success) {
+        setExpenses(prev)
+        setError(result.error ?? 'Erro ao excluir despesa')
       }
     })
   }
@@ -153,12 +162,22 @@ export function useDashboardData() {
   const addIncome = (income: Omit<Income, 'id' | 'date' | 'userId'>) => {
     if (!user?.id) return
     setError(null)
-    startTransition(async () => {
-      const result = await serverCreateIncome({ ...income, date: new Date().toISOString().split('T')[0] })
-      if (result.success) {
-        if (result.data) setIncomes((prev) => [result.data as Income, ...prev])
+    const optimisticId = crypto.randomUUID()
+    const optimistic: Income = {
+      ...income as Income,
+      id: optimisticId,
+      userId: user.id,
+      date: new Date().toISOString().split('T')[0],
+    }
+    setIncomes((prev) => [optimistic, ...prev])
+    serverCreateIncome({ ...income, date: new Date().toISOString().split('T')[0] }).then((result) => {
+      if (result.success && result.data) {
+        setIncomes((prev) =>
+          prev.map((i) => (i.id === optimisticId ? (result.data as Income) : i))
+        )
       } else {
-        setError(result.error)
+        setIncomes((prev) => prev.filter((i) => i.id !== optimisticId))
+        setError(result.error ?? 'Erro ao criar receita')
       }
     })
   }
@@ -166,12 +185,12 @@ export function useDashboardData() {
   const handleDeleteIncome = (id: string) => {
     if (!user?.id) return
     setError(null)
-    startTransition(async () => {
-      const result = await serverDeleteIncome(id)
-      if (result.success) {
-        setIncomes((prev) => prev.filter((i) => i.id !== id))
-      } else {
-        setError(result.error)
+    const prev = incomes
+    setIncomes((prev) => prev.filter((i) => i.id !== id))
+    serverDeleteIncome(id).then((result) => {
+      if (!result.success) {
+        setIncomes(prev)
+        setError(result.error ?? 'Erro ao excluir receita')
       }
     })
   }
@@ -179,16 +198,16 @@ export function useDashboardData() {
   const handleMarkIncomeAsReceived = (id: string) => {
     if (!user?.id) return
     setError(null)
-    startTransition(async () => {
-      const result = await serverMarkIncomeAsReceived(id)
-      if (result.success) {
-        setIncomes((prev) =>
-          prev.map((i) =>
-            i.id === id ? { ...i, status: 'received' as const, receivedDate: new Date().toISOString() } : i
-          )
-        )
-      } else {
-        setError(result.error)
+    const prev = incomes
+    setIncomes((prev) =>
+      prev.map((i) =>
+        i.id === id ? { ...i, status: 'received' as const, receivedDate: new Date().toISOString() } : i
+      )
+    )
+    serverMarkIncomeAsReceived(id).then((result) => {
+      if (!result.success) {
+        setIncomes(prev)
+        setError(result.error ?? 'Erro ao marcar receita como recebida')
       }
     })
   }

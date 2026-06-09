@@ -56,53 +56,68 @@ export async function migrateFromLocalStorage(payload: MigrationPayload): Promis
   const invRepo = new SupabaseInvoiceRepository()
   const planRepo = new SupabasePlanningRepository()
 
-  // Despesas
-  for (const item of payload.expenses) {
-    try {
-      await expRepo.create(userId, { ...item, userId })
-      migrated.expenses++
-    } catch { /* ignora duplicatas */ }
+  // Processa itens em batch de 20 (evita rate limit)
+  const migrateBatch = async <T>(
+    items: T[],
+    createFn: (item: T) => Promise<unknown>
+  ): Promise<number> => {
+    if (items.length === 0) return 0
+    let count = 0
+    const BATCH_SIZE = 20
+    for (let i = 0; i < items.length; i += BATCH_SIZE) {
+      const batch = items.slice(i, i + BATCH_SIZE)
+      const results = await Promise.allSettled(
+        batch.map((item) => createFn(item))
+      )
+      count += results.filter((r) => r.status === 'fulfilled').length
+    }
+    return count
   }
 
-  // Receitas
-  for (const item of payload.incomes) {
-    try {
-      await incRepo.create(userId, { ...item, userId })
-      migrated.incomes++
-    } catch { /* ignora duplicatas */ }
+  // Normaliza IDs para UUID — cartões do localStorage podem ter IDs nao-UUID
+  const normalizeId = (id: string): string => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return uuidRegex.test(id) ? id : crypto.randomUUID()
   }
 
-  // Cartões
-  for (const item of payload.cards) {
+  const cardIdMap = new Map<string, string>()
+
+  // 1. Cartões primeiro (invoices tem FK para credit_cards)
+  for (const card of payload.cards) {
     try {
-      await cardRepo.create(userId, { ...item, userId })
+      const newId = normalizeId(card.id ?? '')
+      cardIdMap.set(card.id ?? '', newId)
+      await cardRepo.create(userId, { ...card, id: newId, userId })
       migrated.cards++
     } catch { /* ignora duplicatas */ }
   }
 
-  // Card Bills legados
-  for (const item of payload.cardBills) {
+  // 2. Faturas (dependem de credit_cards pelo card_id)
+  for (const inv of payload.invoices) {
     try {
-      await billRepo.create(userId, { ...item, userId })
-      migrated.cardBills++
-    } catch { /* ignora duplicatas */ }
-  }
-
-  // Faturas (Invoice + invoice_items)
-  for (const item of payload.invoices) {
-    try {
-      await invRepo.create(userId, { ...item, userId })
+      const newCardId = cardIdMap.get(inv.cardId) ?? normalizeId(inv.cardId)
+      await invRepo.create(userId, {
+        ...inv,
+        id: normalizeId(inv.id ?? ''),
+        cardId: newCardId,
+        userId,
+      })
       migrated.invoices++
     } catch { /* ignora duplicatas */ }
   }
 
-  // Planejamentos
-  for (const item of payload.plannings) {
-    try {
-      await planRepo.create(userId, { ...item, userId })
-      migrated.plannings++
-    } catch { /* ignora duplicatas */ }
-  }
+  // Demais entidades são independentes — rodam em paralelo
+  const rest = await Promise.all([
+    migrateBatch(payload.expenses, (item) => expRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.incomes, (item) => incRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.cardBills, (item) => billRepo.create(userId, { ...item, userId })),
+    migrateBatch(payload.plannings, (item) => planRepo.create(userId, { ...item, userId })),
+  ])
+
+  migrated.expenses = rest[0]
+  migrated.incomes = rest[1]
+  migrated.cardBills = rest[2]
+  migrated.plannings = rest[3]
 
   return { success: true, migrated, errors }
 }
