@@ -4,32 +4,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@clerk/nextjs'
 import type { FinancialContext } from '../types'
 import { evaluateRiskLevel } from '../rules'
-
-// Cache global para reduzir leituras de localStorage
-let cachedContext: FinancialContext | null = null
-let cacheUserId: string | null = null
-let cacheTimestamp: number = 0
-const CACHE_DURATION = 30000 // 30 segundos
+import { getExpenses } from '@/server/actions/expenses'
+import { getIncomes } from '@/server/actions/incomes'
+import { getPlannings } from '@/server/actions/planning'
 
 /**
- * Invalida o cache do contexto financeiro
- * Deve ser chamado sempre que houver mudanças em receitas, gastos ou planejamentos
+ * Invalida o cache — mantido para compatibilidade de imports.
+ * Com Supabase não há cache de módulo (VULN-12 corrigido).
  */
 export function invalidateFinancialContextCache() {
-  cachedContext = null
-  cacheUserId = null
-  cacheTimestamp = 0
+  // no-op: sem cache de módulo
 }
 
 /**
- * Hook para obter contexto financeiro completo do usuário
- * 
- * Este hook calcula automaticamente:
- * - Renda mensal e média
- * - Gastos fixos e variáveis
- * - Planejamentos ativos e seus compromissos
- * - Renda livre disponível
- * - Nível de risco financeiro
+ * Hook para obter contexto financeiro completo do usuário.
+ * Lê dados via Server Actions (Supabase) — sem localStorage.
  */
 export function useFinancialContext() {
   const { user } = useUser()
@@ -37,133 +26,88 @@ export function useFinancialContext() {
   const [loading, setLoading] = useState(true)
 
   const calculateContext = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false)
-      return
-    }
-
-    // Verifica cache
-    const now = Date.now()
-    if (cachedContext && cacheUserId === user.id && (now - cacheTimestamp) < CACHE_DURATION) {
-      setContext(cachedContext)
-      setLoading(false)
-      return
-    }
+    if (!user?.id) { setLoading(false); return }
 
     try {
       setLoading(true)
 
-      // Buscar todos os dados de uma vez para reduzir I/O
-      const incomesData = localStorage.getItem(`incomes_${user.id}`)
-      const expensesData = localStorage.getItem(`expenses_${user.id}`)
-      const planningsData = localStorage.getItem(`plannings_${user.id}`)
-      
-      const incomes = incomesData ? JSON.parse(incomesData) : []
-      const expenses = expensesData ? JSON.parse(expensesData) : []
-      const plannings = planningsData ? JSON.parse(planningsData) : []
-      
-      // Calcular renda mensal
-      const currentMonth = new Date().getMonth()
-      const currentYear = new Date().getFullYear()
-      const currentMonthIncomes = incomes.filter((income: any) => {
-        const date = new Date(income.date)
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear
-      })
-      
-      const monthlyIncome = currentMonthIncomes.reduce(
-        (sum: number, income: any) => sum + income.amount, 
-        0
-      )
+      const [expRes, incRes, planRes] = await Promise.all([
+        getExpenses(),
+        getIncomes(),
+        getPlannings(),
+      ])
 
-      // Calcular m\u00e9dia dos \u00faltimos 3 meses
-      const last3MonthsIncomes = incomes.filter((income: any) => {
-        const date = new Date(income.date)
-        const monthsDiff = (currentYear - date.getFullYear()) * 12 + (currentMonth - date.getMonth())
-        return monthsDiff >= 0 && monthsDiff < 3
+      const expenses = (expRes.success ? expRes.data : []) as { amount: number; date: string; isRecurring?: boolean; category?: string }[]
+      const incomes = (incRes.success ? incRes.data : []) as { amount: number; date: string }[]
+      const plannings = (planRes.success ? planRes.data : []) as {
+        status: string; targetAmount: number; currentAmount: number
+        startDate: string; targetDate?: string
+      }[]
+
+      const now = new Date()
+      const currentMonth = now.getMonth()
+      const currentYear = now.getFullYear()
+
+      const currentMonthIncomes = incomes.filter((income) => {
+        const d = new Date(income.date)
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear
       })
-      
+
+      const monthlyIncome = currentMonthIncomes.reduce((s, i) => s + i.amount, 0)
+
+      const last3MonthsIncomes = incomes.filter((income) => {
+        const d = new Date(income.date)
+        const diff = (currentYear - d.getFullYear()) * 12 + (currentMonth - d.getMonth())
+        return diff >= 0 && diff < 3
+      })
       const averageIncome = last3MonthsIncomes.length > 0
-        ? last3MonthsIncomes.reduce((sum: number, income: any) => sum + income.amount, 0) / 3
+        ? last3MonthsIncomes.reduce((s, i) => s + i.amount, 0) / 3
         : monthlyIncome
-      
-      // Gastos fixos (recorrentes ou assinaturas)
+
       const fixedExpenses = expenses
-        .filter((exp: any) => exp.isRecurring || exp.category === 'Assinaturas')
-        .reduce((sum: number, exp: any) => sum + exp.amount, 0)
+        .filter((e) => e.isRecurring || e.category === 'Assinaturas')
+        .reduce((s, e) => s + e.amount, 0)
 
-      // Gastos variáveis do mês atual
-      const currentMonthExpenses = expenses.filter((exp: any) => {
-        const date = new Date(exp.date)
-        return date.getMonth() === currentMonth && 
-               date.getFullYear() === currentYear &&
-               !exp.isRecurring
-      })
-      
-      const variableExpenses = currentMonthExpenses.reduce(
-        (sum: number, exp: any) => sum + exp.amount, 
-        0
-      )
-      
+      const variableExpenses = expenses
+        .filter((e) => {
+          const d = new Date(e.date)
+          return d.getMonth() === currentMonth && d.getFullYear() === currentYear && !e.isRecurring
+        })
+        .reduce((s, e) => s + e.amount, 0)
+
       const activePlannings = plannings.filter(
-        (p: any) => p.status === 'planned' || p.status === 'in_progress'
+        (p) => p.status === 'planned' || p.status === 'in_progress'
       )
 
-      // Calcular compromisso mensal com planejamentos
-      const monthlyCommittedAmount = activePlannings.reduce((sum: number, planning: any) => {
+      const monthlyCommittedAmount = activePlannings.reduce((sum, planning) => {
         const remaining = planning.targetAmount - planning.currentAmount
-        const startDate = new Date(planning.startDate)
-        const targetDate = planning.targetDate ? new Date(planning.targetDate) : null
-        
-        if (!targetDate) return sum
-        
-        const monthsDiff = Math.max(
-          (targetDate.getFullYear() - startDate.getFullYear()) * 12 + 
-          (targetDate.getMonth() - startDate.getMonth()),
+        if (!planning.targetDate) return sum
+        const start = new Date(planning.startDate)
+        const target = new Date(planning.targetDate)
+        const months = Math.max(
+          (target.getFullYear() - start.getFullYear()) * 12 + (target.getMonth() - start.getMonth()),
           1
         )
-        
-        return sum + (remaining / monthsDiff)
+        return sum + remaining / months
       }, 0)
 
-      // Calcular renda livre
       const freeIncome = monthlyIncome - fixedExpenses - monthlyCommittedAmount
-      const freeIncomePercentage = monthlyIncome > 0 
-        ? (freeIncome / monthlyIncome) * 100 
-        : 0
+      const freeIncomePercentage = monthlyIncome > 0 ? (freeIncome / monthlyIncome) * 100 : 0
+      const isHealthy = freeIncome > monthlyIncome * 0.2
 
-      // Avaliar saúde financeira
-      const isHealthy = freeIncome > monthlyIncome * 0.2 // Pelo menos 20% livre
-      
-      // Calcular nível de risco
       const riskLevel = evaluateRiskLevel(
-        monthlyCommittedAmount, 
-        {
-          monthlyIncome,
-          monthlyFixedExpenses: fixedExpenses,
-          freeIncome,
-        } as FinancialContext,
+        monthlyCommittedAmount,
+        { monthlyIncome, monthlyFixedExpenses: fixedExpenses, freeIncome } as FinancialContext,
         monthlyCommittedAmount * 12
       )
 
-      const financialContext: FinancialContext = {
-        monthlyIncome,
-        averageIncome,
+      setContext({
+        monthlyIncome, averageIncome,
         monthlyFixedExpenses: fixedExpenses,
         monthlyVariableExpenses: variableExpenses,
         activePlanningsCount: activePlannings.length,
-        monthlyCommittedAmount,
-        freeIncome,
-        freeIncomePercentage,
-        isHealthy,
-        riskLevel,
-      }
-
-      // Atualiza cache
-      cachedContext = financialContext
-      cacheUserId = user.id
-      cacheTimestamp = Date.now()
-      
-      setContext(financialContext)
+        monthlyCommittedAmount, freeIncome, freeIncomePercentage, isHealthy, riskLevel,
+      })
     } catch (error) {
       console.error('[useFinancialContext] Error:', error)
     } finally {
@@ -171,17 +115,11 @@ export function useFinancialContext() {
     }
   }, [user?.id])
 
-  useEffect(() => {
-    calculateContext()
-  }, [calculateContext])
+  useEffect(() => { calculateContext() }, [calculateContext])
 
   return context
 }
 
-/**
- * Hook para calcular contexto financeiro de forma manual
- * Útil quando os dados já estão disponíveis
- */
 export function useCalculateFinancialContext(
   monthlyIncome: number,
   fixedExpenses: number,
@@ -191,27 +129,18 @@ export function useCalculateFinancialContext(
   const freeIncome = monthlyIncome - fixedExpenses - committedAmount
   const freeIncomePercentage = monthlyIncome > 0 ? (freeIncome / monthlyIncome) * 100 : 0
   const isHealthy = freeIncome > monthlyIncome * 0.2
-  
+
   const riskLevel = evaluateRiskLevel(
     committedAmount,
-    {
-      monthlyIncome,
-      monthlyFixedExpenses: fixedExpenses,
-      freeIncome,
-    } as FinancialContext,
+    { monthlyIncome, monthlyFixedExpenses: fixedExpenses, freeIncome } as FinancialContext,
     committedAmount * 12
   )
 
   return {
-    monthlyIncome,
-    averageIncome: monthlyIncome,
-    monthlyFixedExpenses: fixedExpenses,
-    monthlyVariableExpenses: 0,
+    monthlyIncome, averageIncome: monthlyIncome,
+    monthlyFixedExpenses: fixedExpenses, monthlyVariableExpenses: 0,
     activePlanningsCount: activePlannings,
     monthlyCommittedAmount: committedAmount,
-    freeIncome,
-    freeIncomePercentage,
-    isHealthy,
-    riskLevel,
+    freeIncome, freeIncomePercentage, isHealthy, riskLevel,
   }
 }

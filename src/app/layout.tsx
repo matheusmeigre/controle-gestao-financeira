@@ -42,6 +42,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
+    // @ts-ignore -- @clerk/nextjs v6 async ClerkProvider type issue with React 19
     <ClerkProvider appearance={{
       variables: { colorPrimary: '#000' },
       elements: {

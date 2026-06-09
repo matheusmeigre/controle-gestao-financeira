@@ -7,10 +7,10 @@
  * Segue padrão Material Design 3 e apps financeiros modernos
  */
 
-import { Home, FileText, BarChart3, User } from 'lucide-react'
+import { Home, Wallet, Receipt, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type NavigationTab = 'home' | 'transactions' | 'reports' | 'profile'
+export type NavigationTab = 'home' | 'transactions' | 'invoices' | 'profile'
 
 interface BottomNavigationProps {
   activeTab: NavigationTab
@@ -19,8 +19,8 @@ interface BottomNavigationProps {
 
 const navItems = [
   { id: 'home' as const, label: 'Início', icon: Home },
-  { id: 'transactions' as const, label: 'Extrato', icon: FileText },
-  { id: 'reports' as const, label: 'Relatórios', icon: BarChart3 },
+  { id: 'transactions' as const, label: 'Transações', icon: Wallet },
+  { id: 'invoices' as const, label: 'Faturas', icon: Receipt },
   { id: 'profile' as const, label: 'Perfil', icon: User },
 ]
 

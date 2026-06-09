@@ -87,7 +87,7 @@ export interface OcrProcessedResult {
 // ====================================
 
 const OCR_API_CONFIG = {
-  baseUrl: 'https://ocr-api-leitura-financas.onrender.com',
+  baseUrl: process.env.OCR_API_BASE_URL ?? 'https://ocr-api-leitura-financas.onrender.com',
   endpoint: '/extract',
   healthEndpoint: '/health/ready',
   timeout: 60000, // 60 segundos para primeira requisição (warm-up)
@@ -584,7 +584,6 @@ export class OcrService {
           trimmedLine.includes('Pagamentos e Financiamentos') ||
           trimmedLine.includes('---') ||
           trimmedLine.startsWith('Página') ||
-          trimmedLine.includes('Matheus M Silva') ||
           /^Total de compras/i.test(trimmedLine) ||
           /cartões.*R\$/i.test(trimmedLine)) {
         continue

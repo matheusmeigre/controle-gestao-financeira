@@ -7,7 +7,7 @@
  * Visível apenas em telas >= md (768px)
  */
 
-import { Home, FileText, BarChart3, User } from 'lucide-react'
+import { Home, Wallet, Receipt, User } from 'lucide-react'
 import type { NavigationTab } from './bottom-navigation'
 
 interface DesktopNavigationProps {
@@ -18,8 +18,8 @@ interface DesktopNavigationProps {
 export function DesktopNavigation({ activeTab, onTabChange }: DesktopNavigationProps) {
   const navItems = [
     { id: 'home' as NavigationTab, label: 'Início', icon: Home },
-    { id: 'transactions' as NavigationTab, label: 'Extrato', icon: FileText },
-    { id: 'reports' as NavigationTab, label: 'Relatórios', icon: BarChart3 },
+    { id: 'transactions' as NavigationTab, label: 'Transações', icon: Wallet },
+    { id: 'invoices' as NavigationTab, label: 'Faturas', icon: Receipt },
     { id: 'profile' as NavigationTab, label: 'Perfil', icon: User },
   ]
 

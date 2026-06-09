@@ -3,63 +3,52 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { PlanningService } from '../services/planning.service'
-import { invalidateFinancialContextCache } from './use-financial-context'
-import type { 
-  Planning, 
-  CreatePlanningInput, 
+import {
+  getPlannings,
+  getPlanning as serverGetPlanning,
+  createPlanning as serverCreatePlanning,
+  updatePlanning as serverUpdatePlanning,
+  deletePlanning as serverDeletePlanning,
+  linkExpenseToPlan,
+  unlinkExpenseFromPlan,
+  markPlanningAsCompleted,
+  markPlanningAsCancelled,
+} from '@/server/actions/planning'
+import type {
+  Planning,
+  CreatePlanningInput,
   UpdatePlanningInput,
   PlanningFilters,
   PlanningSummary,
-  PlanningIndicators
+  PlanningIndicators,
 } from '../types'
 
 const planningService = new PlanningService()
 
-// Cache global
-let cachedPlannings: Planning[] = []
-let cacheUserId: string | null = null
-let cacheTimestamp: number = 0
-const CACHE_DURATION = 15000 // 15 segundos
-
-/**
- * Hook principal para gerenciar planejamentos
- */
 export function usePlannings(filters?: PlanningFilters) {
   const { user } = useUser()
-  const [plannings, setPlannings] = useState<Planning[]>(cachedPlannings)
+  const [plannings, setPlannings] = useState<Planning[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadPlannings = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false)
-      return
-    }
-
-    // Verifica cache apenas se não houver filtros
-    const now = Date.now()
-    if (!filters && cachedPlannings.length > 0 && cacheUserId === user.id && (now - cacheTimestamp) < CACHE_DURATION) {
-      setPlannings(cachedPlannings)
-      setLoading(false)
-      return
-    }
+    if (!user?.id) { setLoading(false); return }
 
     try {
       setLoading(true)
       setError(null)
-      
-      const data = filters 
-        ? await planningService.getPlanningsWithFilters(user.id, filters)
-        : await planningService.getAllPlannings(user.id)
-      
-      setPlannings(data)
-      
-      // Atualiza cache apenas se não houver filtros
-      if (!filters) {
-        cachedPlannings = data
-        cacheUserId = user.id
-        cacheTimestamp = now
+      const res = await getPlannings()
+      if (!res.success) throw new Error(res.error)
+
+      let data = (res.data as Planning[]) ?? []
+
+      if (filters) {
+        if (filters.status) data = data.filter((p) => p.status === filters.status)
+        if (filters.category) data = data.filter((p) => p.category === filters.category)
+        if (filters.riskLevel) data = data.filter((p) => p.riskLevel === filters.riskLevel)
       }
+
+      setPlannings(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar planejamentos')
       console.error('[usePlannings] Error:', err)
@@ -68,113 +57,83 @@ export function usePlannings(filters?: PlanningFilters) {
     }
   }, [user?.id, filters])
 
-  useEffect(() => {
-    loadPlannings()
-  }, [loadPlannings])
+  useEffect(() => { loadPlannings() }, [loadPlannings])
+
+  // ─── Escritas com atualização otimista (sem re-leitura) ──────────────
 
   const createPlanning = useCallback(async (input: CreatePlanningInput) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
-
-    const newPlanning = await planningService.createPlanning(user.id, input)
-    // Invalida cache
-    cacheTimestamp = 0
-    invalidateFinancialContextCache()
-    await loadPlannings()
-    return newPlanning
-  }, [user?.id, loadPlannings])
+    const res = await serverCreatePlanning(input)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => [res.data as Planning, ...prev])
+    return res.data as Planning
+  }, [])
 
   const updatePlanning = useCallback(async (input: UpdatePlanningInput) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
+    const res = await serverUpdatePlanning(input)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.map(p => p.id === input.id ? (res.data as Planning) : p))
+    return res.data as Planning
+  }, [])
 
-    const updated = await planningService.updatePlanning(user.id, input)
-    // Invalida cache
-    cacheTimestamp = 0
-    invalidateFinancialContextCache()
-    await loadPlannings()
-    return updated
-  }, [user?.id, loadPlannings])
-
-  const deletePlanning = useCallback(async (id: string) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
-
-    const success = await planningService.deletePlanning(user.id, id)
-    // Invalida cache
-    cacheTimestamp = 0
-    invalidateFinancialContextCache()
-    await loadPlannings()
-    return success
-  }, [user?.id, loadPlannings])
+  const deletePlanningFn = useCallback(async (id: string) => {
+    const res = await serverDeletePlanning(id)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.filter(p => p.id !== id))
+    return true
+  }, [])
 
   const addAmount = useCallback(async (planningId: string, amount: number) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
+    const res = await serverUpdatePlanning({ id: planningId, currentAmount: amount })
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.map(p => p.id === planningId ? (res.data as Planning) : p))
+    return res.data as Planning
+  }, [])
 
-    const updated = await planningService.addAmount(user.id, planningId, amount)
-    // Invalida cache
-    cacheTimestamp = 0
-    invalidateFinancialContextCache()
-    await loadPlannings()
-    return updated
-  }, [user?.id, loadPlannings])
+  const linkExpense = useCallback(async (planningId: string, expenseId: string, expenseAmount: number) => {
+    const res = await linkExpenseToPlan(planningId, expenseId, expenseAmount)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.map(p => {
+      if (p.id !== planningId) return p
+      return {
+        ...p,
+        linkedExpenseIds: [...p.linkedExpenseIds, expenseId],
+        currentAmount: p.currentAmount + expenseAmount,
+      }
+    }))
+  }, [])
 
-  const linkExpense = useCallback(async (
-    planningId: string, 
-    expenseId: string,
-    expenseAmount: number
-  ) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
-
-    const updated = await planningService.linkExpense(user.id, planningId, expenseId, expenseAmount)
-    await loadPlannings()
-    return updated
-  }, [user?.id, loadPlannings])
-
-  const unlinkExpense = useCallback(async (
-    planningId: string,
-    expenseId: string,
-    expenseAmount: number
-  ) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
-
-    const updated = await planningService.unlinkExpense(user.id, planningId, expenseId, expenseAmount)
-    await loadPlannings()
-    return updated
-  }, [user?.id, loadPlannings])
+  const unlinkExpense = useCallback(async (planningId: string, expenseId: string, expenseAmount: number) => {
+    const res = await unlinkExpenseFromPlan(planningId, expenseId, expenseAmount)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.map(p => {
+      if (p.id !== planningId) return p
+      return {
+        ...p,
+        linkedExpenseIds: p.linkedExpenseIds.filter(id => id !== expenseId),
+        currentAmount: Math.max(0, p.currentAmount - expenseAmount),
+      }
+    }))
+  }, [])
 
   const markAsCompleted = useCallback(async (planningId: string) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
-
-    const updated = await planningService.markAsCompleted(user.id, planningId)
-    await loadPlannings()
-    return updated
-  }, [user?.id, loadPlannings])
+    const res = await markPlanningAsCompleted(planningId)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.map(p => p.id === planningId ? { ...p, status: 'completed' as const } : p))
+  }, [])
 
   const markAsCancelled = useCallback(async (planningId: string) => {
-    if (!user?.id) throw new Error('Usuário não autenticado')
-
-    const updated = await planningService.markAsCancelled(user.id, planningId)
-    await loadPlannings()
-    return updated
-  }, [user?.id, loadPlannings])
+    const res = await markPlanningAsCancelled(planningId)
+    if (!res.success) throw new Error(res.error)
+    setPlannings(prev => prev.map(p => p.id === planningId ? { ...p, status: 'cancelled' as const } : p))
+  }, [])
 
   return {
-    plannings,
-    loading,
-    error,
-    refresh: loadPlannings,
-    createPlanning,
-    updatePlanning,
-    deletePlanning,
-    addAmount,
-    linkExpense,
-    unlinkExpense,
-    markAsCompleted,
-    markAsCancelled,
+    plannings, loading, error, refresh: loadPlannings,
+    createPlanning, updatePlanning, deletePlanning: deletePlanningFn,
+    addAmount, linkExpense, unlinkExpense, markAsCompleted, markAsCancelled,
   }
 }
 
-/**
- * Hook para buscar um planejamento específico
- */
 export function usePlanning(planningId: string | null) {
   const { user } = useUser()
   const [planning, setPlanning] = useState<Planning | null>(null)
@@ -182,132 +141,49 @@ export function usePlanning(planningId: string | null) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadPlanning = async () => {
-      if (!user?.id || !planningId) {
-        setLoading(false)
-        return
-      }
-
+    const load = async () => {
+      if (!user?.id || !planningId) { setLoading(false); return }
       try {
         setLoading(true)
         setError(null)
-        const data = await planningService.getPlanningById(user.id, planningId)
-        setPlanning(data)
+        const res = await serverGetPlanning(planningId)
+        setPlanning(res.success ? (res.data as Planning) : null)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro ao carregar planejamento')
-        console.error('[usePlanning] Error:', err)
       } finally {
         setLoading(false)
       }
     }
-
-    loadPlanning()
+    load()
   }, [user?.id, planningId])
 
   return { planning, loading, error }
 }
 
-/**
- * Hook para calcular indicadores de um planejamento
- */
 export function usePlanningIndicators(planning: Planning | null): PlanningIndicators | null {
   if (!planning) return null
   return planningService.calculateIndicators(planning)
 }
 
-/**
- * Hook para obter resumo de todos os planejamentos
- */
 export function usePlanningSummary() {
-  const { user } = useUser()
-  const [summary, setSummary] = useState<PlanningSummary | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { plannings, loading, error, refresh } = usePlannings()
 
-  const loadSummary = useCallback(async () => {
-    if (!user?.id) {
-      setLoading(false)
-      return
-    }
+  const summary = useMemo<PlanningSummary | null>(() => {
+    if (loading) return null
+    return planningService.calculateSummaryFromData(plannings)
+  }, [plannings, loading])
 
-    try {
-      setLoading(true)
-      setError(null)
-      const data = await planningService.getSummary(user.id)
-      setSummary(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar resumo')
-      console.error('[usePlanningSummary] Error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.id])
-
-  useEffect(() => {
-    loadSummary()
-  }, [loadSummary])
-
-  return { summary, loading, error, refresh: loadSummary }
+  return { summary, loading, error, refresh }
 }
 
-/**
- * Hook para planejamentos atrasados
- */
 export function useDelayedPlannings() {
-  const { user } = useUser()
-  const [plannings, setPlannings] = useState<Planning[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.id) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        const data = await planningService.getDelayedPlannings(user.id)
-        setPlannings(data)
-      } catch (err) {
-        console.error('[useDelayedPlannings] Error:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-  }, [user?.id])
-
-  return { plannings, loading }
+  return usePlannings({ status: 'delayed' } as PlanningFilters)
 }
 
-/**
- * Hook para planejamentos com orçamento estourado
- */
 export function useOverBudgetPlannings() {
-  const { user } = useUser()
-  const [plannings, setPlannings] = useState<Planning[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.id) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        const data = await planningService.getOverBudgetPlannings(user.id)
-        setPlannings(data)
-      } catch (err) {
-        console.error('[useOverBudgetPlannings] Error:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-  }, [user?.id])
-
-  return { plannings, loading }
+  const { plannings, loading } = usePlannings()
+  const overBudget = plannings.filter(
+    (p) => p.currentAmount > p.targetAmount && p.status !== 'completed' && p.status !== 'cancelled'
+  )
+  return { plannings: overBudget, loading }
 }

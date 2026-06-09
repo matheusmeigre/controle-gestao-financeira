@@ -1,18 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { Receipt, ChevronDown, ChevronUp, Edit2, Users, Calendar, CreditCard as CreditCardIcon, DollarSign } from 'lucide-react'
+import { Receipt, ChevronDown, ChevronUp, Edit2, Calendar, CreditCard as CreditCardIcon, DollarSign, Trash2, AlertTriangle, User } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import type { Invoice } from '../types'
 import type { CreditCard } from '@/features/cards/types'
 import { InvoiceEditModal } from './InvoiceEditModal'
+import {
+  hasPersonSplit,
+  getPersonDivisions,
+  getPersonFromNotes,
+  getPersonColor,
+} from '../utils/invoice-split.utils'
 
 interface InvoicesListProps {
   invoices: Invoice[]
   cards: CreditCard[]
   onUpdateInvoice: (invoiceId: string, updates: Partial<Invoice>) => Promise<void>
+  onDeleteInvoice?: (invoiceId: string) => Promise<void>
 }
 
 const MONTHS = [
@@ -20,9 +35,10 @@ const MONTHS = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
 
-export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListProps) {
+export function InvoicesList({ invoices, cards, onUpdateInvoice, onDeleteInvoice }: InvoicesListProps) {
   const [expandedInvoices, setExpandedInvoices] = useState<Set<string>>(new Set())
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
+  const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null)
 
   const toggleExpanded = (invoiceId: string) => {
     const newExpanded = new Set(expandedInvoices)
@@ -191,9 +207,34 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListP
                           </div>
                         </div>
 
+                        {/* Divisão por pessoa (resumo compacto) */}
+                        {hasPersonSplit(invoice) && (() => {
+                          const divisions = getPersonDivisions(invoice)
+                          return (
+                            <div className="pt-2 border-t space-y-1.5">
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                Divisão por pessoa
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {Object.entries(divisions).map(([person, amount]) => (
+                                  <div
+                                    key={person}
+                                    className={`inline-flex flex-col items-start px-2 py-1 rounded-md border text-xs ${getPersonColor(person)}`}
+                                  >
+                                    <span className="font-semibold leading-tight">{person}</span>
+                                    <span className="font-bold text-[11px]">
+                                      {formatCurrency(amount)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        })()}
+
                         {/* Botões de ação */}
-                        <div className="flex gap-2 pt-2 border-t">
-                          <Button
+                        <div className="flex gap-2 pt-2 border-t">                          <Button
                             size="sm"
                             variant="outline"
                             className="flex-1"
@@ -219,6 +260,15 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListP
                             <Edit2 className="h-3 w-3 mr-1" />
                             Editar
                           </Button>
+                          {onDeleteInvoice && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setDeletingInvoice(invoice)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
                         </div>
 
                         {/* Itens expandidos */}
@@ -228,27 +278,40 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListP
                               Itens da fatura
                             </p>
                             <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                              {invoice.items.map(item => (
-                                <div 
-                                  key={item.id} 
-                                  className="flex items-start justify-between gap-2 p-2 bg-muted/50 rounded text-xs"
-                                >
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-medium truncate">{item.description}</p>
-                                    <p className="text-muted-foreground text-[10px]">
-                                      {formatDate(item.date)} • {item.category}
-                                    </p>
-                                    {item.installment && (
+                              {invoice.items.map(item => {
+                                  const person = getPersonFromNotes(item.notes)
+                                  const showBadge = hasPersonSplit(invoice)
+                                  return (
+                                  <div 
+                                    key={item.id} 
+                                    className="flex items-start justify-between gap-2 p-2 bg-muted/50 rounded text-xs"
+                                  >
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium truncate">{item.description}</p>
                                       <p className="text-muted-foreground text-[10px]">
-                                        Parcela {item.installment}
+                                        {formatDate(item.date)} • {item.category}
                                       </p>
-                                    )}
+                                      {item.installment && (
+                                        <p className="text-muted-foreground text-[10px]">
+                                          Parcela {item.installment}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                                      <span className="font-semibold whitespace-nowrap">
+                                        {formatCurrency(item.amount)}
+                                      </span>
+                                      {showBadge && (
+                                        <span
+                                          className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${getPersonColor(person)}`}
+                                        >
+                                          {person}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <span className="font-semibold whitespace-nowrap">
-                                    {formatCurrency(item.amount)}
-                                  </span>
-                                </div>
-                              ))}
+                                  )
+                                })}
                             </div>
                           </div>
                         )}
@@ -274,6 +337,38 @@ export function InvoicesList({ invoices, cards, onUpdateInvoice }: InvoicesListP
           }}
         />
       )}
+
+      {/* Modal de confirmação de exclusão */}
+      <Dialog open={!!deletingInvoice} onOpenChange={(open) => { if (!open) setDeletingInvoice(null) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Excluir Fatura
+            </DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir esta fatura? Todos os itens serão removidos permanentemente e essa ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeletingInvoice(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (deletingInvoice?.id && onDeleteInvoice) {
+                  await onDeleteInvoice(deletingInvoice.id)
+                  setDeletingInvoice(null)
+                }
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

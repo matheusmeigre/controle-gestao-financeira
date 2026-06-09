@@ -263,6 +263,43 @@ export class PlanningService {
   }
 
   /**
+   * Calcula o resumo a partir de um array já carregado (sem acesso ao repositório).
+   * Usado pelos hooks após migração para Supabase.
+   */
+  calculateSummaryFromData(plannings: Planning[]): PlanningSummary {
+    const summary: PlanningSummary = {
+      total: plannings.length,
+      planned: 0,
+      inProgress: 0,
+      completed: 0,
+      cancelled: 0,
+      totalTargetAmount: 0,
+      totalCurrentAmount: 0,
+      totalProgress: 0,
+    }
+
+    plannings.forEach((planning) => {
+      switch (planning.status) {
+        case PLANNING_STATUS.PLANNED: summary.planned++; break
+        case PLANNING_STATUS.IN_PROGRESS: summary.inProgress++; break
+        case PLANNING_STATUS.COMPLETED: summary.completed++; break
+        case PLANNING_STATUS.CANCELLED: summary.cancelled++; break
+      }
+      if (planning.status !== PLANNING_STATUS.CANCELLED) {
+        summary.totalTargetAmount += planning.targetAmount
+        summary.totalCurrentAmount += planning.currentAmount
+      }
+    })
+
+    if (summary.totalTargetAmount > 0) {
+      summary.totalProgress = Math.round(
+        (summary.totalCurrentAmount / summary.totalTargetAmount) * 100
+      )
+    }
+    return summary
+  }
+
+  /**
    * Adiciona valor ao planejamento
    */
   async addAmount(userId: string, planningId: string, amount: number): Promise<Planning | null> {

@@ -407,4 +407,5 @@ export interface PlanningFilters {
   search?: string
   startDateFrom?: string
   startDateTo?: string
+  riskLevel?: string
 }
