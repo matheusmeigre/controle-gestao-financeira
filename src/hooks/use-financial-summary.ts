@@ -48,15 +48,15 @@ export function useBalanceState(balance: number) {
       isNeutral,
       isNegative,
       color: isPositive 
-        ? 'text-green-600 dark:text-green-500' 
+        ? 'text-success' 
         : isNeutral 
         ? 'text-muted-foreground' 
-        : 'text-red-600 dark:text-red-500',
+        : 'text-destructive',
       bgColor: isPositive 
-        ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800/50' 
+        ? 'bg-success/5 border-success/20' 
         : isNeutral 
-        ? 'bg-muted dark:bg-slate-800/50' 
-        : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/50',
+        ? 'bg-muted border-border' 
+        : 'bg-destructive/5 border-destructive/20',
       icon: isPositive ? 'trending-up' : isNeutral ? 'minus' : 'trending-down',
     }
   }, [balance])

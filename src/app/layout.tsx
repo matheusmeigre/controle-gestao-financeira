@@ -44,10 +44,10 @@ export default function RootLayout({
   return (
     // @ts-ignore -- @clerk/nextjs v6 async ClerkProvider type issue with React 19
     <ClerkProvider appearance={{
-      variables: { colorPrimary: '#000' },
+      variables: { colorPrimary: '#0071e3' },
       elements: {
-        formButtonPrimary: 'bg-black hover:bg-gray-800',
-        card: 'shadow-lg'
+        formButtonPrimary: 'bg-[#0071e3] hover:bg-[#0066cc]',
+        card: 'shadow-sm rounded-xl'
       }
     }}>
       <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
