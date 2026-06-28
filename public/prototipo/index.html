@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Controle de Gastos · Protótipo</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --fg: #000000;
+      --muted: #6e6e73;
+      --border: #d2d2d7;
+      --accent: #0071e3;
+      --font: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0 0 8px;
+    }
+    .subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 14px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 16px;
+    }
+
+    .project-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+    .project-info h2 {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 0 0 16px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .info-item .label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .info-item .value {
+      font-size: 15px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .platforms {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .platform-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .platform-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .platform-card .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .platform-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+    .platform-card p {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+    }
+    .platform-card .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .screens {
+      margin-bottom: 40px;
+    }
+    .screens h2 {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin: 0 0 16px;
+    }
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .screen-card .emoji {
+      font-size: 28px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      text-align: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 640px) {
+      .platforms { grid-template-columns: 1fr; }
+      .screen-grid { grid-template-columns: 1fr 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Protótipo Cross-Platform</div>
+      <h1>Controle de Gastos</h1>
+      <p class="subtitle">Sistema completo de gestão financeira pessoal — protótipo de alta fidelidade para iOS e Android</p>
+    </header>
+
+    <div class="project-info">
+      <h2>Sobre o Projeto</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="label">Baseado em</div>
+          <div class="value">Next.js 14 · TypeScript · Feature-Based</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Design System</div>
+          <div class="value">Apple-Inspired · #f5f5f7 #0071e3 #000000</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Plataformas</div>
+          <div class="value">iOS 17+ · Android 14+</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Funcionalidades</div>
+          <div class="value">Dashboard · Transações · Orçamentos · Relatórios · Perfil</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="platforms">
+      <a class="platform-card" href="mobile-ios.html" target="_blank">
+        <div class="icon">📱</div>
+        <h3>iOS — iPhone 15 Pro</h3>
+        <p>Navegação com Tab Bar nativa, gestos iOS, Dynamic Island</p>
+        <span class="btn">Abrir protótipo →</span>
+      </a>
+      <a class="platform-card" href="mobile-android.html" target="_blank">
+        <div class="icon">📱</div>
+        <h3>Android — Pixel 7</h3>
+        <p>Material 3 Bottom Navigation, navegação por gestos Android</p>
+        <span class="btn">Abrir protótipo →</span>
+      </a>
+    </div>
+
+    <div class="screens">
+      <h2>Telas do Protótipo</h2>
+      <div class="screen-grid">
+        <div class="screen-card">
+          <span class="emoji">🏠</span>
+          Dashboard Financeiro
+        </div>
+        <div class="screen-card">
+          <span class="emoji">💳</span>
+          Transações
+        </div>
+        <div class="screen-card">
+          <span class="emoji">➕</span>
+          Nova Transação
+        </div>
+        <div class="screen-card">
+          <span class="emoji">📊</span>
+          Orçamentos
+        </div>
+        <div class="screen-card">
+          <span class="emoji">📈</span>
+          Relatórios
+        </div>
+        <div class="screen-card">
+          <span class="emoji">👤</span>
+          Perfil
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Protótipo gerado com Open Design · <a href="https://github.com" target="_blank">Repositório original do projeto</a>
+    </div>
+  </div>
+</body>
+</html>

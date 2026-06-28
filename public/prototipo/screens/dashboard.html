@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Dashboard · Controle de Gastos</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+
+  <!-- status-bar -->
+  <div class="status-bar" role="status" aria-label="Status do dispositivo">
+    <span class="time" aria-label="9 horas e 41 minutos">9:41</span>
+    <span class="icons">
+      <!-- Cellular signal -->
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="none" aria-label="Sinal de rede">
+        <rect x="0" y="8" width="3" height="4" rx="0.5" fill="currentColor"/>
+        <rect x="5" y="5" width="3" height="7" rx="0.5" fill="currentColor"/>
+        <rect x="10" y="2.5" width="3" height="9.5" rx="0.5" fill="currentColor"/>
+        <rect x="15" y="0" width="3" height="12" rx="0.5" fill="currentColor"/>
+      </svg>
+      <!-- WiFi -->
+      <svg width="15" height="12" viewBox="0 0 15 12" fill="none" aria-label="WiFi conectado">
+        <path d="M1.5 4.5A9.5 9.5 0 0 1 7.5 2a9.5 9.5 0 0 1 6 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M3.5 6.5A6 6 0 0 1 7.5 5a6 6 0 0 1 4 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M5.5 8.5A2.5 2.5 0 0 1 7.5 8a2.5 2.5 0 0 1 2 .5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <!-- Battery -->
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none" aria-label="Bateria 75%">
+        <rect x="0.5" y="0.5" width="22" height="11" rx="2" stroke="currentColor" stroke-opacity="0.35"/>
+        <rect x="2.5" y="2" width="18" height="8" rx="1" fill="currentColor" fill-opacity="0.35"/>
+        <rect x="2.5" y="2" width="13.5" height="8" rx="1" fill="currentColor"/>
+        <rect x="23.5" y="4" width="1.5" height="4" rx="0.5" fill="currentColor" fill-opacity="0.35"/>
+      </svg>
+    </span>
+  </div>
+
+  <main>
+
+    <!-- app-header -->
+    <div class="app-header" data-od-id="header">
+      <h1>Resumo</h1>
+      <div class="header-actions">
+        <button class="header-btn" aria-label="Notificações" type="button">
+          <svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 1.5a7.5 7.5 0 0 1 7.5 7.5v4l2 3H.5l2-3V9A7.5 7.5 0 0 1 10 1.5z"/>
+            <path d="M7.5 17a2.5 2.5 0 0 0 5 0"/>
+          </svg>
+        </button>
+        <button class="header-btn" aria-label="Perfil" type="button">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="8" r="4"/>
+            <path d="M3 20c0-4.5 3.6-8 8-8s8 3.5 8 8"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- balance-card -->
+    <section class="balance-card" data-od-id="balance-card" aria-label="Saldo total">
+      <div class="balance-label">Saldo Total</div>
+      <div class="balance-amount num">R$ 12.458,30</div>
+      <div class="balance-change positive" aria-label="Aumento de 8 vírgula 2 porcento este mês">
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true">
+          <path d="M5 0l5 6H0z"/>
+        </svg>
+        8,2% este mês
+      </div>
+      <div class="balance-row">
+        <div class="balance-item">
+          <div class="label">Receitas</div>
+          <div class="amount num" style="color: var(--status-green);">R$ 8.420,00</div>
+        </div>
+        <div class="balance-item">
+          <div class="label">Despesas</div>
+          <div class="amount num" style="color: var(--fg);">R$ 4.237,50</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- quick-actions -->
+    <nav class="quick-actions" data-od-id="quick-actions" aria-label="Ações rápidas">
+      <button class="quick-action" onclick="navigateTo('add-transaction.html')" type="button" aria-label="Adicionar transação">
+        <span class="icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M11 3v16M3 11h16"/>
+          </svg>
+        </span>
+        <span class="label">Adicionar</span>
+      </button>
+      <button class="quick-action" type="button" aria-label="Transferir">
+        <span class="icon" aria-hidden="true">
+          <svg width="22" height="18" viewBox="0 0 22 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 1l4 4-4 4"/><path d="M21 5H7"/><path d="M5 17l-4-4 4-4"/><path d="M1 13h14"/>
+          </svg>
+        </span>
+        <span class="label">Transferir</span>
+      </button>
+      <button class="quick-action" type="button" aria-label="Cartões">
+        <span class="icon" aria-hidden="true">
+          <svg width="24" height="18" viewBox="0 0 24 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="1" width="22" height="16" rx="2.5"/><path d="M1 6h22"/><path d="M6 12h4"/>
+          </svg>
+        </span>
+        <span class="label">Cartões</span>
+      </button>
+      <button class="quick-action" type="button" aria-label="Faturas">
+        <span class="icon" aria-hidden="true">
+          <svg width="20" height="24" viewBox="0 0 20 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 1H2a1 1 0 0 0-1 1v20a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2"/>
+            <path d="M7 1h6v4H7V1z"/><path d="M7 15l2 2 4-4"/>
+          </svg>
+        </span>
+        <span class="label">Faturas</span>
+      </button>
+      <button class="quick-action" type="button" aria-label="Relatórios">
+        <span class="icon" aria-hidden="true">
+          <svg width="22" height="20" viewBox="0 0 22 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 20V8"/><path d="M12 20V4"/><path d="M6 20v-8"/><path d="M0 20h22"/><path d="M2 12l4-4 6 6 8-8"/>
+          </svg>
+        </span>
+        <span class="label">Relatórios</span>
+      </button>
+    </nav>
+
+    <!-- spending-by-category -->
+    <section data-od-id="spending-by-category" aria-label="Gastos por categoria">
+      <div class="section-title">
+        <h2>Gastos por Categoria</h2>
+        <a href="reports.html" aria-label="Ver detalhes de gastos por categoria">Ver tudo</a>
+      </div>
+
+      <div class="card" style="margin: 0 var(--gutter) var(--gap-lg);">
+        <div class="chart-placeholder">
+          <svg width="100%" height="100%" viewBox="0 0 300 120" role="img" aria-label="Barras de gastos por categoria: Alimentação 32%, Transporte 18%, Moradia 40%, Saúde 10%, Lazer 14%, Assinaturas 22%">
+            <text x="10" y="20" font-size="11">Alimentação</text>
+            <text x="10" y="36" font-size="11">Transporte</text>
+            <text x="10" y="52" font-size="11">Moradia</text>
+            <text x="10" y="68" font-size="11">Saúde</text>
+            <text x="10" y="84" font-size="11">Lazer</text>
+            <text x="10" y="100" font-size="11">Assinaturas</text>
+
+            <rect class="bar-track" x="94" y="8" width="196" height="10" rx="5"/>
+            <rect class="bar-fill" x="94" y="8" width="31%" height="10" rx="5"/>
+
+            <rect class="bar-track" x="94" y="24" width="196" height="10" rx="5"/>
+            <rect class="bar-fill green" x="94" y="24" width="18%" height="10" rx="5"/>
+
+            <rect class="bar-track" x="94" y="40" width="196" height="10" rx="5"/>
+            <rect class="bar-fill orange" x="94" y="40" width="39%" height="10" rx="5"/>
+
+            <rect class="bar-track" x="94" y="56" width="196" height="10" rx="5"/>
+            <rect class="bar-fill red" x="94" y="56" width="10%" height="10" rx="5"/>
+
+            <rect class="bar-track" x="94" y="72" width="196" height="10" rx="5"/>
+            <rect class="bar-fill purple" x="94" y="72" width="14%" height="10" rx="5"/>
+
+            <rect class="bar-track" x="94" y="88" width="196" height="10" rx="5"/>
+            <rect class="bar-fill indigo" x="94" y="88" width="22%" height="10" rx="5"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- recent-transactions -->
+    <section data-od-id="recent-transactions" aria-label="Transações recentes">
+      <div class="section-title">
+        <h2>Transações Recentes</h2>
+        <a href="transactions.html" aria-label="Ver todas as transações">Ver tudo</a>
+      </div>
+
+      <div class="transaction-list" role="list" aria-label="Lista de transações recentes">
+        <div class="transaction-item" role="listitem" tabindex="0" data-transaction-id="1">
+          <span class="transaction-icon food" aria-hidden="true">
+            <svg width="18" height="20" viewBox="0 0 18 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 1v18M3 5l6-4 6 4M5 10v5"/><path d="M13 10v5"/><path d="M1 19h16"/>
+            </svg>
+          </span>
+          <div class="transaction-info">
+            <div class="name">Restaurante do Zé</div>
+            <div class="meta">Alimentação · Hoje, 12:30</div>
+          </div>
+          <div class="transaction-amount negative num">-R$ 54,90</div>
+        </div>
+
+        <div class="transaction-item" role="listitem" tabindex="0" data-transaction-id="2">
+          <span class="transaction-icon income" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="10" cy="10" r="9"/><path d="M10 5v10"/><path d="M6 9l4-4 4 4"/>
+            </svg>
+          </span>
+          <div class="transaction-info">
+            <div class="name">Salário</div>
+            <div class="meta">Renda · Ontem</div>
+          </div>
+          <div class="transaction-amount positive num">+R$ 5.800,00</div>
+        </div>
+
+        <div class="transaction-item" role="listitem" tabindex="0" data-transaction-id="3">
+          <span class="transaction-icon transport" aria-hidden="true">
+            <svg width="20" height="18" viewBox="0 0 20 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="4" width="18" height="13" rx="2"/><path d="M5 17v-2h10v2"/><circle cx="5" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/><path d="M14 4V3a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v1"/>
+            </svg>
+          </span>
+          <div class="transaction-info">
+            <div class="name">Uber</div>
+            <div class="meta">Transporte · Ontem, 08:15</div>
+          </div>
+          <div class="transaction-amount negative num">-R$ 23,50</div>
+        </div>
+
+        <div class="transaction-item" role="listitem" tabindex="0" data-transaction-id="4">
+          <span class="transaction-icon subscription" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 1v4M5 3l2 3"/><path d="M13 3l-2 3"/><circle cx="9" cy="11" r="6"/><path d="M6 11l2 2 4-3"/>
+            </svg>
+          </span>
+          <div class="transaction-info">
+            <div class="name">Spotify Premium</div>
+            <div class="meta">Assinatura · 25 jun</div>
+          </div>
+          <div class="transaction-amount negative num">-R$ 21,90</div>
+        </div>
+
+        <div class="transaction-item" role="listitem" tabindex="0" data-transaction-id="5">
+          <span class="transaction-icon shopping" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 7V5a5 5 0 0 1 10 0v2"/><rect x="2" y="7" width="16" height="12" rx="2"/><path d="M8 11h4"/><path d="M8 14h4"/>
+            </svg>
+          </span>
+          <div class="transaction-info">
+            <div class="name">Mercado Livre</div>
+            <div class="meta">Compras · 24 jun</div>
+          </div>
+          <div class="transaction-amount negative num">-R$ 189,90</div>
+        </div>
+
+        <!-- empty state (hidden when there are items) -->
+        <div class="empty-transactions empty-state" style="display:none" aria-label="Nenhuma transação encontrada">
+          <div class="icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.3">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v4"/><path d="M10 14h4"/>
+            </svg>
+          </div>
+          <h3>Nenhuma transação</h3>
+          <p>Adicione sua primeira transação para começar a controlar seus gastos.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>
