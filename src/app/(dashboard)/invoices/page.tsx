@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { Receipt, Home, CreditCard, Target, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
-import { InvoiceRepository, InvoicesList } from '@/features/invoices'
+import { InvoicesList } from '@/features/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { UserHeader } from '@/components/user-header'
 import { useToast } from '@/hooks/use-toast'
 import { getCards } from '@/server/actions/cards'
+import { getInvoices, deleteInvoice as deleteInvoiceAction, updateInvoice as updateInvoiceAction } from '@/server/actions/invoices'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
@@ -27,9 +28,10 @@ export default function InvoicesPage() {
       try {
         setIsLoading(true)
         
-        // Carrega faturas do repositório
-        const invoiceRepo = new InvoiceRepository()
-        const userInvoices = await invoiceRepo.findAll(user.id)
+        // Carrega faturas do Supabase
+        const invoiceResult = await getInvoices()
+        if (!invoiceResult.success) throw new Error(invoiceResult.error)
+        const userInvoices = invoiceResult.data!
         
         // Ordena por competência (mais recente primeiro)
         const sortedInvoices = userInvoices.sort((a, b) => {
@@ -63,8 +65,8 @@ export default function InvoicesPage() {
     if (!user?.id) return
 
     try {
-      const invoiceRepo = new InvoiceRepository()
-      await invoiceRepo.delete(user.id, invoiceId)
+      const result = await deleteInvoiceAction(invoiceId)
+      if (!result.success) throw new Error(result.error)
 
       setInvoices(prev => prev.filter(inv => inv.id !== invoiceId))
 
@@ -86,12 +88,13 @@ export default function InvoicesPage() {
     if (!user?.id) return
     
     try {
-      const invoiceRepo = new InvoiceRepository()
-      await invoiceRepo.update(user.id, invoiceId, updates)
+      const result = await updateInvoiceAction(invoiceId, updates)
+      if (!result.success) throw new Error(result.error)
       
       // Recarrega as faturas
-      const updatedInvoices = await invoiceRepo.findAll(user.id)
-      const sortedInvoices = updatedInvoices.sort((a, b) => {
+      const refreshResult = await getInvoices()
+      if (!refreshResult.success) throw new Error(refreshResult.error)
+      const sortedInvoices = refreshResult.data!.sort((a, b) => {
         if (a.year !== b.year) return b.year - a.year
         return b.month - a.month
       })

@@ -9,8 +9,7 @@ import type { CreditCard } from '../types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-
-const STORAGE_KEY = 'credit_cards'
+import { getCards, deleteCard as deleteCardAction } from '@/server/actions/cards'
 
 // Cores baseadas nos bancos
 const BANK_COLORS: Record<string, { bg: string; text: string; accent: string }> = {
@@ -61,20 +60,16 @@ export function CardsList() {
     }
   }, [openMenuId])
 
-  const loadCards = () => {
+  const loadCards = async () => {
     if (!user) {
       setIsLoading(false)
       return
     }
 
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const allCards: CreditCard[] = JSON.parse(stored)
-        const userCards = allCards.filter(
-          card => card.userId === user.id && card.isActive
-        )
-        setCards(userCards)
+      const result = await getCards()
+      if (result.success) {
+        setCards(result.data)
       }
     } catch (error) {
       console.error('Error loading cards:', error)
@@ -83,17 +78,10 @@ export function CardsList() {
     }
   }
 
-  const deleteCard = (cardId: string) => {
+  const deleteCard = async (cardId: string) => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const allCards: CreditCard[] = JSON.parse(stored)
-        const updatedCards = allCards.map(card =>
-          card.id === cardId ? { ...card, isActive: false } : card
-        )
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCards))
-        loadCards()
-      }
+      await deleteCardAction(cardId)
+      loadCards()
     } catch (error) {
       console.error('Error deleting card:', error)
     }
