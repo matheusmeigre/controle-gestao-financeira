@@ -28,7 +28,6 @@ export function UserHeader() {
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <UserButton 
-              afterSignOutUrl="/sign-in"
               appearance={{
                 elements: {
                   avatarBox: "w-9 h-9",

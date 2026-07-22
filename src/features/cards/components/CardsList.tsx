@@ -49,6 +49,7 @@ export function CardsList() {
 
   useEffect(() => {
     loadCards()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   // Fechar menu ao clicar fora

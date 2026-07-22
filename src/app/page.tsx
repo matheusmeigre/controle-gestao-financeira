@@ -1,18 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
-import { ExportManager } from '@/components/export-manager'
-import { EnhancedExportManager } from '@/components/enhanced-export-manager'
 import { UserHeader } from '@/components/user-header'
 import { WelcomeModal } from '@/components/welcome-modal'
 import { TermsAcceptanceModal } from '@/components/terms-acceptance-modal'
 import { Footer } from '@/components/footer'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import { PlanningAlerts } from '@/features/planning'
 import {
   BottomNavigation,
   FloatingActionButton,
@@ -21,15 +15,14 @@ import {
   DesktopNavigation,
   type NavigationTab,
 } from '@/components/mobile'
-import { CurrentBalanceCard, ProjectedBalanceCard } from '@/components/balance'
 import { QuickTransactionModal } from '@/components/quick-transaction-modal'
 import { InvoiceSelectModal } from '@/components/invoice-select-modal'
-import { FinancialReportsView } from '@/components/financial-reports-view'
 import { useFinancialSummary } from '@/hooks/use-financial-summary'
-import { InvoicesList } from '@/features/invoices'
 import { useCards } from '@/features/cards/hooks/useCards'
+import { InvoicesSection } from '@/components/sections/InvoicesSection'
+import { ProfileSection } from '@/components/sections/ProfileSection'
+import { HomeSummarySection } from '@/components/sections/HomeSummarySection'
 import {
-  DashboardHeader,
   MainNavigation,
   ExpensesTabContent,
   CardsTabContent,
@@ -37,15 +30,6 @@ import {
   useDashboardData,
   useWelcomeFlow,
 } from '@/features/dashboard'
-import {
-  TrendingDown,
-  TrendingUp,
-  Receipt,
-  Plus,
-  CreditCard,
-  BarChart3,
-  ArrowRight,
-} from 'lucide-react'
 
 export default function HomePage() {
   const { user, isLoaded } = useUser()
@@ -54,8 +38,6 @@ export default function HomePage() {
   const [activeNav, setActiveNav] = useState<NavigationTab>('home')
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [showInvoiceSelect, setShowInvoiceSelect] = useState(false)
-
-  const router = useRouter()
 
   // Dashboard data
   const {
@@ -151,161 +133,26 @@ export default function HomePage() {
         <DesktopNavigation activeTab={activeNav} onTabChange={setActiveNav} />
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        {/* 🏠 HOME                                           */}
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {activeNav === 'home' && (
-          <>
-            <DashboardHeader />
-
-            {/* Balance Cards */}
-            <div className="grid gap-3 mb-5 sm:grid-cols-2">
-              <CurrentBalanceCard summary={financialSummary} />
-              <ProjectedBalanceCard summary={financialSummary} />
-            </div>
-
-            {/* Planning Alerts */}
-            <div className="mb-5">
-              <PlanningAlerts />
-            </div>
-
-            {/* ─── Adicionar ─── */}
-            <section className="mb-5">
-              <h2 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                Adicionar
-              </h2>
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  onClick={() => setShowQuickAdd(true)}
-                  className="flex flex-col items-center gap-2 p-4 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors active:scale-95"
-                >
-                  <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
-                    <TrendingDown className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-red-700 dark:text-red-400">
-                    Despesa
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setShowQuickAdd(true)}
-                  className="flex flex-col items-center gap-2 p-4 bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30 rounded-xl hover:bg-green-100 dark:hover:bg-green-950/40 transition-colors active:scale-95"
-                >
-                  <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-green-700 dark:text-green-400">
-                    Receita
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    if (invoices.length === 0) {
-                      router.push('/invoices/new')
-                    } else {
-                      setShowInvoiceSelect(true)
-                    }
-                  }}
-                  className="flex flex-col items-center gap-2 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-950/40 transition-colors active:scale-95"
-                >
-                  <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">
-                    Fatura
-                  </span>
-                </button>              </div>
-            </section>
-
-            {/* ─── Resumo do Mês ─── */}
-            <section className="mb-5">
-              <h2 className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
-                Este Mês
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setActiveNav('transactions')}
-                  className="bg-card border rounded-xl p-4 text-left hover:border-primary/50 transition-colors active:scale-95"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingDown className="w-4 h-4 text-red-500" />
-                    <span className="text-xs text-muted-foreground">Gastos</span>
-                  </div>
-                  <p className="text-xl font-bold">{fmt(totalExpenses)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {currentMonthData.expenses.length} lançamentos
-                  </p>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setActiveNav('transactions')
-                    setTabs((prev) => ({ ...prev, main: 'incomes' }))
-                  }}
-                  className="bg-card border rounded-xl p-4 text-left hover:border-primary/50 transition-colors active:scale-95"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    <span className="text-xs text-muted-foreground">Receitas</span>
-                  </div>
-                  <p className="text-xl font-bold">{fmt(totalIncomes)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {currentMonthData.incomes.length} lançamentos
-                  </p>
-                </button>
-              </div>
-
-              {/* Faturas pendentes */}
-              {pendingInvoices.length > 0 && (
-                <button
-                  onClick={() => setActiveNav('invoices')}
-                  className="w-full mt-3 flex items-center justify-between bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-xl p-4 hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-colors active:scale-95"
-                >
-                  <div className="flex items-center gap-3">
-                    <Receipt className="w-5 h-5 text-orange-500" />
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-orange-700 dark:text-orange-400">
-                        {pendingInvoices.length}{' '}
-                        {pendingInvoices.length === 1
-                          ? 'fatura pendente'
-                          : 'faturas pendentes'}
-                      </p>
-                      <p className="text-xs text-orange-600/70 dark:text-orange-400/70">
-                        Toque para ver e pagar
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-orange-400" />
-                </button>
-              )}
-            </section>
-
-            {/* Empty state */}
-            {currentMonthData.expenses.length === 0 &&
-              currentMonthData.incomes.length === 0 && (
-                <div className="p-6 bg-muted/30 border-2 border-dashed rounded-xl text-center">
-                  <div className="text-4xl mb-3">📝</div>
-                  <h3 className="text-base font-semibold mb-1">Nenhuma transação ainda</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Use os botões acima para registrar suas finanças
-                  </p>
-                  <Button onClick={() => setShowQuickAdd(true)} size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar agora
-                  </Button>
-                </div>
-              )}
-
-            {/* Export — desktop only */}
-            <div className="hidden lg:grid gap-4 lg:grid-cols-2 mt-4">
-              <ExportManager expenses={expenses} cardBills={cardBills} incomes={incomes} />
-              <EnhancedExportManager
-                expenses={expenses}
-                cardBills={cardBills}
-                incomes={incomes}
-              />
-            </div>
-          </>
+          <HomeSummarySection
+            financialSummary={financialSummary}
+            totalExpenses={totalExpenses}
+            totalIncomes={totalIncomes}
+            currentMonthData={currentMonthData}
+            pendingInvoices={pendingInvoices}
+            expenses={expenses}
+            cardBills={cardBills}
+            incomes={incomes}
+            invoices={invoices}
+            fmt={fmt}
+            onNavigate={(tab) => {
+              if (tab === 'transactions') setActiveNav('transactions')
+              else setActiveNav('invoices')
+            }}
+            onSetTabs={(t) => setTabs(t)}
+            onOpenQuickAdd={() => setShowQuickAdd(true)}
+            onOpenInvoiceSelect={() => setShowInvoiceSelect(true)}
+          />
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
@@ -387,159 +234,20 @@ export default function HomePage() {
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        {/* 💳 FATURAS                                        */}
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {activeNav === 'invoices' && (
-          <>
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h2 className="text-xl font-bold">Faturas</h2>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Faturas dos seus cartões de crédito
-                </p>
-              </div>
-              <Link href="/invoices/new">
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Nova Fatura
-                </Button>
-              </Link>
-            </div>
-
-            {cards.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <CreditCard className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Nenhum cartão cadastrado</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-xs">
-                  Cadastre seus cartões de crédito para começar a gerenciar suas faturas
-                </p>
-                <Link href="/cards/new">
-                  <Button>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Cadastrar Cartão
-                  </Button>
-                </Link>
-              </div>
-            )}
-
-            {cards.length > 0 && invoices.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Receipt className="w-12 h-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Nenhuma fatura ainda</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-xs">
-                  Crie sua primeira fatura para controlar os gastos do cartão
-                </p>
-                <Link href="/invoices/new">
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Criar Primeira Fatura
-                  </Button>
-                </Link>
-              </div>
-            )}
-
-            {invoices.length > 0 && (
-              <>
-                <InvoicesList
-                  invoices={invoices}
-                  cards={cards}
-                  onUpdateInvoice={async () => {
-                    // Reload happens via navigation to /invoices
-                  }}
-                />
-                <div className="mt-4 flex justify-center">
-                  <Link href="/invoices">
-                    <Button variant="outline" size="sm">
-                      Gerenciar todas as faturas
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </>
-            )}
-          </>
+          <InvoicesSection invoices={invoices} cards={cards} />
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        {/* 👤 PERFIL                                         */}
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {activeNav === 'profile' && (
-          <div className="py-2 space-y-6">
-            {/* User info */}
-            <div className="text-center py-4">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                <span className="text-3xl">👤</span>
-              </div>
-              <h2 className="text-xl font-bold">{firstName}</h2>
-              <p className="text-sm text-muted-foreground">
-                {user?.emailAddresses[0]?.emailAddress}
-              </p>
-            </div>
-
-            {/* Relatórios */}
-            <section>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Relatórios
-              </h3>
-              <FinancialReportsView
-                expenses={expenses}
-                incomes={incomes}
-                cardBills={cardBills}
-                invoices={invoices}
-              />
-            </section>
-
-            {/* Exportar */}
-            <section className="lg:hidden">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                Exportar Dados
-              </h3>
-              <div className="space-y-3">
-                <ExportManager expenses={expenses} cardBills={cardBills} incomes={incomes} />
-                <EnhancedExportManager
-                  expenses={expenses}
-                  cardBills={cardBills}
-                  incomes={incomes}
-                />
-              </div>
-            </section>
-
-            {/* Links */}
-            <section>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                Navegação Rápida
-              </h3>
-              <div className="space-y-2">
-                <Link href="/cards">
-                  <button className="w-full p-4 bg-card border rounded-xl text-left hover:border-primary/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <CreditCard className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-medium">Meus Cartões</span>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </button>
-                </Link>
-                <Link href="/planning">
-                  <button className="w-full p-4 bg-card border rounded-xl text-left hover:border-primary/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">🎯</span>
-                        <span className="font-medium">Planejamento Financeiro</span>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </button>
-                </Link>
-              </div>
-            </section>
-
-            <div className="text-center text-xs text-muted-foreground pt-2 pb-8">
-              <p>Controle de Gastos v2.0</p>
-            </div>
-          </div>
+          <ProfileSection
+            firstName={firstName}
+            email={user?.emailAddresses[0]?.emailAddress ?? ''}
+            expenses={expenses}
+            incomes={incomes}
+            cardBills={cardBills}
+            invoices={invoices}
+          />
         )}
       </MobileContainer>
 

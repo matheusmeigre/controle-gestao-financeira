@@ -10,7 +10,6 @@ export { CreditLimitInput } from './components/CreditLimitInput'
 export { useCards } from './hooks/useCards'
 
 // Services
-export { CardService } from './services/card.service'
 export { CardRepository } from './services/card.repository'
 
 // Types

@@ -37,7 +37,7 @@ export function CardForm({ onSuccess }: CardFormProps) {
     setValue,
     watch,
   } = useForm<CreateCreditCardInput>({
-    resolver: zodResolver(createCreditCardSchema),
+    resolver: zodResolver(createCreditCardSchema) as any,
     mode: 'onSubmit',
     defaultValues: {
       nickname: '',

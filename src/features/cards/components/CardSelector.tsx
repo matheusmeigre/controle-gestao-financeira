@@ -22,6 +22,7 @@ export function CardSelector({ value, onChange, disabled }: CardSelectorProps) {
   
   useEffect(() => {
     loadCards()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
   
   const loadCards = () => {

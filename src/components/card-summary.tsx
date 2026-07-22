@@ -150,7 +150,7 @@ export function CardSummary({ cardBills }: CardSummaryProps) {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Valor"]} />
+                    <Tooltip formatter={(value) => [`R$ ${(Number(value) || 0).toFixed(2)}`, "Valor"]} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -195,7 +195,7 @@ export function CardSummary({ cardBills }: CardSummaryProps) {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-45} textAnchor="end" height={70} interval={0} />
                   <YAxis tick={{ fontSize: 10 }} width={60} />
-                  <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Total"]} />
+                  <Tooltip formatter={(value) => [`R$ ${(Number(value) || 0).toFixed(2)}`, "Total"]} />
                   <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
                     {cardData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
