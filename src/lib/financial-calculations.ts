@@ -115,7 +115,7 @@ export function calculateFinancialSummary(
     .reduce((sum, invoice) => sum + getMyPortion(invoice), 0)
   
   // 📊 TOTALIZAÇÕES (inclui tanto CardBills quanto Invoices)
-  const paidExpenses = paidGeneralExpenses + paidSubscriptions + paidCardBills + paidInvoices
+  const paidExpenses = paidGeneralExpenses + paidSubscriptions + paidCardBills
   const totalExpectedExpenses = expectedGeneralExpenses + expectedSubscriptions + expectedCardBills + expectedInvoices
   const pendingExpenses = (expectedGeneralExpenses - paidGeneralExpenses)
     + (expectedSubscriptions - paidSubscriptions)
