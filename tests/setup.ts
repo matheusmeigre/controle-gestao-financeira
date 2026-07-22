@@ -1,5 +1,3 @@
-import '@testing-library/jest-dom'
-
 vi.mock('@clerk/nextjs', () => ({
   useUser: () => ({
     user: { id: 'test_user_123' },

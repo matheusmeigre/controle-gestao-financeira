@@ -151,14 +151,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_credit_cards_updated_at ON credit_cards;
 CREATE TRIGGER trg_credit_cards_updated_at
   BEFORE UPDATE ON credit_cards
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trg_invoices_updated_at ON invoices;
 CREATE TRIGGER trg_invoices_updated_at
   BEFORE UPDATE ON invoices
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trg_plannings_updated_at ON plannings;
 CREATE TRIGGER trg_plannings_updated_at
   BEFORE UPDATE ON plannings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
