@@ -9,10 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { UserHeader } from '@/components/user-header'
 import { useToast } from '@/hooks/use-toast'
+import { getCards } from '@/server/actions/cards'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
-
-const STORAGE_KEY = 'credit_cards'
 
 export default function InvoicesPage() {
   const { user } = useUser()
@@ -40,12 +39,10 @@ export default function InvoicesPage() {
         
         setInvoices(sortedInvoices)
         
-        // Carrega cartões
-        const stored = localStorage.getItem(STORAGE_KEY)
-        if (stored) {
-          const allCards: CardType[] = JSON.parse(stored)
-          const userCards = allCards.filter(c => c.userId === user.id && c.isActive)
-          setCards(userCards)
+        // Carrega cartões do Supabase
+        const cardResult = await getCards()
+        if (cardResult.success) {
+          setCards(cardResult.data as CardType[])
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)

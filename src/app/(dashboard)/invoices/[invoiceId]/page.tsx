@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { getCards } from '@/server/actions/cards'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
@@ -18,8 +19,6 @@ const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 ]
-
-const STORAGE_KEY = 'credit_cards'
 
 export default function InvoiceDetailPage({
   params,
@@ -136,11 +135,11 @@ export default function InvoiceDetailPage({
         
         setInvoice(foundInvoice)
         
-        // Carrega o cartão
-        const stored = localStorage.getItem(STORAGE_KEY)
-        if (stored) {
-          const allCards: CardType[] = JSON.parse(stored)
-          const foundCard = allCards.find(c => c.id === foundInvoice.cardId && c.userId === user.id)
+        // Carrega o cartão do Supabase
+        const cardResult = await getCards()
+        if (cardResult.success) {
+          const allCards = cardResult.data as CardType[]
+          const foundCard = allCards.find(c => c.id === foundInvoice.cardId)
           setCard(foundCard || null)
         }
       } catch (error) {
