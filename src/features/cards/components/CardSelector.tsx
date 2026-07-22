@@ -5,8 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import { CreditCard as CreditCardIcon, ChevronDown } from 'lucide-react'
 import type { CreditCard } from '../types'
 import { Label } from '@/components/ui/label'
-
-const STORAGE_KEY = 'credit_cards'
+import { getCards } from '@/server/actions/cards'
 
 interface CardSelectorProps {
   value?: string
@@ -25,7 +24,7 @@ export function CardSelector({ value, onChange, disabled }: CardSelectorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
   
-  const loadCards = () => {
+  const loadCards = async () => {
     if (!user) {
       setIsLoading(false)
       return
@@ -33,16 +32,12 @@ export function CardSelector({ value, onChange, disabled }: CardSelectorProps) {
 
     try {
       setIsLoading(true)
-      const stored = localStorage.getItem(STORAGE_KEY)
+      const result = await getCards()
       
-      if (stored) {
-        const allCards: CreditCard[] = JSON.parse(stored)
-        const userCards = allCards.filter(
-          card => card.userId === user.id && card.isActive
-        )
-        setCards(userCards)
+      if (result.success) {
+        setCards(result.data)
       } else {
-        setCards([])
+        setError(result.error || 'Erro ao carregar cartões')
       }
     } catch (err) {
       setError('Erro ao carregar cartões')
