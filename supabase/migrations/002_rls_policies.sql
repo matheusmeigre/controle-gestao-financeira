@@ -20,27 +20,27 @@ ALTER TABLE plannings      ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 
 -- expenses
-CREATE POLICY "expenses_user_isolation" ON expenses
+CREATE POLICY IF NOT EXISTS "expenses_user_isolation" ON expenses
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
 
 -- incomes
-CREATE POLICY "incomes_user_isolation" ON incomes
+CREATE POLICY IF NOT EXISTS "incomes_user_isolation" ON incomes
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
 
 -- credit_cards
-CREATE POLICY "credit_cards_user_isolation" ON credit_cards
+CREATE POLICY IF NOT EXISTS "credit_cards_user_isolation" ON credit_cards
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
 
 -- card_bills
-CREATE POLICY "card_bills_user_isolation" ON card_bills
+CREATE POLICY IF NOT EXISTS "card_bills_user_isolation" ON card_bills
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
 
 -- invoices
-CREATE POLICY "invoices_user_isolation" ON invoices
+CREATE POLICY IF NOT EXISTS "invoices_user_isolation" ON invoices
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
 
 -- invoice_items (herdado via invoice)
-CREATE POLICY "invoice_items_user_isolation" ON invoice_items
+CREATE POLICY IF NOT EXISTS "invoice_items_user_isolation" ON invoice_items
   FOR ALL USING (
     invoice_id IN (
       SELECT id FROM invoices
@@ -49,5 +49,5 @@ CREATE POLICY "invoice_items_user_isolation" ON invoice_items
   );
 
 -- plannings
-CREATE POLICY "plannings_user_isolation" ON plannings
+CREATE POLICY IF NOT EXISTS "plannings_user_isolation" ON plannings
   FOR ALL USING (user_id = current_setting('app.current_user_id', true));
