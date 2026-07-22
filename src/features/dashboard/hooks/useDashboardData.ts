@@ -24,7 +24,7 @@ import {
   deleteIncome as serverDeleteIncome,
   markIncomeAsReceived as serverMarkIncomeAsReceived,
 } from '@/server/actions/incomes'
-import { getInvoices } from '@/server/actions/invoices'
+import { getInvoices, updateInvoice as serverUpdateInvoice, deleteInvoice as serverDeleteInvoice } from '@/server/actions/invoices'
 import {
   getCardBills,
   createCardBill as serverCreateCardBill,
@@ -238,6 +238,33 @@ export function useDashboardData() {
     })
   }
 
+  // ─── Actions para faturas de cartão (Supabase) ──────────────────────
+  const handleUpdateInvoice = async (id: string, updates: Partial<Invoice>) => {
+    if (!user?.id) return
+    setError(null)
+    const prev = invoices
+    setInvoices((prev) =>
+      prev.map((inv) => (inv.id === id ? { ...inv, ...updates } : inv))
+    )
+    const result = await serverUpdateInvoice(id, updates)
+    if (!result.success) {
+      setInvoices(prev)
+      setError(result.error ?? 'Erro ao atualizar fatura')
+    }
+  }
+
+  const handleDeleteInvoice = async (id: string) => {
+    if (!user?.id) return
+    setError(null)
+    const prev = invoices
+    setInvoices((prev) => prev.filter((inv) => inv.id !== id))
+    const result = await serverDeleteInvoice(id)
+    if (!result.success) {
+      setInvoices(prev)
+      setError(result.error ?? 'Erro ao excluir fatura')
+    }
+  }
+
   // ─── Dados derivados ─────────────────────────────────────────────────
   const currentMonthData = DashboardService.getCurrentMonthData({ expenses, cardBills, incomes })
 
@@ -261,5 +288,6 @@ export function useDashboardData() {
     addExpense, updateExpense: handleUpdateExpense, deleteExpense: handleDeleteExpense,
     addCardBill, updateCardBill: handleUpdateCardBill, deleteCardBill: handleDeleteCardBill,
     addIncome, deleteIncome: handleDeleteIncome, markIncomeAsReceived: handleMarkIncomeAsReceived,
+    updateInvoice: handleUpdateInvoice, deleteInvoice: handleDeleteInvoice,
   }
 }

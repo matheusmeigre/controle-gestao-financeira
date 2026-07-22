@@ -360,6 +360,23 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
   }
 }
 
+export async function updateInvoice(invoiceId: string, updates: Partial<Invoice>) {
+  try {
+    const { userId } = await auth()
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    const data = await invoiceRepository.update(userId, invoiceId, updates)
+    if (!data) return { success: false, error: 'Fatura não encontrada' }
+
+    revalidatePath(`/invoices/${invoiceId}`)
+    revalidatePath('/invoices')
+    return { success: true, data }
+  } catch (error) {
+    console.error('[updateInvoice] Error:', error)
+    return { success: false, error: 'Erro ao atualizar fatura' }
+  }
+}
+
 /**
  * Deleta uma fatura permanentemente
  */

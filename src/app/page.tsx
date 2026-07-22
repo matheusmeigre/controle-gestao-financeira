@@ -63,6 +63,8 @@ export default function HomePage() {
     addIncome,
     deleteIncome,
     markIncomeAsReceived,
+    updateInvoice,
+    deleteInvoice,
   } = useDashboardData()
 
   // Welcome flow
@@ -235,7 +237,12 @@ export default function HomePage() {
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {activeNav === 'invoices' && (
-          <InvoicesSection invoices={invoices} cards={cards} />
+          <InvoicesSection
+            invoices={invoices}
+            cards={cards}
+            onUpdateInvoice={updateInvoice}
+            onDeleteInvoice={deleteInvoice}
+          />
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}

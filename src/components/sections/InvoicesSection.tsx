@@ -10,9 +10,11 @@ import type { CreditCard as CreditCardType } from '@/features/cards/types'
 interface InvoicesSectionProps {
   invoices: Invoice[]
   cards: CreditCardType[]
+  onUpdateInvoice?: (invoiceId: string, updates: Partial<Invoice>) => Promise<void>
+  onDeleteInvoice?: (invoiceId: string) => Promise<void>
 }
 
-export function InvoicesSection({ invoices, cards }: InvoicesSectionProps) {
+export function InvoicesSection({ invoices, cards, onUpdateInvoice, onDeleteInvoice }: InvoicesSectionProps) {
   return (
     <>
       <div className="flex items-center justify-between mb-5">
@@ -67,7 +69,8 @@ export function InvoicesSection({ invoices, cards }: InvoicesSectionProps) {
           <InvoicesList
             invoices={invoices}
             cards={cards}
-            onUpdateInvoice={async () => {}}
+            onUpdateInvoice={onUpdateInvoice ?? (async () => {})}
+            onDeleteInvoice={onDeleteInvoice ?? (async () => {})}
           />
           <div className="mt-4 flex justify-center">
             <Link href="/invoices">
