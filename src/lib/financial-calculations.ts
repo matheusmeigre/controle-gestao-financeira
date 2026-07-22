@@ -108,15 +108,19 @@ export function calculateFinancialSummary(
   // Verifica se alguma fatura tem divisão por pessoa ativa
   const invoicesHaveSplit = invoices.some(invoice => hasPersonSplit(invoice))
 
-  // Apenas a minha parte: soma getMyPortion de cada fatura
+  // Apenas a minha parte: soma getMyPortion de cada fatura não paga
   // Se não há divisão em nenhuma fatura, retorna o total bruto (sem alteração)
   const expectedInvoices = invoices
+    .filter(invoice => !invoice.isPaid)
     .reduce((sum, invoice) => sum + getMyPortion(invoice), 0)
   
   // 📊 TOTALIZAÇÕES (inclui tanto CardBills quanto Invoices)
   const paidExpenses = paidGeneralExpenses + paidSubscriptions + paidCardBills + paidInvoices
   const totalExpectedExpenses = expectedGeneralExpenses + expectedSubscriptions + expectedCardBills + expectedInvoices
-  const pendingExpenses = totalExpectedExpenses - paidExpenses
+  const pendingExpenses = (expectedGeneralExpenses - paidGeneralExpenses)
+    + (expectedSubscriptions - paidSubscriptions)
+    + expectedCardBills
+    + expectedInvoices
   
   // 💰 SALDO ATUAL (Regime de Caixa)
   const currentBalance = receivedIncomes - paidExpenses

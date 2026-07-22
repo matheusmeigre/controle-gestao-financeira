@@ -235,12 +235,10 @@ export class SupabaseInvoiceRepository {
         const { error: itemsError } = await (supabase.from('invoice_items') as any).insert(itemRows)
         if (itemsError) throw new Error(`[invoice_items] update: ${itemsError.message}`)
       }
-
-      // findById apenas quando items mudaram (precisa da lista atualizada)
-      return this.findById(userId, id)
     }
 
-    return null
+    // findById sempre para retornar o estado atualizado
+    return this.findById(userId, id)
   }
 
   async delete(userId: string, id: string): Promise<boolean> {
