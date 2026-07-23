@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, AlertTriangle, ArrowRight, Database, Loader2 } from 'lucide-react'
@@ -32,6 +32,13 @@ function formatCurrency(v: number) {
 export default function MigratePage() {
   const { user, isLoaded } = useUser()
   const router = useRouter()
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') {
+      router.replace('/')
+    }
+  }, [router])
+
   const [step, setStep] = useState<'idle' | 'scanning' | 'preview' | 'migrating' | 'done' | 'error'>('idle')
   const [preview, setPreview] = useState<MigrationPayload | null>(null)
   const [result, setResult] = useState<Awaited<ReturnType<typeof migrateFromLocalStorage>> | null>(null)
