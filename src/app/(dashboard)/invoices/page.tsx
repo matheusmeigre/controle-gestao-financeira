@@ -96,13 +96,11 @@ export default function InvoicesPage() {
       const result = await updateInvoiceAction(invoiceId, updates)
       if (!result.success) throw new Error(result.error)
 
-      const refreshResult = await getInvoices()
-      if (refreshResult.success) {
-        const sortedInvoices = refreshResult.data!.sort((a, b) => {
-          if (a.year !== b.year) return b.year - a.year
-          return b.month - a.month
-        })
-        setInvoices(sortedInvoices)
+      const updated = result.data
+      if (updated) {
+        setInvoices(prev =>
+          prev.map(inv => (inv.id === invoiceId ? updated : inv))
+        )
       }
 
       toast({
