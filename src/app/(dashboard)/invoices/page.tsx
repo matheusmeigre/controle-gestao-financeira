@@ -86,25 +86,31 @@ export default function InvoicesPage() {
 
   const handleUpdateInvoice = async (invoiceId: string, updates: Partial<Invoice>) => {
     if (!user?.id) return
-    
+
+    const previous = invoices
+    setInvoices(prev =>
+      prev.map(inv => (inv.id === invoiceId ? { ...inv, ...updates } : inv))
+    )
+
     try {
       const result = await updateInvoiceAction(invoiceId, updates)
       if (!result.success) throw new Error(result.error)
-      
-      // Recarrega as faturas
+
       const refreshResult = await getInvoices()
-      if (!refreshResult.success) throw new Error(refreshResult.error)
-      const sortedInvoices = refreshResult.data!.sort((a, b) => {
-        if (a.year !== b.year) return b.year - a.year
-        return b.month - a.month
-      })
-      setInvoices(sortedInvoices)
-      
+      if (refreshResult.success) {
+        const sortedInvoices = refreshResult.data!.sort((a, b) => {
+          if (a.year !== b.year) return b.year - a.year
+          return b.month - a.month
+        })
+        setInvoices(sortedInvoices)
+      }
+
       toast({
         title: 'Fatura atualizada',
         description: 'As alterações foram salvas com sucesso.',
       })
     } catch (error) {
+      setInvoices(previous)
       console.error('Erro ao atualizar fatura:', error)
       toast({
         title: 'Erro ao atualizar',
