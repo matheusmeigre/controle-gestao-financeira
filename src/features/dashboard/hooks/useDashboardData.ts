@@ -185,18 +185,19 @@ export function useDashboardData() {
   }
 
   // ─── Actions para rendas ─────────────────────────────────────────────
-  const addIncome = (income: Omit<Income, 'id' | 'date' | 'userId'>) => {
+  const addIncome = (income: Omit<Income, 'id' | 'userId'>) => {
     if (!user?.id) return
     setError(null)
     const optimisticId = crypto.randomUUID()
+    const incomeDate = income.date ?? new Date().toISOString().split('T')[0]
     const optimistic: Income = {
       ...income as Income,
       id: optimisticId,
       userId: user.id,
-      date: new Date().toISOString().split('T')[0],
+      date: incomeDate,
     }
     setIncomes((prev) => [optimistic, ...prev])
-    serverCreateIncome({ ...income, date: new Date().toISOString().split('T')[0] }).then((result) => {
+    serverCreateIncome({ ...income, date: incomeDate }).then((result) => {
       if (result.success && result.data) {
         setIncomes((prev) =>
           prev.map((i) => (i.id === optimisticId ? (result.data as Income) : i))
