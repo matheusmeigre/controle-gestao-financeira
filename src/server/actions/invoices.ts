@@ -336,6 +336,10 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
     if (paidAmount < 0) {
       return { success: false, error: 'Valor pago não pode ser negativo' }
     }
+
+    if (paidAmount > existing.totalAmount) {
+      return { success: false, error: 'Valor pago não pode exceder o valor total da fatura' }
+    }
     
     const invoice = await invoiceRepository.update(userId, invoiceId, {
       paidAmount,

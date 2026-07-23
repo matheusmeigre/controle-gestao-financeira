@@ -214,27 +214,25 @@ export class SupabaseInvoiceRepository {
       if (error) throw new Error(`[invoices] update: ${error.message}`)
     }
 
-    // Substitui items — delete + insert
+    // Substitui items atomicamente via RPC (transação no banco)
     if (updates.items !== undefined) {
-      await supabase.from('invoice_items').delete().eq('invoice_id', id)
+      const itemsJson = updates.items.map((item) => ({
+        id: item.id ?? crypto.randomUUID(),
+        date: item.date instanceof Date
+          ? item.date.toISOString().split('T')[0]
+          : item.date,
+        description: item.description,
+        amount: item.amount,
+        category: item.category ?? 'Outros',
+        installment: item.installment ?? null,
+        notes: item.notes ?? null,
+      }))
 
-      if (updates.items.length > 0) {
-        const itemRows = updates.items.map((item) => ({
-          id: item.id ?? crypto.randomUUID(),
-          invoice_id: id,
-          date: item.date instanceof Date
-            ? item.date.toISOString().split('T')[0]
-            : item.date,
-          description: item.description,
-          amount: item.amount,
-          category: item.category ?? 'Outros',
-          installment: item.installment ?? null,
-          notes: item.notes ?? null,
-        }))
-
-        const { error: itemsError } = await (supabase.from('invoice_items') as any).insert(itemRows)
-        if (itemsError) throw new Error(`[invoice_items] update: ${itemsError.message}`)
-      }
+      const { error: rpcError } = await (supabase.rpc as any)('replace_invoice_items', {
+        p_invoice_id: id,
+        p_items: JSON.stringify(itemsJson),
+      })
+      if (rpcError) throw new Error(`[invoice_items] replace: ${rpcError.message}`)
     }
 
     // findById sempre para retornar o estado atualizado

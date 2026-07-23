@@ -39,6 +39,14 @@ export async function createCard(input: CreateCreditCardInput) {
   }
 
   try {
+    const existing = await repo.findActive(userId)
+    const duplicate = existing.find(
+      (card) => card.last4Digits === input.last4Digits && card.isActive
+    )
+    if (duplicate) {
+      return { success: false as const, error: 'Cartão já cadastrado com estes últimos 4 dígitos' }
+    }
+
     const newCard: CreditCard = {
       id: crypto.randomUUID(),
       userId,
