@@ -15,7 +15,7 @@ type IncomesTabContentProps = {
   onCategoryFilterChange: (category: string) => void
   currentMonthIncomes: Income[]
   filteredIncomes: Income[]
-  onAddIncome: (income: Omit<Income, 'id' | 'date' | 'userId'>) => void
+  onAddIncome: (income: Omit<Income, 'id' | 'userId'>) => void
   onDeleteIncome: (id: string) => void
   onMarkIncomeAsReceived: (id: string) => void
 }

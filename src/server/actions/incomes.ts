@@ -30,7 +30,6 @@ export async function createIncome(input: CreateIncomeInput) {
       userId,
       date: input.date ?? new Date().toISOString().split('T')[0],
       registrationDate: new Date().toISOString(),
-      receivedDate: null,
     }
     const data = await repo.create(userId, income)
     revalidatePath('/')
