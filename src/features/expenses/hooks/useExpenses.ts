@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { ExpenseService } from '../services/expense.service'
+import { getExpenses, createExpense as serverCreateExpense, updateExpense as serverUpdateExpense, deleteExpense as serverDeleteExpense } from '@/server/actions/expenses'
 import type { Expense, CreateExpenseInput, UpdateExpenseInput } from '../types'
-
-const expenseService = new ExpenseService()
 
 export function useExpenses() {
   const { user } = useUser()
@@ -20,8 +18,12 @@ export function useExpenses() {
     try {
       setLoading(true)
       setError(null)
-      const data = await expenseService.getAllExpenses(user.id)
-      setExpenses(data)
+      const result = await getExpenses()
+      if (result.success) {
+        setExpenses(result.data)
+      } else {
+        throw new Error(result.error)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar despesas')
       console.error('Erro ao carregar despesas:', err)
@@ -40,9 +42,10 @@ export function useExpenses() {
     if (!user?.id) throw new Error('Usuário não autenticado')
 
     try {
-      const newExpense = await expenseService.addExpense(user.id, data)
-      setExpenses(prev => [...prev, newExpense])
-      return newExpense
+      const result = await serverCreateExpense(data)
+      if (!result.success) throw new Error(result.error)
+      setExpenses(prev => [...prev, result.data as Expense])
+      return result.data as Expense
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao adicionar despesa'
       setError(message)
@@ -55,10 +58,10 @@ export function useExpenses() {
     if (!user?.id) throw new Error('Usuário não autenticado')
 
     try {
-      const updated = await expenseService.updateExpense(user.id, input)
-      if (updated) {
-        setExpenses(prev => prev.map(e => e.id === updated.id ? updated : e))
-      }
+      const result = await serverUpdateExpense(input)
+      if (!result.success) throw new Error(result.error)
+      const updated = result.data as Expense
+      setExpenses(prev => prev.map(e => e.id === updated.id ? updated : e))
       return updated
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao atualizar despesa'
@@ -72,11 +75,10 @@ export function useExpenses() {
     if (!user?.id) throw new Error('Usuário não autenticado')
 
     try {
-      const success = await expenseService.deleteExpense(user.id, id)
-      if (success) {
-        setExpenses(prev => prev.filter(e => e.id !== id))
-      }
-      return success
+      const result = await serverDeleteExpense(id)
+      if (!result.success) throw new Error(result.error)
+      setExpenses(prev => prev.filter(e => e.id !== id))
+      return true
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao remover despesa'
       setError(message)

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt, Home, Check, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
-import { InvoiceRepository } from '@/features/invoices'
+import { getInvoice, updateInvoice } from '@/server/actions/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -56,7 +56,7 @@ export default function InvoiceDetailPage({
   const status = getInvoiceStatus()
   
   const handlePaymentUpdate = async () => {
-    if (!user?.id || !invoice) return
+    if (!invoice) return
     
     const amount = parseFloat(paidAmount.replace(/[^\d,]/g, '').replace(',', '.'))
     
@@ -73,17 +73,14 @@ export default function InvoiceDetailPage({
     
     try {
       setIsSaving(true)
-      const invoiceRepo = new InvoiceRepository()
       
-      const updatedInvoice = {
-        ...invoice,
+      const result = await updateInvoice(invoice.id!, {
         paidAmount: amount,
         isPaid: amount >= invoice.totalAmount,
-        updatedAt: new Date(),
-      }
+      })
       
-      await invoiceRepo.update(user.id, invoice.id!, updatedInvoice)
-      setInvoice(updatedInvoice)
+      if (!result.success) throw new Error(result.error)
+      setInvoice({ ...invoice, paidAmount: amount, isPaid: amount >= invoice.totalAmount })
       setPaidAmount('')
     } catch (error) {
       console.error('Erro ao atualizar pagamento:', error)
@@ -94,21 +91,18 @@ export default function InvoiceDetailPage({
   }
   
   const handleMarkAsPaid = async () => {
-    if (!user?.id || !invoice) return
+    if (!invoice) return
     
     try {
       setIsSaving(true)
-      const invoiceRepo = new InvoiceRepository()
       
-      const updatedInvoice = {
-        ...invoice,
+      const result = await updateInvoice(invoice.id!, {
         paidAmount: invoice.totalAmount,
         isPaid: true,
-        updatedAt: new Date(),
-      }
+      })
       
-      await invoiceRepo.update(user.id, invoice.id!, updatedInvoice)
-      setInvoice(updatedInvoice)
+      if (!result.success) throw new Error(result.error)
+      setInvoice({ ...invoice, paidAmount: invoice.totalAmount, isPaid: true })
     } catch (error) {
       console.error('Erro ao marcar como paga:', error)
       alert('Erro ao marcar fatura como paga')
@@ -124,22 +118,19 @@ export default function InvoiceDetailPage({
       try {
         setIsLoading(true)
         
-        // Carrega a fatura
-        const invoiceRepo = new InvoiceRepository()
-        const foundInvoice = await invoiceRepo.findById(user.id, params.invoiceId)
+        const result = await getInvoice(params.invoiceId)
         
-        if (!foundInvoice) {
+        if (!result.success || !result.data) {
           router.push('/invoices')
           return
         }
         
-        setInvoice(foundInvoice)
+        setInvoice(result.data)
         
-        // Carrega o cartão do Supabase
         const cardResult = await getCards()
         if (cardResult.success) {
           const allCards = cardResult.data as CardType[]
-          const foundCard = allCards.find(c => c.id === foundInvoice.cardId)
+          const foundCard = allCards.find(c => c.id === result.data!.cardId)
           setCard(foundCard || null)
         }
       } catch (error) {
