@@ -1,9 +1,3 @@
-/**
- * StatusBadge Component
- * 
- * Badge visual para indicar status (positivo, negativo, neutro)
- */
-
 import React from 'react'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -22,21 +16,21 @@ export function StatusBadge({ value, showIcon = true, showValue = true, classNam
 
   const statusConfig = {
     positive: {
-      bg: 'bg-green-50 dark:bg-green-950',
-      text: 'text-green-700 dark:text-green-400',
-      border: 'border-green-200 dark:border-green-800',
+      bg: 'bg-success/10',
+      text: 'text-success',
+      border: 'border-success/20',
       icon: TrendingUp,
     },
     negative: {
-      bg: 'bg-red-50 dark:bg-red-950',
-      text: 'text-red-700 dark:text-red-400',
-      border: 'border-red-200 dark:border-red-800',
+      bg: 'bg-destructive/10',
+      text: 'text-destructive',
+      border: 'border-destructive/20',
       icon: TrendingDown,
     },
     neutral: {
-      bg: 'bg-gray-50 dark:bg-gray-950',
-      text: 'text-gray-700 dark:text-gray-400',
-      border: 'border-gray-200 dark:border-gray-800',
+      bg: 'bg-muted',
+      text: 'text-muted-foreground',
+      border: 'border-border',
       icon: Minus,
     },
   }
