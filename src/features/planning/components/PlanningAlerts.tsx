@@ -2,20 +2,13 @@
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { useDelayedPlannings, useOverBudgetPlannings } from '../hooks/use-plannings'
 import { AlertTriangle, Calendar, DollarSign, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import type { PlanningAlertsData } from '@/features/dashboard/services/dashboard.service'
 
-export function PlanningAlerts() {
-  const { plannings: delayedPlannings, loading: loadingDelayed } = useDelayedPlannings()
-  const { plannings: overBudgetPlannings, loading: loadingOverBudget } = useOverBudgetPlannings()
-
-  const loading = loadingDelayed || loadingOverBudget
-
-  if (loading) {
-    return null
-  }
+export function PlanningAlerts({ alerts }: { alerts: PlanningAlertsData }) {
+  const delayedPlannings = alerts.delayed
+  const overBudgetPlannings = alerts.overBudget
 
   const hasAlerts = delayedPlannings.length > 0 || overBudgetPlannings.length > 0
 

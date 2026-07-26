@@ -12,6 +12,7 @@ import type { Expense, CardBill, Income } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
 import type { DashboardTabs } from '@/features/dashboard/hooks/useDashboardData'
 import type { FinancialSummary } from '@/lib/financial-calculations'
+import type { PlanningAlertsData } from '@/features/dashboard/services/dashboard.service'
 
 interface HomeSummarySectionProps {
   financialSummary: FinancialSummary
@@ -23,6 +24,7 @@ interface HomeSummarySectionProps {
   cardBills: CardBill[]
   incomes: Income[]
   fmt: (v: number) => string
+  planningAlerts: PlanningAlertsData
   onNavigate: (tab: 'transactions' | 'invoices') => void
   onSetTabs: (tabs: DashboardTabs) => void
   onOpenQuickAdd: () => void
@@ -40,6 +42,7 @@ export function HomeSummarySection({
   cardBills,
   incomes,
   fmt,
+  planningAlerts,
   onNavigate,
   onSetTabs,
   onOpenQuickAdd,
@@ -58,7 +61,7 @@ export function HomeSummarySection({
       </div>
 
       <div className="mb-5">
-        <PlanningAlerts />
+        <PlanningAlerts alerts={planningAlerts} />
       </div>
 
       <section className="mb-5">

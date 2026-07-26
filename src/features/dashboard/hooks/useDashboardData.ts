@@ -8,30 +8,44 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
+import type { CreditCard } from '@/features/cards/types'
+import type { Planning } from '@/features/planning/types'
 import type { Expense, CardBill, Income } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
 import {
-  getExpenses,
   createExpense as serverCreateExpense,
   updateExpense as serverUpdateExpense,
   deleteExpense as serverDeleteExpense,
 } from '@/server/actions/expenses'
 import {
-  getIncomes,
   createIncome as serverCreateIncome,
   deleteIncome as serverDeleteIncome,
   markIncomeAsReceived as serverMarkIncomeAsReceived,
 } from '@/server/actions/incomes'
-import { getInvoices, updateInvoice as serverUpdateInvoice, deleteInvoice as serverDeleteInvoice } from '@/server/actions/invoices'
+import { updateInvoice as serverUpdateInvoice, deleteInvoice as serverDeleteInvoice } from '@/server/actions/invoices'
 import {
-  getCardBills,
   createCardBill as serverCreateCardBill,
   updateCardBill as serverUpdateCardBill,
   deleteCardBill as serverDeleteCardBill,
 } from '@/server/actions/card-bills'
 import * as DashboardService from '../services/dashboard.service'
+
+export type DashboardInitialData = {
+  expenses: Expense[]
+  cardBills: CardBill[]
+  incomes: Income[]
+  invoices: Invoice[]
+  cards: CreditCard[]
+  plannings: Planning[]
+  loadedAt: string
+  yearMonth: string
+  currentPeriod: {
+    year: number
+    month: number
+  }
+}
 
 export type DashboardFilters = {
   expenseCategory: string
@@ -44,13 +58,17 @@ export type DashboardTabs = {
   expenseSubTab: 'general' | 'subscriptions'
 }
 
-export function useDashboardData() {
+export function useDashboardData(initialData: DashboardInitialData) {
   const { user } = useUser()
 
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [cardBills, setCardBills] = useState<CardBill[]>([])
-  const [incomes, setIncomes] = useState<Income[]>([])
-  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>(initialData.expenses)
+  const [cardBills, setCardBills] = useState<CardBill[]>(initialData.cardBills)
+  const [incomes, setIncomes] = useState<Income[]>(initialData.incomes)
+  const [invoices, setInvoices] = useState<Invoice[]>(initialData.invoices)
+  const [cards] = useState<CreditCard[]>(initialData.cards)
+  const [planningAlerts] = useState(() =>
+    DashboardService.getPlanningAlerts(initialData.plannings)
+  )
 
   const [filters, setFilters] = useState<DashboardFilters>({
     expenseCategory: 'all',
@@ -64,23 +82,6 @@ export function useDashboardData() {
     main: 'expenses',
     expenseSubTab: 'general',
   })
-
-  // ─── Carregamento inicial via Server Actions ────────────────────────
-  useEffect(() => {
-    if (!user?.id) return
-    ;(async () => {
-      const [expRes, incRes, invRes, cbRes] = await Promise.all([
-        getExpenses(),
-        getIncomes(),
-        getInvoices(),
-        getCardBills(),
-      ])
-      if (expRes.success) setExpenses(expRes.data as Expense[])
-      if (incRes.success) setIncomes(incRes.data as Income[])
-      if (invRes.success) setInvoices(invRes.data as Invoice[])
-      if (cbRes.success) setCardBills(cbRes.data as CardBill[])
-    })()
-  }, [user?.id])
 
   // ─── Actions para despesas ───────────────────────────────────────────
   const addExpense = (expense: Omit<Expense, 'id' | 'date' | 'userId'>) => {
@@ -268,6 +269,7 @@ export function useDashboardData() {
 
   // ─── Dados derivados ─────────────────────────────────────────────────
   const currentMonthData = DashboardService.getCurrentMonthData({ expenses, cardBills, incomes })
+  const summaryInvoices = DashboardService.getSummaryInvoices(invoices)
 
   const filteredGeneralExpenses = DashboardService.filterGeneralExpenses(
     currentMonthData.expenses, filters.expenseCategory
@@ -283,6 +285,9 @@ export function useDashboardData() {
   )
 
   return {
+    cards,
+    planningAlerts,
+    summaryInvoices,
     expenses, cardBills, incomes, invoices, currentMonthData,
     filteredGeneralExpenses, filteredSubscriptions, filteredCardBills, filteredIncomes,
     filters, setFilters, tabs, setTabs, error,
