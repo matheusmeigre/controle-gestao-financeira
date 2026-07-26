@@ -1,6 +1,5 @@
 'use client'
 
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { PlanningCategory } from '../types'
 import { 
@@ -133,16 +132,30 @@ export function CategorySelector({ selectedCategory, onSelectCategory }: Categor
           const isSelected = selectedCategory === category.value
           
           return (
-            <Card
+            <div
               key={category.value}
               className={cn(
-                'relative overflow-hidden cursor-pointer transition-all hover:shadow-lg',
+                'relative overflow-hidden rounded-xl border bg-card text-left shadow-sm transition-[border-color,box-shadow,transform] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/35 hover:-translate-y-0.5 hover:shadow-md',
                 isSelected
-                  ? 'ring-2 ring-primary shadow-lg scale-105'
-                  : 'hover:scale-102'
+                  ? 'border-primary ring-2 ring-primary/25 shadow-md'
+                  : 'hover:border-primary/25'
               )}
-              onClick={() => onSelectCategory(category.value)}
             >
+              <input
+                id={`planning-category-${category.value}`}
+                type="radio"
+                name="planning-category"
+                value={category.value}
+                checked={isSelected}
+                onChange={() => onSelectCategory(category.value)}
+                className="sr-only"
+              />
+              <label
+                htmlFor={`planning-category-${category.value}`}
+                className="absolute inset-0 z-10 cursor-pointer"
+              >
+                <span className="sr-only">Selecionar {category.label}</span>
+              </label>
               {/* Gradient Header */}
               <div className={`h-24 bg-gradient-to-br ${category.color} p-4 flex items-center justify-center relative`}>
                 <Icon className="w-12 h-12 text-white drop-shadow-lg" />
@@ -188,7 +201,7 @@ export function CategorySelector({ selectedCategory, onSelectCategory }: Categor
                   {getDifficultyDescription(category.difficulty)}
                 </p>
               </div>
-            </Card>
+            </div>
           )
         })}
       </div>

@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { TermsOfUse } from "@/components/terms-of-use"
 import { PrivacyPolicy } from "@/components/privacy-policy"
 import { Shield, AlertCircle, ScrollText, FileText, X, Check } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 
 interface TermsAcceptanceModalProps {
   onAccept: () => void
@@ -61,29 +62,28 @@ function DocumentModal({
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <Card className="w-full max-w-4xl my-8 flex flex-col shadow-2xl relative">
-        <CardHeader className="shrink-0 pb-4 space-y-2 border-b">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl gap-0 p-0" hideCloseButton>
+      <Card className="relative flex max-h-[calc(100dvh-2rem)] w-full flex-col border-0 py-0 shadow-none">
+        <CardHeader className="shrink-0 space-y-2 border-b pb-4 pt-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               {title}
-            </CardTitle>
+            </DialogTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8"
+              aria-label="Fechar documento"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             Role até o final do documento para poder confirmar a leitura.
-          </p>
+          </DialogDescription>
         </CardHeader>
 
         <CardContent className="flex-1 overflow-hidden p-0 relative flex flex-col" style={{ maxHeight: '70vh' }}>
@@ -118,7 +118,7 @@ function DocumentModal({
           <Button
             onClick={handleConfirm}
             disabled={!hasScrolledToEnd}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
+            className="bg-success text-success-foreground hover:bg-success/90"
           >
             {hasScrolledToEnd ? (
               <>
@@ -131,7 +131,8 @@ function DocumentModal({
           </Button>
         </div>
       </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -166,16 +167,22 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
         <PrivacyPolicy />
       </DocumentModal>
 
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-        <Card className="w-full max-w-3xl my-8 flex flex-col shadow-2xl relative">
-          <CardHeader className="shrink-0 pb-4 space-y-2 border-b">
-            <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+      <Dialog open>
+        <DialogContent
+          className="max-w-3xl gap-0 p-0"
+          hideCloseButton
+          onEscapeKeyDown={(event) => event.preventDefault()}
+          onPointerDownOutside={(event) => event.preventDefault()}
+        >
+        <Card className="relative flex max-h-[calc(100dvh-2rem)] w-full flex-col border-0 py-0 shadow-none">
+          <CardHeader className="shrink-0 space-y-2 border-b pb-4 pt-6">
+            <DialogTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2">
               <Shield className="h-6 w-6 text-primary" />
               Termos de Uso e Política de Privacidade
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            </DialogTitle>
+            <DialogDescription>
               Clique nos botões abaixo para ler cada documento. É necessário ler ambos completamente.
-            </p>
+            </DialogDescription>
           </CardHeader>
 
           <CardContent className="flex-1 overflow-y-auto p-6">
@@ -310,7 +317,7 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
               onClick={onAccept}
               disabled={!canAccept}
               size="lg"
-              className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-6 text-base transition-all"
+              className="h-12 w-full bg-success text-base font-semibold text-success-foreground hover:bg-success/90"
             >
               {canAccept ? (
                 <>
@@ -327,7 +334,8 @@ export function TermsAcceptanceModal({ onAccept }: TermsAcceptanceModalProps) {
             </p>
           </div>
         </Card>
-      </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

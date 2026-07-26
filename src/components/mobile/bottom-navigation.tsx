@@ -1,39 +1,32 @@
 'use client'
 
-import { Home, Wallet, Receipt, User } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { appNavigationItems, isNavigationItemActive } from './navigation-items'
 
-export type NavigationTab = 'home' | 'transactions' | 'invoices' | 'profile'
+const mobileNavigationItems = appNavigationItems.filter((item) => item.id !== 'cards')
 
-interface BottomNavigationProps {
-  activeTab: NavigationTab
-  onTabChange: (tab: NavigationTab) => void
-}
+export function BottomNavigation() {
+  const pathname = usePathname()
+  const view = useSearchParams().get('view')
 
-const navItems = [
-  { id: 'home' as const, label: 'Início', icon: Home },
-  { id: 'transactions' as const, label: 'Transações', icon: Wallet },
-  { id: 'invoices' as const, label: 'Faturas', icon: Receipt },
-  { id: 'profile' as const, label: 'Perfil', icon: User },
-]
-
-export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-lg border-t md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t bg-card/94 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgb(0_0_0/0.04)] backdrop-blur-xl md:hidden"
       aria-label="Navegação principal"
     >
-      <div className="flex items-center justify-around h-16 px-2 max-w-md mx-auto">
-        {navItems.map((item) => {
+      <div className="mx-auto grid h-16 max-w-lg grid-cols-5 px-1">
+        {mobileNavigationItems.map((item) => {
           const Icon = item.icon
-          const isActive = activeTab === item.id
+          const isActive = isNavigationItemActive(item, pathname, view)
 
           return (
-            <button
+            <Link
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 min-w-[64px] h-14 px-2 rounded-xl transition-all duration-200 active:scale-95",
+                "relative flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-xl px-1 transition-colors active:bg-accent",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -43,20 +36,20 @@ export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationPro
             >
               <Icon
                 className={cn(
-                  "w-6 h-6 transition-all",
-                  isActive && "scale-110"
+                  "size-5 transition-transform",
+                  isActive && "scale-105"
                 )}
                 strokeWidth={isActive ? 2.5 : 2}
               />
               <span
                 className={cn(
-                  "text-[10px] font-medium mt-0.5",
+                  "mt-0.5 max-w-full truncate text-[10px] font-medium",
                   isActive && "font-semibold"
                 )}
               >
-                {item.label}
+                {item.shortLabel ?? item.label}
               </span>
-            </button>
+            </Link>
           )
         })}
       </div>

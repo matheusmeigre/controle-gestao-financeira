@@ -1,25 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
-import { Footer } from '@/components/footer'
 import { InvoiceSelectModal } from '@/components/invoice-select-modal'
-import { QuickTransactionModal } from '@/components/quick-transaction-modal'
+import { QuickTransactionModal, type TransactionType } from '@/components/quick-transaction-modal'
 import { TermsAcceptanceModal } from '@/components/terms-acceptance-modal'
-import { UserHeader } from '@/components/user-header'
 import { WelcomeModal } from '@/components/welcome-modal'
-import {
-  BottomNavigation,
-  DesktopNavigation,
-  FloatingActionButton,
-  MobileContainer,
-  MobileLayout,
-  type NavigationTab,
-} from '@/components/mobile'
-import { InvoicesSection } from '@/components/sections/InvoicesSection'
+import { FloatingActionButton } from '@/components/mobile'
 import { HomeSummarySection } from '@/components/sections/HomeSummarySection'
 import { ProfileSection } from '@/components/sections/ProfileSection'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { CircleAlert } from 'lucide-react'
 import { useFinancialSummary } from '@/hooks/use-financial-summary'
 import {
   CardsTabContent,
@@ -33,9 +26,14 @@ import {
 
 export function DashboardClient({ initialData }: { initialData: DashboardInitialData }) {
   const { user, isLoaded } = useUser()
-  const [activeNav, setActiveNav] = useState<NavigationTab>('home')
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [showQuickAdd, setShowQuickAdd] = useState(false)
+  const [quickAddType, setQuickAddType] = useState<TransactionType>('expense')
   const [showInvoiceSelect, setShowInvoiceSelect] = useState(false)
+  const view = searchParams.get('view')
+  const activeNav = view === 'transactions' || view === 'profile' ? view : 'home'
+  const quickAddOpen = showQuickAdd || searchParams.get('action') === 'new'
 
   const {
     expenses,
@@ -43,6 +41,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
     incomes,
     invoices,
     cards,
+    allCards,
     planningAlerts,
     currentMonthData,
     summaryInvoices,
@@ -54,6 +53,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
     setFilters,
     tabs,
     setTabs,
+    error,
     addExpense,
     updateExpense,
     deleteExpense,
@@ -63,8 +63,6 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
     addIncome,
     deleteIncome,
     markIncomeAsReceived,
-    updateInvoice,
-    deleteInvoice,
   } = useDashboardData(initialData)
 
   const { showWelcome, showTermsModal, setShowWelcome, handleAcceptTerms } =
@@ -79,10 +77,10 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
 
   if (!isLoaded || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center justify-center py-20" role="status" aria-label="Carregando dashboard">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-primary" />
-          <p className="mt-4 text-muted-foreground">Carregando...</p>
+          <p className="mt-4 text-muted-foreground">Carregando seus dados...</p>
         </div>
       </div>
     )
@@ -96,16 +94,35 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
   const fmt = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
+  const navigateTo = (viewName: 'home' | 'transactions' | 'profile') => {
+    router.push(viewName === 'home' ? '/' : `/?view=${viewName}`)
+  }
+
+  const handleQuickAddOpenChange = (open: boolean) => {
+    setShowQuickAdd(open)
+    if (!open && searchParams.get('action') === 'new') {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete('action')
+      router.replace(params.size > 0 ? `/?${params.toString()}` : '/')
+    }
+  }
+
+  const openQuickAdd = (type: TransactionType = 'expense') => {
+    setQuickAddType(type)
+    setShowQuickAdd(true)
+  }
+
   return (
-    <MobileLayout hasBottomNav hasFAB>
+    <>
       {showTermsModal && <TermsAcceptanceModal onAccept={handleAcceptTerms} />}
       {showWelcome && (
         <WelcomeModal userName={firstName} onClose={() => setShowWelcome(false)} />
       )}
 
       <QuickTransactionModal
-        open={showQuickAdd}
-        onOpenChange={setShowQuickAdd}
+        open={quickAddOpen}
+        onOpenChange={handleQuickAddOpenChange}
+        initialType={quickAddType}
         onAddExpense={addExpense}
         onAddIncome={addIncome}
         onAddCardBill={addCardBill}
@@ -118,10 +135,13 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
         cards={cards}
       />
 
-      <UserHeader />
-
-      <MobileContainer>
-        <DesktopNavigation activeTab={activeNav} onTabChange={setActiveNav} />
+      {error && (
+        <Alert variant="destructive" className="mb-5" role="alert">
+          <CircleAlert aria-hidden="true" />
+          <AlertTitle>Não foi possível concluir a operação</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
         {activeNav === 'home' && (
           <HomeSummarySection
@@ -137,11 +157,11 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
             planningAlerts={planningAlerts}
             fmt={fmt}
             onNavigate={(tab) => {
-              if (tab === 'transactions') setActiveNav('transactions')
-              else setActiveNav('invoices')
+              if (tab === 'transactions') navigateTo('transactions')
+              else router.push('/invoices')
             }}
             onSetTabs={(nextTabs) => setTabs(nextTabs)}
-            onOpenQuickAdd={() => setShowQuickAdd(true)}
+            onOpenQuickAdd={openQuickAdd}
             onOpenInvoiceSelect={() => setShowInvoiceSelect(true)}
           />
         )}
@@ -198,6 +218,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
                   currentMonthCardBills={currentMonthData.cardBills}
                   filteredCardBills={filteredCardBills}
                   invoices={invoices}
+                  cards={allCards}
                   onAddCardBill={addCardBill}
                   onUpdateCardBill={updateCardBill}
                   onDeleteCardBill={deleteCardBill}
@@ -221,15 +242,6 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
           </>
         )}
 
-        {activeNav === 'invoices' && (
-          <InvoicesSection
-            invoices={invoices}
-            cards={cards}
-            onUpdateInvoice={updateInvoice}
-            onDeleteInvoice={deleteInvoice}
-          />
-        )}
-
         {activeNav === 'profile' && (
           <ProfileSection
             firstName={firstName}
@@ -240,14 +252,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardInitial
             invoices={invoices}
           />
         )}
-      </MobileContainer>
-
-      <div className="mt-auto hidden md:block">
-        <Footer />
-      </div>
-
-      <BottomNavigation activeTab={activeNav} onTabChange={setActiveNav} />
-      <FloatingActionButton onClick={() => setShowQuickAdd(true)} />
-    </MobileLayout>
+      <FloatingActionButton onClick={() => openQuickAdd('expense')} />
+    </>
   )
 }

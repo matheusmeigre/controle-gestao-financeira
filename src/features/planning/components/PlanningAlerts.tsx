@@ -95,16 +95,17 @@ export function PlanningAlerts({ alerts }: { alerts: PlanningAlertsData }) {
           )}
 
           {/* Botão para ir aos planejamentos */}
-          <Link href="/planning">
-            <Button
+          <Button
+              asChild
               variant="outline"
               size="sm"
               className="w-full mt-2 border-orange-300 dark:border-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900"
-            >
+          >
+            <Link href="/planning">
               Ver Planejamentos
               <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </Card>

@@ -48,5 +48,5 @@ export type Category = (typeof CATEGORIES)[number]
 export type CardOption = (typeof CARD_OPTIONS)[number]
 export type PersonOption = (typeof PERSON_OPTIONS)[number]
 
-export type CreateExpenseInput = Omit<Expense, "id" | "userId" | "date">
+export type CreateExpenseInput = Omit<Expense, "id" | "userId">
 export type UpdateExpenseInput = Partial<CreateExpenseInput> & { id: string }

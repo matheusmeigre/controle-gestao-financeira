@@ -57,4 +57,16 @@ export class SupabasePlanningRepository extends SupabaseBaseRepository<Planning>
     if (error) throw new Error(`[plannings] findByStatus: ${error.message}`)
     return (data ?? []).map((row) => this.fromRow(row as Record<string, unknown>))
   }
+
+  async incrementAmount(userId: string, planningId: string, amount: number): Promise<Planning | null> {
+    const supabase = this.client()
+    const { data, error } = await (supabase as any).rpc('increment_planning_amount', {
+      p_user_id: userId,
+      p_planning_id: planningId,
+      p_amount: amount,
+    })
+    if (error) throw new Error(`[plannings] incrementAmount: ${error.message}`)
+    const row = data?.[0]
+    return row ? this.fromRow(row as Record<string, unknown>) : null
+  }
 }

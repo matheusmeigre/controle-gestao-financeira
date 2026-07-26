@@ -169,7 +169,7 @@ export function FinancialReportsView({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Entradas</CardDescription>
-            <CardTitle className="text-2xl text-green-600 dark:text-green-500">
+            <CardTitle className="font-mono text-2xl tabular-nums text-success">
               {formatCurrency(stats.totalEntradas)}
             </CardTitle>
           </CardHeader>
@@ -178,7 +178,7 @@ export function FinancialReportsView({
               Média: {formatCurrency(stats.mediaEntradas)}/mês
             </p>
             {stats.crescimentoEntradas !== 0 && (
-              <p className={`text-xs mt-1 flex items-center gap-1 ${stats.crescimentoEntradas > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs mt-1 flex items-center gap-1 ${stats.crescimentoEntradas > 0 ? 'text-success' : 'text-destructive'}`}>
                 {stats.crescimentoEntradas > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {Math.abs(stats.crescimentoEntradas).toFixed(1)}% vs mês anterior
               </p>
@@ -189,7 +189,7 @@ export function FinancialReportsView({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Saídas</CardDescription>
-            <CardTitle className="text-2xl text-red-600 dark:text-red-500">
+            <CardTitle className="font-mono text-2xl tabular-nums text-destructive">
               {formatCurrency(stats.totalSaidas)}
             </CardTitle>
           </CardHeader>
@@ -198,7 +198,7 @@ export function FinancialReportsView({
               Média: {formatCurrency(stats.mediaSaidas)}/mês
             </p>
             {stats.crescimentoSaidas !== 0 && (
-              <p className={`text-xs mt-1 flex items-center gap-1 ${stats.crescimentoSaidas < 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <p className={`text-xs mt-1 flex items-center gap-1 ${stats.crescimentoSaidas < 0 ? 'text-success' : 'text-destructive'}`}>
                 {stats.crescimentoSaidas > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                 {Math.abs(stats.crescimentoSaidas).toFixed(1)}% vs mês anterior
               </p>
@@ -209,7 +209,7 @@ export function FinancialReportsView({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Saldo Atual</CardDescription>
-            <CardTitle className={`text-2xl ${stats.currentMonth.saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
+            <CardTitle className={`font-mono text-2xl tabular-nums ${stats.currentMonth.saldo >= 0 ? 'text-success' : 'text-destructive'}`}>
               {formatCurrency(stats.currentMonth.saldo)}
             </CardTitle>
           </CardHeader>
@@ -223,7 +223,7 @@ export function FinancialReportsView({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Saldo Acumulado</CardDescription>
-            <CardTitle className={`text-2xl ${cumulativeData[cumulativeData.length - 1].acumulado >= 0 ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
+            <CardTitle className={`font-mono text-2xl tabular-nums ${cumulativeData[cumulativeData.length - 1].acumulado >= 0 ? 'text-success' : 'text-destructive'}`}>
               {formatCurrency(cumulativeData[cumulativeData.length - 1].acumulado)}
             </CardTitle>
           </CardHeader>
@@ -258,8 +258,8 @@ export function FinancialReportsView({
               <Tooltip 
                 formatter={(value) => formatCurrency(Number(value) || 0)}
                 contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px'
                 }}
               />
@@ -267,26 +267,26 @@ export function FinancialReportsView({
               <Line 
                 type="monotone" 
                 dataKey="entradas" 
-                stroke="#22c55e" 
+                stroke="var(--chart-2)"
                 strokeWidth={2}
                 name="Entradas"
-                dot={{ fill: '#22c55e', r: 4 }}
+                dot={{ fill: 'var(--chart-2)', r: 4 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="saidas" 
-                stroke="#ef4444" 
+                stroke="var(--chart-4)"
                 strokeWidth={2}
                 name="Saídas"
-                dot={{ fill: '#ef4444', r: 4 }}
+                dot={{ fill: 'var(--chart-4)', r: 4 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="acumulado" 
-                stroke="#3b82f6" 
+                stroke="var(--chart-1)"
                 strokeWidth={2}
                 name="Saldo Acumulado"
-                dot={{ fill: '#3b82f6', r: 4 }}
+                dot={{ fill: 'var(--chart-1)', r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -316,14 +316,14 @@ export function FinancialReportsView({
               <Tooltip 
                 formatter={(value) => formatCurrency(Number(value) || 0)}
                 contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px'
                 }}
               />
               <Legend />
-              <Bar dataKey="entradas" fill="#22c55e" name="Entradas" />
-              <Bar dataKey="saidas" fill="#ef4444" name="Saídas" />
+              <Bar dataKey="entradas" fill="var(--chart-2)" name="Entradas" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="saidas" fill="var(--chart-4)" name="Saídas" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -338,44 +338,47 @@ export function FinancialReportsView({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/35" tabIndex={0} aria-label="Tabela de detalhamento financeiro por período">
             <table className="w-full text-sm">
+              <caption className="sr-only">Entradas, saídas e saldo final consolidados por mês</caption>
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-2 font-semibold">Período</th>
-                  <th className="text-right py-3 px-2 font-semibold text-green-600">Entradas</th>
-                  <th className="text-right py-3 px-2 font-semibold text-red-600">Saídas</th>
-                  <th className="text-right py-3 px-2 font-semibold">Saldo Final</th>
+                  <th scope="col" className="text-left py-3 px-2 font-semibold">Período</th>
+                  <th scope="col" className="text-right py-3 px-2 font-semibold text-success">Entradas</th>
+                  <th scope="col" className="text-right py-3 px-2 font-semibold text-destructive">Saídas</th>
+                  <th scope="col" className="text-right py-3 px-2 font-semibold">Saldo Final</th>
                 </tr>
               </thead>
               <tbody>
                 {monthlyData.map((item, index) => (
                   <tr key={index} className="border-b hover:bg-muted/50">
                     <td className="py-3 px-2">{item.month}</td>
-                    <td className="text-right py-3 px-2 text-green-600">
+                    <td className="text-right py-3 px-2 font-mono tabular-nums text-success">
                       {formatCurrency(item.entradas)}
                     </td>
-                    <td className="text-right py-3 px-2 text-red-600">
+                    <td className="text-right py-3 px-2 font-mono tabular-nums text-destructive">
                       {formatCurrency(item.saidas)}
                     </td>
-                    <td className={`text-right py-3 px-2 font-semibold ${item.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className={`text-right py-3 px-2 font-mono font-semibold tabular-nums ${item.saldo >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(item.saldo)}
                     </td>
                   </tr>
                 ))}
+              </tbody>
+              <tfoot>
                 <tr className="font-bold bg-muted/30">
-                  <td className="py-3 px-2">TOTAL</td>
-                  <td className="text-right py-3 px-2 text-green-600">
+                  <th scope="row" className="py-3 px-2 text-left">TOTAL</th>
+                  <td className="text-right py-3 px-2 font-mono tabular-nums text-success">
                     {formatCurrency(stats.totalEntradas)}
                   </td>
-                  <td className="text-right py-3 px-2 text-red-600">
+                  <td className="text-right py-3 px-2 font-mono tabular-nums text-destructive">
                     {formatCurrency(stats.totalSaidas)}
                   </td>
-                  <td className={`text-right py-3 px-2 ${(stats.totalEntradas - stats.totalSaidas) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <td className={`text-right py-3 px-2 font-mono tabular-nums ${(stats.totalEntradas - stats.totalSaidas) >= 0 ? 'text-success' : 'text-destructive'}`}>
                     {formatCurrency(stats.totalEntradas - stats.totalSaidas)}
                   </td>
                 </tr>
-              </tbody>
+              </tfoot>
             </table>
           </div>
         </CardContent>

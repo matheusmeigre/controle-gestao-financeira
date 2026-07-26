@@ -1,5 +1,7 @@
 # 📱 Refatoração Mobile-First - Guia Completo
 
+> **Documento histórico:** a versão atual centraliza layout, navegação e safe areas em `AppShell`. Os trechos com `MobileLayout` permanecem apenas como registro da refatoração anterior.
+
 ## 🎯 Visão Geral
 
 Este documento detalha a refatoração completa da aplicação de gestão financeira, transformando de **Desktop-First para Mobile-First**, com lógica financeira correta seguindo princípios contábeis.

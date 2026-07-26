@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from 'react'
+import Link from 'next/link'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PLANNING_CATEGORIES, PLANNING_STATUS } from '../types'
@@ -19,10 +20,10 @@ import { cn } from '@/lib/utils'
 interface PlanningCardProps {
   planning: Planning
   indicators: PlanningIndicators
-  onClick?: () => void
+  href: string
 }
 
-function PlanningCardComponent({ planning, indicators, onClick }: PlanningCardProps) {
+function PlanningCardComponent({ planning, indicators, href }: PlanningCardProps) {
   const category = Object.values(PLANNING_CATEGORIES).find(
     (cat) => cat.value === planning.category
   )
@@ -85,12 +86,12 @@ function PlanningCardComponent({ planning, indicators, onClick }: PlanningCardPr
   }
 
   return (
+    <Link href={href} className="block w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/35">
     <Card
       className={cn(
-        'group hover:shadow-md hover:border-foreground/10 transition-all duration-150 cursor-pointer overflow-hidden',
+        'group h-full overflow-hidden transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md',
         indicators.isCancelled && 'opacity-50'
       )}
-      onClick={onClick}
     >
       <div className="p-5 space-y-4">
         {/* Header: Nome + Status */}
@@ -181,6 +182,7 @@ function PlanningCardComponent({ planning, indicators, onClick }: PlanningCardPr
         )}
       </div>
     </Card>
+    </Link>
   )
 }
 

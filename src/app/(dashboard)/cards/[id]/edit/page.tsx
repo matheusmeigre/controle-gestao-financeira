@@ -7,6 +7,8 @@ import type { CreditCard } from '@/types/card'
 import { CardEditForm } from '@/features/cards'
 import { getCard } from '@/server/actions/cards'
 import { Loader2 } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export default function EditCardPage() {
   const { id } = useParams()
@@ -47,7 +49,7 @@ export default function EditCardPage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center justify-center py-16" role="status" aria-label="Carregando cartão">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -55,16 +57,24 @@ export default function EditCardPage() {
 
   if (error || !card) {
     return (
-      <div className="container mx-auto max-w-2xl py-8">
-        <div className="rounded-md bg-red-50 p-4 text-red-800">
-          {error || 'Cartão não encontrado'}
-        </div>
+      <div className="mx-auto max-w-2xl">
+        <Alert variant="destructive">
+          <AlertTitle>Cartão indisponível</AlertTitle>
+          <AlertDescription>{error || 'Cartão não encontrado'}</AlertDescription>
+        </Alert>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto max-w-2xl py-8">
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        backHref="/cards"
+        backLabel="Voltar para cartões"
+        eyebrow="Carteira"
+        title="Editar cartão"
+        description="Atualize apelido, vencimento, fechamento e limite do cartão."
+      />
       <CardEditForm
         card={card}
         onSuccess={() => {

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2, AlertTriangle, ArrowRight, Database, Loader2 } from 'lucide-react'
-import { UserHeader } from '@/components/user-header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { migrateFromLocalStorage } from '@/server/actions/migrate'
@@ -87,7 +86,6 @@ export default function MigratePage() {
 
   return (
     <>
-      <UserHeader />
       <div className="container mx-auto py-10 px-4 max-w-lg space-y-6">
         <div className="text-center space-y-2">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">

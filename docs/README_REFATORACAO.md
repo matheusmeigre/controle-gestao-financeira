@@ -1,5 +1,7 @@
 # 📱 Refatoração Mobile-First - README
 
+> **Documento histórico:** a arquitetura atual usa `AppShell`; referências a `MobileLayout` e `MobileContainer` descrevem a implementação anterior.
+
 ## 🎉 Implementação Completa!
 
 Todos os componentes, lógica financeira e documentação foram criados e estão prontos para uso.

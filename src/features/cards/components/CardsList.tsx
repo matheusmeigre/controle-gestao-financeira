@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { useUser } from '@clerk/nextjs'
-import { CreditCard as CreditCardIcon, Plus, Trash2, Eye, Pencil, Receipt, RotateCw, Lock, MoreVertical } from 'lucide-react'
+import { CreditCard as CreditCardIcon, Plus, Trash2, Eye, Pencil, Receipt, RotateCw, Lock, MoreVertical, CircleAlert } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { CreditCard } from '../types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { getCards, deleteCard as deleteCardAction } from '@/server/actions/cards'
 
 // Cores baseadas nos bancos
@@ -45,6 +46,7 @@ export function CardsList() {
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set())
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [menuAnimating, setMenuAnimating] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadCards()
@@ -67,12 +69,16 @@ export function CardsList() {
     }
 
     try {
+      setError(null)
       const result = await getCards()
       if (result.success) {
         setCards(result.data)
+      } else {
+        setError(result.error ?? 'Não foi possível carregar seus cartões.')
       }
     } catch (error) {
       console.error('Error loading cards:', error)
+      setError('Não foi possível carregar seus cartões.')
     } finally {
       setIsLoading(false)
     }
@@ -80,10 +86,12 @@ export function CardsList() {
 
   const deleteCard = async (cardId: string) => {
     try {
-      await deleteCardAction(cardId)
-      loadCards()
+      const result = await deleteCardAction(cardId)
+      if (!result.success) throw new Error(result.error)
+      await loadCards()
     } catch (error) {
       console.error('Error deleting card:', error)
+      setError('Não foi possível excluir o cartão. Tente novamente.')
     }
   }
 
@@ -122,9 +130,22 @@ export function CardsList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-label="Carregando cartões">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
+    )
+  }
+
+  if (error && cards.length === 0) {
+    return (
+      <Alert variant="destructive">
+        <CircleAlert aria-hidden="true" />
+        <AlertTitle>Cartões indisponíveis</AlertTitle>
+        <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+          <span>{error}</span>
+          <Button type="button" variant="outline" size="sm" onClick={loadCards}>Tentar novamente</Button>
+        </AlertDescription>
+      </Alert>
     )
   }
 
@@ -137,19 +158,30 @@ export function CardsList() {
           <p className="text-muted-foreground text-center mb-6 max-w-md">
             Cadastre seu primeiro cartão de crédito para começar a gerenciar suas faturas.
           </p>
-          <Link href="/cards/new">
-            <Button>
+          <Button asChild>
+            <Link href="/cards/new">
               <Plus className="mr-2 h-4 w-4" />
-              Cadastrar Primeiro Cartão
-            </Button>
-          </Link>
+              Cadastrar primeiro cartão
+            </Link>
+          </Button>
         </div>
       </Card>
     )
   }
 
   return (
-    <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-4 sm:px-0">
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <CircleAlert aria-hidden="true" />
+          <AlertTitle>Não foi possível atualizar os cartões</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
+            <span>{error}</span>
+            <Button type="button" variant="outline" size="sm" onClick={loadCards}>Tentar novamente</Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      <div className="grid grid-cols-1 gap-4 px-4 sm:gap-6 sm:px-0 md:grid-cols-2 lg:grid-cols-3">
       {cards.map(card => {
         const colors = getBankColor(card.bankName)
         const brandLogo = BRAND_LOGOS[card.brand] || BRAND_LOGOS['Outros']
@@ -160,11 +192,12 @@ export function CardsList() {
             {/* Menu dropdown - Fora do card para evitar conflitos */}
             <div className="absolute top-2 right-2 z-50">
               <Button
-                size="sm"
+                size="icon"
                 variant="secondary"
-                className="h-8 w-8 p-0 bg-black/40 hover:bg-black/50 border-none backdrop-blur-sm text-white shadow-lg"
+                className="size-10 border-none bg-black/40 p-0 text-white shadow-lg backdrop-blur-sm hover:bg-black/55"
                 onClick={(e) => toggleMenu(card.id || '', e)}
-                title="Opções"
+                aria-label={`Opções do cartão ${card.nickname}`}
+                aria-expanded={openMenuId === card.id}
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
@@ -178,14 +211,15 @@ export function CardsList() {
                     transformStyle: 'preserve-3d'
                   }}
                 >
-                  <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div className="overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-xl" role="menu">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       setOpenMenuId(null)
                       router.push(`/cards/${card.id}/edit`)
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 text-slate-700 dark:text-slate-200 transition-colors duration-150"
+                    className="flex min-h-10 w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-accent"
+                    role="menuitem"
                   >
                     <Pencil className="h-4 w-4" />
                     Editar cartão
@@ -196,12 +230,13 @@ export function CardsList() {
                       setOpenMenuId(null)
                       router.push(`/invoices?cardId=${card.id}`)
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-3 text-slate-700 dark:text-slate-200 transition-colors duration-150"
+                    className="flex min-h-10 w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-accent"
+                    role="menuitem"
                   >
                     <Receipt className="h-4 w-4" />
                     Ver faturas
                   </button>
-                  <div className="border-t border-slate-200 dark:border-slate-700" />
+                  <div className="border-t" />
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -210,7 +245,8 @@ export function CardsList() {
                         setOpenMenuId(null)
                       }
                     }}
-                    className="w-full px-4 py-2.5 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-600 dark:text-red-400 transition-colors duration-150"
+                    className="flex min-h-10 w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
+                    role="menuitem"
                   >
                     <Trash2 className="h-4 w-4" />
                     Excluir cartão
@@ -220,12 +256,22 @@ export function CardsList() {
               )}
             </div>
 
-            <div 
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => toggleFlip(card.id || '')}
-              className={`relative w-full h-full transition-transform duration-700 preserve-3d cursor-pointer ${
+              className={`relative h-full w-full rounded-xl text-left transition-transform duration-700 preserve-3d focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 ${
                 isFlipped ? 'rotate-y-180' : ''
               }`}
               style={{ transformStyle: 'preserve-3d' }}
+              aria-label={`${card.nickname}, final ${card.last4Digits}. ${isFlipped ? 'Mostrar frente' : 'Mostrar detalhes'}`}
+              aria-pressed={isFlipped}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  toggleFlip(card.id || '')
+                }
+              }}
             >
               {/* FRENTE DO CARTÃO */}
               <div
@@ -318,6 +364,7 @@ export function CardsList() {
           </div>
         )
       })}
+      </div>
     </div>
   )
 }

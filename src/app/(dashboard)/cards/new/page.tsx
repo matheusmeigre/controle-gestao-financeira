@@ -1,11 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Home } from 'lucide-react'
-import Link from 'next/link'
 import { CardForm } from '@/features/cards'
-import { Button } from '@/components/ui/button'
-import { UserHeader } from '@/components/user-header'
+import { PageHeader } from '@/components/ui/page-header'
 
 export default function NewCardPage() {
   const router = useRouter()
@@ -15,28 +12,15 @@ export default function NewCardPage() {
   }
   
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 max-w-2xl space-y-6">
-      {/* Navegação */}
-      <div className="flex items-center gap-2">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <Home className="mr-2 h-4 w-4" />
-            Início
-          </Button>
-        </Link>
-        <Link href="/cards">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Cartões
-          </Button>
-        </Link>
-      </div>
-      
-      {/* Form */}
+    <div className="mx-auto max-w-2xl space-y-6">
+      <PageHeader
+        backHref="/cards"
+        backLabel="Voltar para cartões"
+        eyebrow="Carteira"
+        title="Novo cartão"
+        description="Cadastre os dados essenciais para organizar suas próximas faturas."
+      />
       <CardForm onSuccess={handleSuccess} />
-      </div>
-    </>
+    </div>
   )
 }

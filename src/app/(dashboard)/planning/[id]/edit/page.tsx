@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { UserHeader } from '@/components/user-header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Textarea } from '@/components/ui/textarea'
+import { PageHeader } from '@/components/ui/page-header'
 import { useToast } from '@/hooks/use-toast'
 import { 
   usePlanning, 
@@ -17,7 +17,6 @@ import {
   PLANNING_CATEGORIES
 } from '@/features/planning'
 import { 
-  ArrowLeft, 
   Save, 
   Loader2
 } from 'lucide-react'
@@ -120,30 +119,18 @@ export default function EditPlanningPage() {
 
   if (loading) {
     return (
-      <>
-        <UserHeader />
-        <div className="container mx-auto py-8">
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-12" role="status" aria-label="Carregando planejamento">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
-        </div>
-      </>
     )
   }
 
   if (!planning) {
     return (
-      <>
-        <UserHeader />
-        <div className="container mx-auto py-8">
           <div className="text-center py-12">
             <p className="text-muted-foreground">Planejamento não encontrado.</p>
-            <Link href="/planning">
-              <Button className="mt-4">Voltar</Button>
-            </Link>
+            <Button asChild className="mt-4"><Link href="/planning">Voltar</Link></Button>
           </div>
-        </div>
-      </>
     )
   }
 
@@ -152,25 +139,13 @@ export default function EditPlanningPage() {
   )
 
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 space-y-6 max-w-2xl">
-        {/* Navegação */}
-        <Link href={`/planning/${planningId}`}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
-        </Link>
-
-        {/* Header */}
-        <div className="flex items-start gap-4">
-          <span className="text-4xl">{category?.icon}</span>
-          <div>
-            <h1 className="text-3xl font-bold">Editar Planejamento</h1>
-            <p className="text-muted-foreground">{category?.label}</p>
-          </div>
-        </div>
+    <div className="mx-auto max-w-2xl space-y-7">
+        <PageHeader
+          backHref={`/planning/${planningId}`}
+          eyebrow={category?.label}
+          title="Editar planejamento"
+          description="Ajuste valores, datas e observações sem perder o histórico do objetivo."
+        />
 
         {/* Formulário */}
         <form onSubmit={handleSubmit}>
@@ -242,11 +217,11 @@ export default function EditPlanningPage() {
             </div>
 
             <div className="flex gap-2 justify-end pt-4 border-t">
-              <Link href={`/planning/${planningId}`}>
-                <Button type="button" variant="outline">
+              <Button asChild type="button" variant="outline">
+                <Link href={`/planning/${planningId}`}>
                   Cancelar
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <Button type="submit" disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <Save className="mr-2 h-4 w-4" />
@@ -255,7 +230,6 @@ export default function EditPlanningPage() {
             </div>
           </Card>
         </form>
-      </div>
-    </>
+    </div>
   )
 }

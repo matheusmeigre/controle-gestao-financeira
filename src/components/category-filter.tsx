@@ -15,7 +15,7 @@ export function CategoryFilter({ categories, selectedCategory, onCategoryChange,
   return (
     <div className="flex items-center gap-2">
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="w-[200px]">
+        <SelectTrigger className="w-[200px]" aria-label={label}>
           <SelectValue placeholder={label} />
         </SelectTrigger>
         <SelectContent>
@@ -30,9 +30,9 @@ export function CategoryFilter({ categories, selectedCategory, onCategoryChange,
       {selectedCategory !== "all" && (
         <Button
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={() => onCategoryChange("all")}
-          className="h-8 w-8 p-0"
+          aria-label="Limpar filtro de categoria"
         >
           <X className="h-4 w-4" />
         </Button>

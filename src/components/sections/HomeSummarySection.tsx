@@ -13,6 +13,7 @@ import type { Invoice } from '@/features/invoices/types'
 import type { DashboardTabs } from '@/features/dashboard/hooks/useDashboardData'
 import type { FinancialSummary } from '@/lib/financial-calculations'
 import type { PlanningAlertsData } from '@/features/dashboard/services/dashboard.service'
+import type { TransactionType } from '@/components/quick-transaction-modal'
 
 interface HomeSummarySectionProps {
   financialSummary: FinancialSummary
@@ -27,7 +28,7 @@ interface HomeSummarySectionProps {
   planningAlerts: PlanningAlertsData
   onNavigate: (tab: 'transactions' | 'invoices') => void
   onSetTabs: (tabs: DashboardTabs) => void
-  onOpenQuickAdd: () => void
+  onOpenQuickAdd: (type?: TransactionType) => void
   onOpenInvoiceSelect: () => void
   invoices: Invoice[]
 }
@@ -70,25 +71,25 @@ export function HomeSummarySection({
         </h2>
         <div className="grid grid-cols-3 gap-3">
           <button
-            onClick={onOpenQuickAdd}
-            className="flex flex-col items-center gap-2 p-4 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 rounded-xl hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors active:scale-95"
+            onClick={() => onOpenQuickAdd('expense')}
+            className="group flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border bg-card p-4 transition-[border-color,background-color,transform] hover:border-destructive/30 hover:bg-destructive/5 active:scale-[0.98]"
           >
-            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center">
+            <div className="flex size-10 items-center justify-center rounded-full bg-destructive">
               <TrendingDown className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xs font-medium text-red-700 dark:text-red-400">
+            <span className="text-xs font-medium text-destructive">
               Despesa
             </span>
           </button>
 
           <button
-            onClick={onOpenQuickAdd}
-            className="flex flex-col items-center gap-2 p-4 bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30 rounded-xl hover:bg-green-100 dark:hover:bg-green-950/40 transition-colors active:scale-95"
+            onClick={() => onOpenQuickAdd('income')}
+            className="group flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border bg-card p-4 transition-[border-color,background-color,transform] hover:border-success/30 hover:bg-success/5 active:scale-[0.98]"
           >
-            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+            <div className="flex size-10 items-center justify-center rounded-full bg-success">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xs font-medium text-green-700 dark:text-green-400">
+            <span className="text-xs font-medium text-success">
               Receita
             </span>
           </button>
@@ -101,12 +102,12 @@ export function HomeSummarySection({
                 onOpenInvoiceSelect()
               }
             }}
-            className="flex flex-col items-center gap-2 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-950/40 transition-colors active:scale-95"
+            className="group flex min-h-28 flex-col items-center justify-center gap-2 rounded-xl border bg-card p-4 transition-[border-color,background-color,transform] hover:border-primary/30 hover:bg-primary/5 active:scale-[0.98]"
           >
-            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
+            <div className="flex size-10 items-center justify-center rounded-full bg-primary">
               <CreditCard className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xs font-medium text-blue-700 dark:text-blue-400">
+            <span className="text-xs font-medium text-primary">
               Fatura
             </span>
           </button>
@@ -120,13 +121,13 @@ export function HomeSummarySection({
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => onNavigate('transactions')}
-            className="bg-card border rounded-xl p-4 text-left hover:border-primary/50 transition-colors active:scale-95"
+            className="rounded-xl border bg-card p-4 text-left shadow-sm transition-[border-color,transform] hover:border-primary/40 active:scale-[0.99]"
           >
             <div className="flex items-center gap-2 mb-2">
               <TrendingDown className="w-4 h-4 text-red-500" />
               <span className="text-xs text-muted-foreground">Gastos</span>
             </div>
-            <p className="text-xl font-bold">{fmt(totalExpenses)}</p>
+            <p className="font-mono text-xl font-bold tabular-nums">{fmt(totalExpenses)}</p>
             <p className="text-xs text-muted-foreground mt-1">
               {currentMonthData.expenses.length} lançamentos
             </p>
@@ -137,13 +138,13 @@ export function HomeSummarySection({
               onNavigate('transactions')
               onSetTabs({ main: 'incomes', expenseSubTab: 'general' })
             }}
-            className="bg-card border rounded-xl p-4 text-left hover:border-primary/50 transition-colors active:scale-95"
+            className="rounded-xl border bg-card p-4 text-left shadow-sm transition-[border-color,transform] hover:border-primary/40 active:scale-[0.99]"
           >
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-green-500" />
               <span className="text-xs text-muted-foreground">Receitas</span>
             </div>
-            <p className="text-xl font-bold">{fmt(totalIncomes)}</p>
+            <p className="font-mono text-xl font-bold tabular-nums">{fmt(totalIncomes)}</p>
             <p className="text-xs text-muted-foreground mt-1">
               {currentMonthData.incomes.length} lançamentos
             </p>
@@ -153,21 +154,21 @@ export function HomeSummarySection({
         {pendingInvoices.length > 0 && (
           <button
             onClick={() => onNavigate('invoices')}
-            className="w-full mt-3 flex items-center justify-between bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-xl p-4 hover:bg-orange-100 dark:hover:bg-orange-950/40 transition-colors active:scale-95"
+            className="mt-3 flex w-full items-center justify-between rounded-xl border border-warning/25 bg-warning/8 p-4 transition-colors hover:bg-warning/12 active:scale-[0.99]"
           >
             <div className="flex items-center gap-3">
-              <Receipt className="w-5 h-5 text-orange-500" />
+              <Receipt className="w-5 h-5 text-warning" />
               <div className="text-left">
-                <p className="text-sm font-medium text-orange-700 dark:text-orange-400">
+                <p className="text-sm font-medium text-foreground">
                   {pendingInvoices.length}{' '}
                   {pendingInvoices.length === 1 ? 'fatura pendente' : 'faturas pendentes'}
                 </p>
-                <p className="text-xs text-orange-600/70 dark:text-orange-400/70">
+                <p className="text-xs text-muted-foreground">
                   Toque para ver e pagar
                 </p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-orange-400" />
+            <ArrowRight className="w-4 h-4 text-warning" />
           </button>
         )}
       </section>
@@ -175,12 +176,12 @@ export function HomeSummarySection({
       {currentMonthData.expenses.length === 0 &&
         currentMonthData.incomes.length === 0 && (
           <div className="p-6 bg-muted/30 border-2 border-dashed rounded-xl text-center">
-            <div className="text-4xl mb-3">📝</div>
+            <Receipt className="mx-auto mb-3 size-9 text-muted-foreground" aria-hidden="true" />
             <h3 className="text-base font-semibold mb-1">Nenhuma transação ainda</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Use os botões acima para registrar suas finanças
             </p>
-            <Button onClick={onOpenQuickAdd} size="sm">
+            <Button onClick={() => onOpenQuickAdd('expense')} size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Adicionar agora
             </Button>

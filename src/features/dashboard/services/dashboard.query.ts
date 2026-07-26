@@ -30,12 +30,12 @@ export async function getDashboardInitialData(): Promise<DashboardInitialData> {
   const yearMonth = getCurrentYearMonth()
   const { year, month } = getCurrentYearMonthParts()
 
-  const [expenses, incomes, invoices, cardBills, cards, plannings] = await Promise.all([
+  const [expenses, incomes, invoices, cardBills, allCards, plannings] = await Promise.all([
     expenseRepository.findByMonth(userId, yearMonth),
     incomeRepository.findByMonth(userId, yearMonth),
     invoiceRepository.findAll(userId),
     cardBillRepository.findByMonth(userId, yearMonth),
-    cardRepository.findActive(userId),
+    cardRepository.findAll(userId),
     planningRepository.findAll(userId),
   ])
 
@@ -44,7 +44,8 @@ export async function getDashboardInitialData(): Promise<DashboardInitialData> {
     cardBills: cardBills as CardBill[],
     incomes: incomes as Income[],
     invoices,
-    cards: cards as CreditCard[],
+    cards: (allCards as CreditCard[]).filter((card) => card.isActive),
+    allCards: allCards as CreditCard[],
     plannings: plannings as Planning[],
     loadedAt: new Date().toISOString(),
     yearMonth,

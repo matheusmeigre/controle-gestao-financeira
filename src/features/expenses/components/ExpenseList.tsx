@@ -270,10 +270,10 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                     )}
 
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={saveEdit} className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button size="sm" onClick={saveEdit} className="bg-success text-success-foreground hover:bg-success/90" aria-label="Salvar alterações">
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEdit}>
+                      <Button size="sm" variant="outline" onClick={cancelEdit} aria-label="Cancelar edição">
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -285,13 +285,13 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                         <span className="text-sm text-muted-foreground font-mono">{formatDate(expense.date)}</span>
                         <CategoryBadge category={expense.category} size="sm" />
                         {expense.status === "pending" && (
-                          <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                          <Badge variant="outline" className="border-warning/25 bg-warning/10 text-xs text-warning">
                             <Clock className="h-3 w-3 mr-1" />
                             Pendente
                           </Badge>
                         )}
                         {expense.status === "paid" && (
-                          <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                          <Badge variant="outline" className="border-success/25 bg-success/10 text-xs text-success">
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             Pago
                           </Badge>
@@ -329,17 +329,18 @@ export function ExpenseList({ expenses, onUpdateExpense, onDeleteExpense }: Expe
                         </div>
                       )}
 
-                      <p className="text-lg font-semibold text-foreground mt-1">{formatCurrency(expense.amount)}</p>
+                      <p className="mt-1 font-mono text-lg font-semibold tabular-nums text-foreground">{formatCurrency(expense.amount)}</p>
                     </div>
                     <div className="flex gap-2 ml-4">
-                      <Button size="sm" variant="outline" onClick={() => startEdit(expense)} className="h-8 w-8 p-0">
+                      <Button size="icon" variant="outline" onClick={() => startEdit(expense)} aria-label={`Editar despesa ${expense.description}`}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="outline"
                         onClick={() => onDeleteExpense(expense.id)}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive"
+                        aria-label={`Excluir despesa ${expense.description}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

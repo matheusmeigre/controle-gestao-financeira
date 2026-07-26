@@ -32,16 +32,18 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendingDown, TrendingUp, CreditCard, X, ExternalLink } from 'lucide-react'
-import { CATEGORIES, INCOME_CATEGORIES } from '@/types/expense'
+import { CATEGORIES, INCOME_CATEGORIES } from '@/features/categories'
 import Link from 'next/link'
 import type { Expense, Income } from '@/types/expense'
 import { CurrencyInput } from '@/components/ui/currency-input'
+import { isValidDateString } from '@/lib/date-utils'
 
-type TransactionType = 'expense' | 'income' | 'card'
+export type TransactionType = 'expense' | 'income' | 'card'
 
 interface QuickTransactionModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialType?: TransactionType
   onAddExpense?: (expense: Omit<Expense, 'id' | 'userId'>) => void
   onAddIncome?: (income: Omit<Income, 'id' | 'userId'>) => void
   onAddCardBill?: (cardBill: any) => void
@@ -50,12 +52,14 @@ interface QuickTransactionModalProps {
 export function QuickTransactionModal({
   open,
   onOpenChange,
+  initialType = 'expense',
   onAddExpense,
   onAddIncome,
   onAddCardBill,
 }: QuickTransactionModalProps) {
   
   const [activeType, setActiveType] = useState<TransactionType>('expense')
+  const [formError, setFormError] = useState<string | null>(null)
   
   // Expense Form
   const [expenseForm, setExpenseForm] = useState({
@@ -64,6 +68,8 @@ export function QuickTransactionModal({
     category: '',
     date: new Date().toISOString().split('T')[0],
     status: 'pending' as 'paid' | 'pending',
+    recurringFrequency: 'monthly' as 'monthly' | 'yearly',
+    dueDate: '',
   })
   
   // Income Form
@@ -85,6 +91,8 @@ export function QuickTransactionModal({
       category: '',
       date: new Date().toISOString().split('T')[0],
       status: 'pending',
+      recurringFrequency: 'monthly',
+      dueDate: '',
     })
     
     setIncomeForm({
@@ -104,12 +112,19 @@ export function QuickTransactionModal({
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       resetForms()
+      setActiveType(initialType)
+      setFormError(null)
     }
-  }, [open])
+  }, [initialType, open])
   
   const handleAddExpense = () => {
-    if (!expenseForm.description || !expenseForm.amount || !expenseForm.category) {
-      alert('Preencha todos os campos obrigatórios')
+    if (!expenseForm.description || Number(expenseForm.amount) <= 0 || !expenseForm.category || !isValidDateString(expenseForm.date)) {
+      setFormError('Preencha a descrição, o valor, a categoria e uma data válida.')
+      return
+    }
+
+    if (expenseForm.category === 'Assinaturas' && !isValidDateString(expenseForm.dueDate)) {
+      setFormError('Informe a data do próximo vencimento da assinatura.')
       return
     }
     
@@ -119,21 +134,28 @@ export function QuickTransactionModal({
       category: expenseForm.category,
       date: expenseForm.date,
       status: expenseForm.status,
+      ...(expenseForm.category === 'Assinaturas' && {
+        isRecurring: true,
+        isActive: true,
+        recurringFrequency: expenseForm.recurringFrequency,
+        dueDate: expenseForm.dueDate,
+      }),
     })
     
+    setFormError(null)
     onOpenChange(false)
   }
   
   const handleAddIncome = () => {
     // Validação especial para salário
     if (incomeForm.type === 'salary') {
-      if (!incomeForm.amount || !incomeForm.salaryMonth) {
-        alert('Preencha o valor e o mês do salário')
+      if (Number(incomeForm.amount) <= 0 || !incomeForm.salaryMonth || !isValidDateString(incomeForm.date)) {
+        setFormError('Preencha o valor, o mês de referência do salário e uma data válida.')
         return
       }
     } else {
-      if (!incomeForm.description || !incomeForm.amount) {
-        alert('Preencha todos os campos obrigatórios')
+      if (!incomeForm.description || Number(incomeForm.amount) <= 0 || !isValidDateString(incomeForm.date)) {
+        setFormError('Preencha a descrição e o valor da receita.')
         return
       }
     }
@@ -165,6 +187,7 @@ export function QuickTransactionModal({
       receivedDate: incomeForm.status === 'received' ? now : null,
     })
     
+    setFormError(null)
     onOpenChange(false)
   }
   
@@ -184,6 +207,7 @@ export function QuickTransactionModal({
                 variant="ghost"
                 size="icon"
                 className="absolute right-4 top-4 rounded-full"
+                aria-label="Fechar nova transação"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -192,6 +216,12 @@ export function QuickTransactionModal({
           
           <div className="px-4 pb-4 overflow-y-auto max-h-[calc(85vh-140px)]">
             <Tabs value={activeType} onValueChange={(v) => setActiveType(v as TransactionType)}>
+              {formError && (
+                <div role="alert" className="mb-4 rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {formError}
+                </div>
+              )}
+
               {/* Tab Selector */}
               <TabsList className="grid w-full grid-cols-3 mb-4">
                 <TabsTrigger value="expense" className="flex items-center gap-1.5">
@@ -211,23 +241,23 @@ export function QuickTransactionModal({
               {/* Expense Form */}
               <TabsContent value="expense" className="space-y-4 mt-2">
                 <div className="space-y-2">
-                  <Label htmlFor="expense-description">Descrição *</Label>
-                  <Input
-                    id="expense-description"
-                    placeholder="Ex: Almoço no restaurante"
-                    value={expenseForm.description}
-                    onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
-                    autoFocus
-                  />
-                </div>
-                
-                <div className="space-y-2">
                   <Label htmlFor="expense-amount">Valor (R$) *</Label>
                   <CurrencyInput
                     id="expense-amount"
                     value={parseFloat(expenseForm.amount) || 0}
                     onChange={(value) => setExpenseForm({ ...expenseForm, amount: value.toString() })}
                     placeholder="0,00"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="expense-description">Descrição *</Label>
+                  <Input
+                    id="expense-description"
+                    placeholder="Ex: Almoço no restaurante"
+                    value={expenseForm.description}
+                    onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
                   />
                 </div>
                 
@@ -258,6 +288,7 @@ export function QuickTransactionModal({
                       type="date"
                       value={expenseForm.date}
                       onChange={(e) => setExpenseForm({ ...expenseForm, date: e.target.value })}
+                      required
                     />
                   </div>
                   
@@ -279,6 +310,36 @@ export function QuickTransactionModal({
                     </Select>
                   </div>
                 </div>
+
+                {expenseForm.category === 'Assinaturas' && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                    <Label htmlFor="expense-frequency">Frequência da assinatura</Label>
+                    <Select
+                      value={expenseForm.recurringFrequency}
+                      onValueChange={(value: 'monthly' | 'yearly') => setExpenseForm({ ...expenseForm, recurringFrequency: value })}
+                    >
+                      <SelectTrigger id="expense-frequency">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Mensal</SelectItem>
+                        <SelectItem value="yearly">Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="expense-due-date">Próximo vencimento *</Label>
+                      <Input
+                        id="expense-due-date"
+                        type="date"
+                        value={expenseForm.dueDate}
+                        onChange={(event) => setExpenseForm({ ...expenseForm, dueDate: event.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
               </TabsContent>
               
               {/* Income Form */}
@@ -407,12 +468,12 @@ export function QuickTransactionModal({
                 {activeType === 'expense' ? 'Adicionar Despesa' : 'Adicionar Receita'}
               </Button>
             ) : (
-              <Link href="/invoices/new" onClick={() => onOpenChange(false)} className="w-full">
-                <Button className="w-full h-12 text-base font-semibold gap-2">
+              <Button asChild className="w-full h-12 text-base font-semibold gap-2">
+                <Link href="/invoices/new" onClick={() => onOpenChange(false)}>
                   <ExternalLink className="w-4 h-4" />
                   Criar Nova Fatura
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             )}
             <DrawerClose asChild>
               <Button variant="outline" className="w-full">

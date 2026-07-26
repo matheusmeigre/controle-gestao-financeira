@@ -1,23 +1,18 @@
 import { SignUp } from "@clerk/nextjs"
+import { AuthShell } from '@/components/auth-shell'
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Criar Conta
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Comece a gerenciar suas finanças de forma inteligente
-          </p>
-        </div>
-        
+    <AuthShell
+      title="Crie sua conta"
+      description="Comece com uma visão clara das suas finanças e construa seus próximos objetivos."
+    >
         <SignUp 
           appearance={{
             elements: {
-              rootBox: "mx-auto",
-              card: "shadow-xl",
+              rootBox: "mx-auto w-full",
+              cardBox: "w-full",
+              card: "w-full shadow-xl",
             }
           }}
           routing="path"
@@ -25,7 +20,6 @@ export default function SignUpPage() {
           signInUrl="/sign-in"
           forceRedirectUrl="/"
         />
-      </div>
-    </div>
+    </AuthShell>
   )
 }

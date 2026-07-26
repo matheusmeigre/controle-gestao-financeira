@@ -21,7 +21,7 @@ type ExpensesTabContentProps = {
   currentMonthExpenses: Expense[]
   filteredGeneralExpenses: Expense[]
   filteredSubscriptions: Expense[]
-  onAddExpense: (expense: Omit<Expense, 'id' | 'date' | 'userId'>) => void
+  onAddExpense: (expense: Omit<Expense, 'id' | 'userId'>) => void
   onUpdateExpense: (id: string, updates: Partial<Expense>) => void
   onDeleteExpense: (id: string) => void
 }
