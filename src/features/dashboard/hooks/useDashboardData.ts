@@ -8,27 +8,44 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '@clerk/nextjs'
+import type { CreditCard } from '@/features/cards/types'
+import type { Planning } from '@/features/planning/types'
 import type { Expense, CardBill, Income } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
 import {
-  getExpenses,
   createExpense as serverCreateExpense,
   updateExpense as serverUpdateExpense,
   deleteExpense as serverDeleteExpense,
 } from '@/server/actions/expenses'
 import {
-  getIncomes,
   createIncome as serverCreateIncome,
   deleteIncome as serverDeleteIncome,
   markIncomeAsReceived as serverMarkIncomeAsReceived,
 } from '@/server/actions/incomes'
-import { getInvoices } from '@/server/actions/invoices'
+import { updateInvoice as serverUpdateInvoice, deleteInvoice as serverDeleteInvoice } from '@/server/actions/invoices'
+import {
+  createCardBill as serverCreateCardBill,
+  updateCardBill as serverUpdateCardBill,
+  deleteCardBill as serverDeleteCardBill,
+} from '@/server/actions/card-bills'
 import * as DashboardService from '../services/dashboard.service'
 
-// Card bills ainda usa o sistema legado (localStorage) enquanto migração não é concluída
-import { loadUserData, saveUserData } from '@/lib/user-data'
+export type DashboardInitialData = {
+  expenses: Expense[]
+  cardBills: CardBill[]
+  incomes: Income[]
+  invoices: Invoice[]
+  cards: CreditCard[]
+  plannings: Planning[]
+  loadedAt: string
+  yearMonth: string
+  currentPeriod: {
+    year: number
+    month: number
+  }
+}
 
 export type DashboardFilters = {
   expenseCategory: string
@@ -41,13 +58,17 @@ export type DashboardTabs = {
   expenseSubTab: 'general' | 'subscriptions'
 }
 
-export function useDashboardData() {
+export function useDashboardData(initialData: DashboardInitialData) {
   const { user } = useUser()
 
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [cardBills, setCardBills] = useState<CardBill[]>([])
-  const [incomes, setIncomes] = useState<Income[]>([])
-  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [expenses, setExpenses] = useState<Expense[]>(initialData.expenses)
+  const [cardBills, setCardBills] = useState<CardBill[]>(initialData.cardBills)
+  const [incomes, setIncomes] = useState<Income[]>(initialData.incomes)
+  const [invoices, setInvoices] = useState<Invoice[]>(initialData.invoices)
+  const [cards] = useState<CreditCard[]>(initialData.cards)
+  const [planningAlerts] = useState(() =>
+    DashboardService.getPlanningAlerts(initialData.plannings)
+  )
 
   const [filters, setFilters] = useState<DashboardFilters>({
     expenseCategory: 'all',
@@ -61,25 +82,6 @@ export function useDashboardData() {
     main: 'expenses',
     expenseSubTab: 'general',
   })
-
-  // ─── Carregamento inicial via Server Actions ────────────────────────
-  useEffect(() => {
-    if (!user?.id) return
-    ;(async () => {
-      const [expRes, incRes, invRes] = await Promise.all([
-        getExpenses(),
-        getIncomes(),
-        getInvoices(),
-      ])
-      if (expRes.success) setExpenses(expRes.data as Expense[])
-      if (incRes.success) setIncomes(incRes.data as Income[])
-      if (invRes.success) setInvoices(invRes.data as Invoice[])
-
-      // Card bills — ainda via localStorage
-      const cardBillsData = loadUserData<CardBill>('cardBills', user.id)
-      setCardBills(cardBillsData)
-    })()
-  }, [user?.id])
 
   // ─── Actions para despesas ───────────────────────────────────────────
   const addExpense = (expense: Omit<Expense, 'id' | 'date' | 'userId'>) => {
@@ -131,46 +133,72 @@ export function useDashboardData() {
     })
   }
 
-  // ─── Actions para card bills (localStorage legado) ──────────────────
+  // ─── Actions para card bills (Supabase) ─────────────────────────────
   const addCardBill = (cardBill: Omit<CardBill, 'id' | 'date' | 'userId'>) => {
-    if (!user?.id) return
-    const newCardBill = DashboardService.createCardBill(cardBill, user.id)
-    setCardBills((prev) => {
-      const updated = [newCardBill, ...prev]
-      saveUserData('cardBills', user.id, updated)
-      return updated
-    })
-  }
-
-  const handleUpdateCardBill = (id: string, updates: Partial<CardBill>) => {
-    setCardBills((prev) => {
-      const updated = DashboardService.updateCardBill(prev, id, updates)
-      if (user?.id) saveUserData('cardBills', user.id, updated)
-      return updated
-    })
-  }
-
-  const handleDeleteCardBill = (id: string) => {
-    setCardBills((prev) => {
-      const updated = DashboardService.deleteCardBill(prev, id)
-      if (user?.id) saveUserData('cardBills', user.id, updated)
-      return updated
-    })
-  }
-
-  // ─── Actions para rendas ─────────────────────────────────────────────
-  const addIncome = (income: Omit<Income, 'id' | 'date' | 'userId'>) => {
     if (!user?.id) return
     setError(null)
     const optimisticId = crypto.randomUUID()
-    const optimistic: Income = {
-      ...income as Income,
+    const optimistic: CardBill = {
+      ...cardBill as CardBill,
       id: optimisticId,
       userId: user.id,
       date: new Date().toISOString().split('T')[0],
     }
+    setCardBills((prev) => [optimistic, ...prev])
+    serverCreateCardBill(cardBill).then((result) => {
+      if (result.success && result.data) {
+        setCardBills((prev) =>
+          prev.map((cb) => (cb.id === optimisticId ? (result.data as CardBill) : cb))
+        )
+      } else {
+        setCardBills((prev) => prev.filter((cb) => cb.id !== optimisticId))
+        setError(result.error ?? 'Erro ao criar fatura')
+      }
+    })
+  }
+
+  const handleUpdateCardBill = (id: string, updates: Partial<CardBill>) => {
+    if (!user?.id) return
+    setError(null)
+    const prev = cardBills
+    setCardBills((prev) =>
+      prev.map((cb) => (cb.id === id ? { ...cb, ...updates } : cb))
+    )
+    serverUpdateCardBill(id, updates).then((result) => {
+      if (!result.success) {
+        setCardBills(prev)
+        setError(result.error ?? 'Erro ao atualizar fatura')
+      }
+    })
+  }
+
+  const handleDeleteCardBill = (id: string) => {
+    if (!user?.id) return
+    setError(null)
+    const prev = cardBills
+    setCardBills((prev) => prev.filter((cb) => cb.id !== id))
+    serverDeleteCardBill(id).then((result) => {
+      if (!result.success) {
+        setCardBills(prev)
+        setError(result.error ?? 'Erro ao excluir fatura')
+      }
+    })
+  }
+
+  // ─── Actions para rendas ─────────────────────────────────────────────
+  const addIncome = (income: Omit<Income, 'id' | 'userId'>) => {
+    if (!user?.id) return
+    setError(null)
+    const optimisticId = crypto.randomUUID()
+    const incomeDate = income.date ?? new Date().toISOString().split('T')[0]
+    const optimistic: Income = {
+      ...income as Income,
+      id: optimisticId,
+      userId: user.id,
+      date: incomeDate,
+    }
     setIncomes((prev) => [optimistic, ...prev])
-    serverCreateIncome({ ...income, date: new Date().toISOString().split('T')[0] }).then((result) => {
+    serverCreateIncome({ ...income, date: incomeDate }).then((result) => {
       if (result.success && result.data) {
         setIncomes((prev) =>
           prev.map((i) => (i.id === optimisticId ? (result.data as Income) : i))
@@ -212,8 +240,36 @@ export function useDashboardData() {
     })
   }
 
+  // ─── Actions para faturas de cartão (Supabase) ──────────────────────
+  const handleUpdateInvoice = async (id: string, updates: Partial<Invoice>) => {
+    if (!user?.id) return
+    setError(null)
+    const prev = invoices
+    setInvoices((prev) =>
+      prev.map((inv) => (inv.id === id ? { ...inv, ...updates } : inv))
+    )
+    const result = await serverUpdateInvoice(id, updates)
+    if (!result.success) {
+      setInvoices(prev)
+      setError(result.error ?? 'Erro ao atualizar fatura')
+    }
+  }
+
+  const handleDeleteInvoice = async (id: string) => {
+    if (!user?.id) return
+    setError(null)
+    const prev = invoices
+    setInvoices((prev) => prev.filter((inv) => inv.id !== id))
+    const result = await serverDeleteInvoice(id)
+    if (!result.success) {
+      setInvoices(prev)
+      setError(result.error ?? 'Erro ao excluir fatura')
+    }
+  }
+
   // ─── Dados derivados ─────────────────────────────────────────────────
   const currentMonthData = DashboardService.getCurrentMonthData({ expenses, cardBills, incomes })
+  const summaryInvoices = DashboardService.getSummaryInvoices(invoices)
 
   const filteredGeneralExpenses = DashboardService.filterGeneralExpenses(
     currentMonthData.expenses, filters.expenseCategory
@@ -229,11 +285,15 @@ export function useDashboardData() {
   )
 
   return {
+    cards,
+    planningAlerts,
+    summaryInvoices,
     expenses, cardBills, incomes, invoices, currentMonthData,
     filteredGeneralExpenses, filteredSubscriptions, filteredCardBills, filteredIncomes,
     filters, setFilters, tabs, setTabs, error,
     addExpense, updateExpense: handleUpdateExpense, deleteExpense: handleDeleteExpense,
     addCardBill, updateCardBill: handleUpdateCardBill, deleteCardBill: handleDeleteCardBill,
     addIncome, deleteIncome: handleDeleteIncome, markIncomeAsReceived: handleMarkIncomeAsReceived,
+    updateInvoice: handleUpdateInvoice, deleteInvoice: handleDeleteInvoice,
   }
 }

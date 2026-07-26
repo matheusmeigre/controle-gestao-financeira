@@ -9,9 +9,9 @@ import {
   MonthYearPicker, 
   InvoiceImporter, 
   InvoiceDatesDisplay,
-  useInvoiceCreation,
-  InvoiceService
+  useInvoiceCreation
 } from '@/features/invoices'
+import { createInvoice } from '@/server/actions/invoices'
 import { useUser } from '@clerk/nextjs'
 import type { InvoiceItem } from '@/types/invoice'
 import type { CalculatedDates } from '@/features/invoices/utils/invoice-dates.utils'
@@ -140,10 +140,8 @@ export default function NewInvoicePage() {
       setIsSubmitting(true)
       setError(null)
       
-      // Usa InvoiceService diretamente no cliente
-      const invoiceService = new InvoiceService()
-      
-      await invoiceService.createInvoice(user.id, {
+      // Usa server action createInvoice (Supabase)
+      const result = await createInvoice({
         cardId,
         month: extractedDates?.referenceMonth || competency.month,
         year: extractedDates?.referenceYear || competency.year,
@@ -151,6 +149,10 @@ export default function NewInvoicePage() {
         dueDate: datesToUse.dueDate instanceof Date ? datesToUse.dueDate : new Date(datesToUse.dueDate),
         items,
       })
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao criar fatura')
+      }
       
       router.push('/invoices')
     } catch (err) {

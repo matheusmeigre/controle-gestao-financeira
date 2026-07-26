@@ -69,7 +69,7 @@ export function DatePicker({
         setViewDate(createLocalDate(value))
       }
     }
-  }, [value])
+  }, [value, selectedDate])
 
   const handleDateSelect = (dateString: string) => {
     setSelectedDate(dateString)

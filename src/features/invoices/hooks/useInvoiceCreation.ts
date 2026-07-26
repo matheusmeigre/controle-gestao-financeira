@@ -22,8 +22,7 @@ import { useUser } from '@clerk/nextjs'
 import type { CreditCard } from '@/features/cards/types'
 import { InvoiceDateCalculator } from '../utils/invoice-dates.utils'
 import type { InvoiceCompetency, CalculatedDates } from '../utils/invoice-dates.utils'
-
-const STORAGE_KEY = 'credit_cards'
+import { getCards } from '@/server/actions/cards'
 
 interface UseInvoiceCreationReturn {
   // Seleção de cartão
@@ -68,23 +67,20 @@ export function useInvoiceCreation(): UseInvoiceCreationReturn {
       return
     }
     
-    const loadCard = () => {
+    const loadCard = async () => {
       setIsLoadingCard(true)
       
       try {
-        const stored = localStorage.getItem(STORAGE_KEY)
+        const result = await getCards()
         
-        if (!stored) {
+        if (result.success) {
+          const foundCard = result.data.find(
+            c => c.id === cardId
+          )
+          setCard(foundCard || null)
+        } else {
           setCard(null)
-          return
         }
-        
-        const allCards: CreditCard[] = JSON.parse(stored)
-        const foundCard = allCards.find(
-          c => c.id === cardId && c.userId === user.id && c.isActive
-        )
-        
-        setCard(foundCard || null)
       } catch (error) {
         console.error('Error loading card:', error)
         setCard(null)

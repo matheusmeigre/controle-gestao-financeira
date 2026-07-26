@@ -5,9 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import type { CreditCard } from '@/types/card'
 import { CardEditForm } from '@/features/cards'
+import { getCard } from '@/server/actions/cards'
 import { Loader2 } from 'lucide-react'
-
-const STORAGE_KEY = 'credit_cards'
 
 export default function EditCardPage() {
   const { id } = useParams()
@@ -25,33 +24,25 @@ export default function EditCardPage() {
       return
     }
 
-    // Buscar cartão do localStorage
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (!stored) {
-        setError('Nenhum cartão encontrado')
+    const loadCard = async () => {
+      try {
+        const result = await getCard(id as string)
+
+        if (!result.success || !result.data) {
+          setError(result.error || 'Cartão não encontrado')
+          return
+        }
+
+        setCard(result.data)
+      } catch (err) {
+        setError('Erro ao carregar cartão')
+        console.error(err)
+      } finally {
         setIsLoading(false)
-        return
       }
-
-      const allCards: CreditCard[] = JSON.parse(stored)
-      const foundCard = allCards.find(
-        c => c.id === id && c.userId === user.id && c.isActive
-      )
-
-      if (!foundCard) {
-        setError('Cartão não encontrado')
-        setIsLoading(false)
-        return
-      }
-
-      setCard(foundCard)
-    } catch (err) {
-      setError('Erro ao carregar cartão')
-      console.error(err)
-    } finally {
-      setIsLoading(false)
     }
+
+    loadCard()
   }, [id, user, isLoaded, router])
 
   if (!isLoaded || isLoading) {

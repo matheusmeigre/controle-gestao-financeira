@@ -256,7 +256,7 @@ export function FinancialReportsView({
                 tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
               />
               <Tooltip 
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value) => formatCurrency(Number(value) || 0)}
                 contentStyle={{ 
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
@@ -314,7 +314,7 @@ export function FinancialReportsView({
                 tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
               />
               <Tooltip 
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value) => formatCurrency(Number(value) || 0)}
                 contentStyle={{ 
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',

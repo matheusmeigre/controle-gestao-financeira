@@ -20,8 +20,8 @@ export const creditCardSchema = z.object({
   }).int().min(1, 'Mínimo 1').max(31, 'Máximo 31'),
   creditLimit: z.number().positive().optional(),
   isActive: z.boolean().default(true),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
 })
 
 export const createCreditCardSchema = creditCardSchema.omit({ 

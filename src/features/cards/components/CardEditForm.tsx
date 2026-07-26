@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import { z } from 'zod'
 import type { CreditCard } from '../types'
+import { updateCard } from '@/server/actions/cards'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +16,6 @@ import { BankSelector } from './BankSelector'
 import { CreditLimitInput } from './CreditLimitInput'
 
 const CARD_BRANDS = ['Visa', 'Mastercard', 'Elo', 'American Express', 'Hipercard', 'Outros'] as const
-const STORAGE_KEY = 'credit_cards'
 
 const editCardSchema = z.object({
   nickname: z.string().min(1, 'Apelido é obrigatório').max(50),
@@ -68,29 +68,16 @@ export function CardEditForm({ card, onSuccess, onCancel }: CardEditFormProps) {
       setIsSubmitting(true)
       setError(null)
 
-      // Buscar cartões do localStorage
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (!stored) {
-        setError('Nenhum cartão encontrado')
+      if (!card.id) {
+        setError('ID do cartão não encontrado')
         return
       }
+      const result = await updateCard({ id: card.id, ...data })
 
-      const allCards: CreditCard[] = JSON.parse(stored)
-      
-      // Atualizar o cartão
-      const updatedCards = allCards.map(c => {
-        if (c.id === card.id) {
-          return {
-            ...c,
-            ...data,
-            updatedAt: new Date(),
-          }
-        }
-        return c
-      })
-
-      // Salvar no localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedCards))
+      if (!result.success) {
+        setError(result.error || 'Erro ao atualizar cartão')
+        return
+      }
 
       if (onSuccess) {
         onSuccess()

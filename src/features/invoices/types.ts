@@ -2,15 +2,15 @@ import { z } from 'zod'
 
 // Transaction item in an invoice
 export const invoiceItemSchema = z.object({
-  id: z.string().optional(),
-  invoiceId: z.string().optional(),
-  date: z.date(),
+  id: z.string().uuid().optional(),
+  invoiceId: z.string().uuid().optional(),
+  date: z.coerce.date(),
   description: z.string().min(1, 'Descrição é obrigatória'),
   amount: z.number(),
   category: z.string().default('Outros'),
-  installment: z.string().optional(), // e.g., "2/12" for parcela 2 de 12
+  installment: z.string().optional(),
   notes: z.string().optional(),
-  createdAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
 })
 
 // Invoice linked to a credit card and competency (month/year)
@@ -20,14 +20,14 @@ export const invoiceSchema = z.object({
   cardId: z.string(),
   month: z.number().min(1).max(12), // 1 = Janeiro, 12 = Dezembro
   year: z.number().min(2020).max(2100),
-  closingDate: z.date(),
-  dueDate: z.date(),
+  closingDate: z.coerce.date(),
+  dueDate: z.coerce.date(),
   totalAmount: z.number().default(0),
   paidAmount: z.number().default(0),
   isPaid: z.boolean().default(false),
   items: z.array(invoiceItemSchema).default([]),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
 })
 
 export const createInvoiceSchema = invoiceSchema.omit({ 

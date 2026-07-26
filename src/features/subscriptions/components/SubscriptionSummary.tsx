@@ -112,7 +112,7 @@ export function SubscriptionSummary({ subscriptions }: SubscriptionSummaryProps)
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number) => [formatCurrency(value), "Valor"]}
+                      formatter={(value) => [formatCurrency(Number(value) || 0), "Valor"]}
                       labelStyle={{ color: "#0f172a" }}
                     />
                   </PieChart>

@@ -32,6 +32,17 @@ export class SupabaseIncomeRepository extends SupabaseBaseRepository<Income> {
     return row
   }
 
+  async findAll(userId: string): Promise<Income[]> {
+    const supabase = this.client()
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('user_id', userId)
+      .order('registration_date', { ascending: false })
+    if (error) throw new Error(`[${this.tableName}] findAll: ${error.message}`)
+    return (data ?? []).map((row) => this.fromRow(row as Record<string, unknown>))
+  }
+
   async markAsReceived(userId: string, id: string): Promise<Income | null> {
     return this.update(userId, id, {
       status: 'received',

@@ -336,6 +336,10 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
     if (paidAmount < 0) {
       return { success: false, error: 'Valor pago não pode ser negativo' }
     }
+
+    if (paidAmount > existing.totalAmount) {
+      return { success: false, error: 'Valor pago não pode exceder o valor total da fatura' }
+    }
     
     const invoice = await invoiceRepository.update(userId, invoiceId, {
       paidAmount,
@@ -357,6 +361,23 @@ export async function markInvoiceAsPaid(invoiceId: string, paidAmount: number) {
       success: false, 
       error: 'Erro ao marcar fatura como paga' 
     }
+  }
+}
+
+export async function updateInvoice(invoiceId: string, updates: Partial<Invoice>) {
+  try {
+    const { userId } = await auth()
+    if (!userId) return { success: false, error: 'Não autenticado' }
+
+    const data = await invoiceRepository.update(userId, invoiceId, updates)
+    if (!data) return { success: false, error: 'Fatura não encontrada' }
+
+    revalidatePath(`/invoices/${invoiceId}`)
+    revalidatePath('/invoices')
+    return { success: true, data }
+  } catch (error) {
+    console.error('[updateInvoice] Error:', error)
+    return { success: false, error: 'Erro ao atualizar fatura' }
   }
 }
 

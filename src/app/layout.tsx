@@ -8,8 +8,6 @@ import { ClerkProvider } from "@clerk/nextjs"
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
-export const dynamic = 'force-dynamic'
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -42,9 +40,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    // @ts-ignore -- @clerk/nextjs v6 async ClerkProvider type issue with React 19
-    <ClerkProvider appearance={{
-      variables: { colorPrimary: '#0071e3' },
+    <ClerkProvider afterSignOutUrl="/sign-in" appearance={{
+      variables: { colorPrimary: '#000' },
       elements: {
         formButtonPrimary: 'bg-[#0071e3] hover:bg-[#0066cc]',
         card: 'shadow-sm rounded-xl'
