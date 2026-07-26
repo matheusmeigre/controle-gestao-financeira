@@ -16,6 +16,7 @@ import {
   Clock
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { BalanceValue } from '@/components/balance/balance-visibility'
 
 interface PlanningCardProps {
   planning: Planning
@@ -132,7 +133,7 @@ function PlanningCardComponent({ planning, indicators, href }: PlanningCardProps
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Atual</p>
             <p className="font-semibold text-sm font-mono">
-              {formatCurrency(planning.currentAmount)}
+              <BalanceValue>{formatCurrency(planning.currentAmount)}</BalanceValue>
             </p>
           </div>
           
@@ -165,7 +166,7 @@ function PlanningCardComponent({ planning, indicators, href }: PlanningCardProps
             {indicators.isOverBudget && (
               <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400 font-medium">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                <span>Orçamento excedido em {formatCurrency(planning.currentAmount - planning.targetAmount)}</span>
+                <span>Orçamento excedido em <BalanceValue>{formatCurrency(planning.currentAmount - planning.targetAmount)}</BalanceValue></span>
               </div>
             )}
           </div>

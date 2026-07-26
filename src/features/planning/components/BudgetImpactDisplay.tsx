@@ -2,6 +2,7 @@
 
 import type { FinancialContext } from '../types'
 import { ArrowRight } from 'lucide-react'
+import { BalanceValue } from '@/components/balance/balance-visibility'
 
 interface BudgetImpactDisplayProps {
   currentContext: FinancialContext
@@ -76,7 +77,7 @@ export function BudgetImpactDisplay({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Livre</span>
                 <span className="font-medium font-mono text-green-600 dark:text-green-400">
-                  {formatCurrency(currentFreeIncome)}
+                  <BalanceValue>{formatCurrency(currentFreeIncome)}</BalanceValue>
                 </span>
               </div>
               <p className="text-xs text-muted-foreground pt-1">
@@ -124,7 +125,7 @@ export function BudgetImpactDisplay({
                     ? 'text-red-600 dark:text-red-400' 
                     : 'text-green-600 dark:text-green-400'
                 }`}>
-                  {formatCurrency(futureFreeIncome)}
+                  <BalanceValue>{formatCurrency(futureFreeIncome)}</BalanceValue>
                 </span>
               </div>
               <p className="text-xs text-muted-foreground pt-1">
@@ -144,7 +145,7 @@ export function BudgetImpactDisplay({
         <div className="flex-1 space-y-1">
           <span className="text-xs text-muted-foreground">Redução renda livre</span>
           <p className="text-lg font-medium font-mono text-red-600 dark:text-red-400">
-            -{formatCurrency(freeIncomeReduction)}
+            <BalanceValue>-{formatCurrency(freeIncomeReduction)}</BalanceValue>
           </p>
         </div>
         <div className="flex-1 space-y-1">

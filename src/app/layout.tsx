@@ -6,6 +6,7 @@ import { Suspense } from "react"
 import { ClerkProvider } from "@clerk/nextjs"
 import { ptBR } from "@clerk/localizations"
 import { ThemeProvider } from "@/components/theme-provider"
+import { BalanceVisibilityProvider } from "@/components/balance/balance-visibility"
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
@@ -59,9 +60,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Suspense fallback={<div className="min-h-dvh bg-background" aria-busy="true" />}>{children}</Suspense>
-            <Toaster />
-            <Analytics />
+            <BalanceVisibilityProvider>
+              <Suspense fallback={<div className="min-h-dvh bg-background" aria-busy="true" />}>{children}</Suspense>
+              <Toaster />
+              <Analytics />
+            </BalanceVisibilityProvider>
           </ThemeProvider>
         </body>
       </html>
