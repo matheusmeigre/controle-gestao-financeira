@@ -1,5 +1,7 @@
 # ✅ CORREÇÕES APLICADAS COM SUCESSO!
 
+> **Documento histórico:** a versão atual usa `AppShell` no lugar de `MobileLayout`.
+
 ## 🔧 O que foi corrigido em `src/app/page.tsx`:
 
 ### 1. ✅ Lógica Financeira Correta

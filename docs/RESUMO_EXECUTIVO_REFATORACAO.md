@@ -1,5 +1,7 @@
 # 📋 RESUMO EXECUTIVO - Refatoração Mobile-First
 
+> **Documento histórico:** `MobileLayout` foi substituído pelo `AppShell` compartilhado em julho de 2026.
+
 ## ✅ Implementação Concluída
 
 ### 🎯 **Arquivos Criados (11 novos componentes)**

@@ -121,7 +121,7 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
             {subscriptions.map((subscription) => (
               <div
                 key={subscription.id}
-                className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border"
+                className="flex flex-col items-stretch justify-between gap-4 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-center"
               >
                 {editingId === subscription.id ? (
                   <div className="flex-1 space-y-3">
@@ -195,10 +195,10 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                     </div>
 
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={saveEdit} className="bg-green-600 hover:bg-green-700 text-white">
+                      <Button size="sm" onClick={saveEdit} className="bg-success text-success-foreground hover:bg-success/90" aria-label="Salvar alterações">
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEdit}>
+                      <Button size="sm" variant="outline" onClick={cancelEdit} aria-label="Cancelar edição">
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -214,13 +214,13 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                           </Badge>
                         )}
                         {subscription.status === "pending" && (
-                          <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                          <Badge variant="outline" className="border-warning/25 bg-warning/10 text-xs text-warning">
                             <Clock className="h-3 w-3 mr-1" />
                             Pendente
                           </Badge>
                         )}
                         {subscription.status === "paid" && (
-                          <Badge variant="outline" className="text-xs bg-green-100 text-green-800 border-green-200">
+                          <Badge variant="outline" className="border-success/25 bg-success/10 text-xs text-success">
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             Pago
                           </Badge>
@@ -247,28 +247,29 @@ export function SubscriptionList({ subscriptions, onUpdateSubscription, onDelete
                         </div>
                       )}
 
-                      <p className={`text-xl font-bold mt-2 ${subscription.isActive === false ? "text-muted-foreground" : "text-foreground"}`}>
+                       <p className={`mt-2 font-mono text-xl font-bold tabular-nums ${subscription.isActive === false ? "text-muted-foreground" : "text-foreground"}`}>
                         {formatCurrency(subscription.amount)}/{subscription.recurringFrequency === "yearly" ? "ano" : "mês"}
                       </p>
                     </div>
-                    <div className="flex gap-2 ml-4">
+                    <div className="ml-0 flex self-end gap-2 sm:ml-4 sm:self-auto">
                       <Button 
-                        size="sm" 
+                        size="icon"
                         variant="outline" 
                         onClick={() => toggleActive(subscription.id, subscription.isActive !== false)}
-                        className={`h-8 w-8 p-0 ${subscription.isActive === false ? "text-green-600 hover:text-green-700" : "text-gray-600 hover:text-gray-700"}`}
-                        title={subscription.isActive === false ? "Ativar assinatura" : "Inativar assinatura"}
+                        className={subscription.isActive === false ? "text-success hover:text-success" : "text-muted-foreground"}
+                        aria-label={`${subscription.isActive === false ? "Ativar" : "Inativar"} assinatura ${subscription.description}`}
                       >
                         <Power className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => startEdit(subscription)} className="h-8 w-8 p-0">
+                      <Button size="icon" variant="outline" onClick={() => startEdit(subscription)} aria-label={`Editar assinatura ${subscription.description}`}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="outline"
                         onClick={() => onDeleteSubscription(subscription.id)}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive"
+                        aria-label={`Excluir assinatura ${subscription.description}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

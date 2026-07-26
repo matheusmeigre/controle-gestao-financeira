@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { UserHeader } from '@/components/user-header'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { Label } from '@/components/ui/label'
+import { PageHeader } from '@/components/ui/page-header'
 import { useToast } from '@/hooks/use-toast'
 import { 
   usePlanning, 
@@ -17,7 +17,6 @@ import {
   PLANNING_STATUS
 } from '@/features/planning'
 import { 
-  ArrowLeft, 
   Edit, 
   Trash2, 
   CheckCircle2, 
@@ -38,7 +37,7 @@ export default function PlanningDetailPage() {
   const { toast } = useToast()
   const planningId = params.id as string
 
-  const { planning, loading } = usePlanning(planningId)
+  const { planning, loading, refresh } = usePlanning(planningId)
   const indicators = usePlanningIndicators(planning)
   const { 
     deletePlanning, 
@@ -80,6 +79,7 @@ export default function PlanningDetailPage() {
 
     try {
       await markAsCompleted(planning.id)
+      await refresh()
       toast({
         title: 'Parabéns! 🎉',
         description: 'Planejamento marcado como completo!',
@@ -104,6 +104,7 @@ export default function PlanningDetailPage() {
 
     try {
       await markAsCancelled(planning.id)
+      await refresh()
       toast({
         title: 'Planejamento cancelado',
         description: 'O planejamento foi marcado como cancelado.',
@@ -130,6 +131,7 @@ export default function PlanningDetailPage() {
     try {
       setIsAddingAmount(true)
       await addAmount(planning.id, amountToAdd)
+      await refresh()
       setAmountToAdd(0)
       toast({
         title: 'Valor adicionado!',
@@ -148,30 +150,18 @@ export default function PlanningDetailPage() {
 
   if (loading) {
     return (
-      <>
-        <UserHeader />
-        <div className="container mx-auto py-8">
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-12" role="status" aria-label="Carregando planejamento">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
-        </div>
-      </>
     )
   }
 
   if (!planning || !indicators) {
     return (
-      <>
-        <UserHeader />
-        <div className="container mx-auto py-8">
           <div className="text-center py-12">
             <p className="text-muted-foreground">Planejamento não encontrado.</p>
-            <Link href="/planning">
-              <Button className="mt-4">Voltar</Button>
-            </Link>
+            <Button asChild className="mt-4"><Link href="/planning">Voltar</Link></Button>
           </div>
-        </div>
-      </>
     )
   }
 
@@ -195,25 +185,25 @@ export default function PlanningDetailPage() {
       case PLANNING_STATUS.COMPLETED:
         return {
           label: 'Completo',
-          className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+          className: 'bg-success/10 text-success border-success/20',
           icon: CheckCircle2,
         }
       case PLANNING_STATUS.CANCELLED:
         return {
           label: 'Cancelado',
-          className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+          className: 'bg-muted text-muted-foreground',
           icon: XCircle,
         }
       case PLANNING_STATUS.IN_PROGRESS:
         return {
           label: 'Em Progresso',
-          className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+          className: 'bg-primary/10 text-primary border-primary/20',
           icon: TrendingUp,
         }
       default:
         return {
           label: 'Planejado',
-          className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+          className: 'bg-primary/10 text-primary border-primary/20',
           icon: Target,
         }
     }
@@ -226,32 +216,17 @@ export default function PlanningDetailPage() {
                    planning.status !== PLANNING_STATUS.CANCELLED
 
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 space-y-6 max-w-4xl">
-        {/* Navegação */}
-        <Link href="/planning">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
-        </Link>
-
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <span className="text-4xl">{category?.icon}</span>
-            <div>
-              <h1 className="text-3xl font-bold">{planning.name}</h1>
-              <p className="text-muted-foreground">{category?.label}</p>
-            </div>
-          </div>
-
-          <Badge className={statusConfig.className}>
+    <div className="mx-auto max-w-4xl space-y-7">
+        <PageHeader
+          backHref="/planning"
+          eyebrow={category?.label}
+          title={planning.name}
+          description="Acompanhe o progresso, atualize valores e revise as datas deste objetivo."
+          actions={<Badge className={statusConfig.className}>
             <StatusIcon className="w-4 h-4 mr-1" />
             {statusConfig.label}
-          </Badge>
-        </div>
+          </Badge>}
+        />
 
         {/* Alertas */}
         {isActive && (indicators.isOverBudget || indicators.isDelayed) && (
@@ -460,7 +435,6 @@ export default function PlanningDetailPage() {
             </Button>
           </div>
         </div>
-      </div>
-    </>
+    </div>
   )
 }

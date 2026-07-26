@@ -37,6 +37,7 @@ export function CategorySelector({
             type="button"
             disabled={disabled}
             onClick={() => onChange(category)}
+            aria-pressed={value === category}
             className={cn(
               'group relative overflow-hidden rounded-lg border-2 p-2.5 sm:p-3 text-left transition-all',
               'hover:shadow-md hover:scale-[1.02] active:scale-[0.98]',

@@ -1,51 +1,31 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { UserHeader } from '@/components/user-header'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
 import { PlanningList, PlanningSummary } from '@/features/planning'
-import { Plus, Home, Info, ChevronDown } from 'lucide-react'
+import { Plus, Info, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export default function PlanningPage() {
-  const router = useRouter()
   const [infoOpen, setInfoOpen] = useState(false)
 
-  const handlePlanningClick = (planningId: string) => {
-    router.push(`/planning/${planningId}`)
-  }
-
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 space-y-8 px-4">
-        {/* Navegação */}
-        <div className="flex items-center gap-2">
-          <Link href="/" prefetch={true}>
-            <Button variant="ghost" size="sm">
-              <Home className="mr-2 h-4 w-4" />
-              Início
-            </Button>
-          </Link>
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Planejamentos</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Acompanhe seus objetivos financeiros
-            </p>
-          </div>
-          <Link href="/planning/new" prefetch={true}>
-            <Button className="h-10">
+    <div className="space-y-7">
+        <PageHeader
+          eyebrow="Objetivos"
+          title="Planejamentos"
+          description="Transforme metas futuras em um plano mensal que cabe no seu momento financeiro."
+          actions={
+            <Button asChild>
+              <Link href="/planning/new" prefetch={true}>
               <Plus className="mr-2 h-4 w-4" />
-              Novo Planejamento
+                Novo planejamento
+              </Link>
             </Button>
-          </Link>
-        </div>
+          }
+        />
 
         {/* Resumo/KPIs */}
         <PlanningSummary />
@@ -55,6 +35,8 @@ export default function PlanningPage() {
           <button
             onClick={() => setInfoOpen(!infoOpen)}
             className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/50 transition-colors"
+            aria-expanded={infoOpen}
+            aria-controls="planning-help"
           >
             <div className="flex items-center gap-2">
               <Info className="w-4 h-4 text-muted-foreground" />
@@ -68,7 +50,7 @@ export default function PlanningPage() {
             />
           </button>
           {infoOpen && (
-            <div className="px-4 py-3 border-t border-border/50 animate-in slide-in-from-top-2 duration-200">
+            <div id="planning-help" className="px-4 py-3 border-t border-border/50 animate-in slide-in-from-top-2 duration-200">
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Planejamentos ajudam você a organizar objetivos financeiros futuros. 
                 Você pode vincular gastos reais aos planejamentos para acompanhar o progresso automaticamente.
@@ -78,8 +60,7 @@ export default function PlanningPage() {
         </div>
 
         {/* Lista de planejamentos */}
-        <PlanningList onPlanningClick={handlePlanningClick} />
-      </div>
-    </>
+        <PlanningList />
+    </div>
   )
 }

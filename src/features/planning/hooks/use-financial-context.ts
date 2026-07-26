@@ -24,18 +24,24 @@ export function useFinancialContext() {
   const { user } = useUser()
   const [context, setContext] = useState<FinancialContext | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const calculateContext = useCallback(async () => {
     if (!user?.id) { setLoading(false); return }
 
     try {
       setLoading(true)
+      setError(null)
 
       const [expRes, incRes, planRes] = await Promise.all([
         getExpenses(),
         getIncomes(),
         getPlannings(),
       ])
+
+      if (!expRes.success || !incRes.success || !planRes.success) {
+        throw new Error('Não foi possível carregar todos os dados financeiros.')
+      }
 
       const expenses = (expRes.success ? expRes.data : []) as { amount: number; date: string; isRecurring?: boolean; category?: string }[]
       const incomes = (incRes.success ? incRes.data : []) as { amount: number; date: string }[]
@@ -110,6 +116,7 @@ export function useFinancialContext() {
       })
     } catch (error) {
       console.error('[useFinancialContext] Error:', error)
+      setError(error instanceof Error ? error.message : 'Erro ao carregar contexto financeiro')
     } finally {
       setLoading(false)
     }
@@ -117,7 +124,7 @@ export function useFinancialContext() {
 
   useEffect(() => { calculateContext() }, [calculateContext])
 
-  return context
+  return { context, loading, error, retry: calculateContext }
 }
 
 export function useCalculateFinancialContext(

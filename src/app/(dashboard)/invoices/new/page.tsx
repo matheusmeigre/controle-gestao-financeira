@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Trash2, Loader2, Home, CreditCard } from 'lucide-react'
-import Link from 'next/link'
+import { Plus, Trash2, Loader2 } from 'lucide-react'
 import { CardSelector } from '@/features/cards'
 import { 
   MonthYearPicker, 
@@ -21,6 +20,9 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar } from 'lucide-react'
+import { PageHeader } from '@/components/ui/page-header'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CATEGORIES } from '@/features/categories'
 
 export default function NewInvoicePage() {
   const router = useRouter()
@@ -81,7 +83,9 @@ export default function NewInvoicePage() {
   }
   
   const handleAddManualItem = () => {
-    if (!newItem.description || !newItem.amount) {
+    const amount = parseFloat(newItem.amount)
+    if (!newItem.description || !Number.isFinite(amount) || amount <= 0) {
+      setError('Informe uma descrição e um valor maior que zero para adicionar o item.')
       return
     }
     
@@ -89,12 +93,13 @@ export default function NewInvoicePage() {
       id: crypto.randomUUID(),
       date: new Date(newItem.date),
       description: newItem.description,
-      amount: parseFloat(newItem.amount),
+      amount,
       category: newItem.category,
       createdAt: new Date(),
     }
     
     setItems(prev => [...prev, item])
+    setError(null)
     
     // Reset form
     setNewItem({
@@ -166,28 +171,14 @@ export default function NewInvoicePage() {
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
   
   return (
-    <div className="container mx-auto py-8 max-w-5xl space-y-6">
-      {/* Navegação */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <Home className="mr-2 h-4 w-4" />
-            Início
-          </Button>
-        </Link>
-        <Link href="/invoices">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Faturas
-          </Button>
-        </Link>
-        <Link href="/cards">
-          <Button variant="ghost" size="sm">
-            <CreditCard className="mr-2 h-4 w-4" />
-            Gerenciar Cartões
-          </Button>
-        </Link>
-      </div>
+    <div className="mx-auto max-w-5xl space-y-7">
+      <PageHeader
+        backHref="/invoices"
+        backLabel="Voltar para faturas"
+        eyebrow="Nova fatura"
+        title="Registrar fatura"
+        description="Escolha o cartão, importe um arquivo ou adicione os itens manualmente."
+      />
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
@@ -223,13 +214,13 @@ export default function NewInvoicePage() {
                   Datas da Fatura
                 </CardTitle>
                 {extractedDates && (
-                  <Badge variant="default" className="bg-green-600">
-                    ✓ Extraídas do arquivo
+                  <Badge variant="default" className="bg-success text-success-foreground">
+                    Extraidas do arquivo
                   </Badge>
                 )}
                 {!extractedDates && calculatedDates && (
                   <Badge variant="outline">
-                    🧮 Calculadas automaticamente
+                    Calculadas automaticamente
                   </Badge>
                 )}
               </div>
@@ -267,7 +258,7 @@ export default function NewInvoicePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
               <div className="space-y-2">
                 <Label htmlFor="itemDate">Data</Label>
                 <Input
@@ -278,7 +269,7 @@ export default function NewInvoicePage() {
                 />
               </div>
               
-              <div className="space-y-2 col-span-2">
+              <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="itemDescription">Descrição</Label>
                 <Input
                   id="itemDescription"
@@ -298,6 +289,20 @@ export default function NewInvoicePage() {
                   value={newItem.amount}
                   onChange={(e) => setNewItem(prev => ({ ...prev, amount: e.target.value }))}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="itemCategory">Categoria</Label>
+                <Select value={newItem.category} onValueChange={(category) => setNewItem((prev) => ({ ...prev, category }))}>
+                  <SelectTrigger id="itemCategory">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
@@ -358,8 +363,9 @@ export default function NewInvoicePage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveItem(item.id!)}
+                        aria-label={`Remover ${item.description}`}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
                   </div>
@@ -371,7 +377,7 @@ export default function NewInvoicePage() {
         
         {/* Error Message */}
         {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-800">
+          <div className="rounded-lg border border-destructive/25 bg-destructive/10 p-4 text-sm text-destructive" role="alert">
             {error}
           </div>
         )}

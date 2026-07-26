@@ -24,12 +24,12 @@ export function InvoicesSection({ invoices, cards, onUpdateInvoice, onDeleteInvo
             Faturas dos seus cartões de crédito
           </p>
         </div>
-        <Link href="/invoices/new">
-          <Button className="gap-2">
+        <Button asChild className="gap-2">
+          <Link href="/invoices/new">
             <Plus className="w-4 h-4" />
             Nova Fatura
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       {cards.length === 0 && (
@@ -39,12 +39,12 @@ export function InvoicesSection({ invoices, cards, onUpdateInvoice, onDeleteInvo
           <p className="text-sm text-muted-foreground mb-6 max-w-xs">
             Cadastre seus cartões de crédito para começar a gerenciar suas faturas
           </p>
-          <Link href="/cards/new">
-            <Button>
+          <Button asChild>
+            <Link href="/cards/new">
               <CreditCard className="w-4 h-4 mr-2" />
               Cadastrar Cartão
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       )}
 
@@ -55,12 +55,12 @@ export function InvoicesSection({ invoices, cards, onUpdateInvoice, onDeleteInvo
           <p className="text-sm text-muted-foreground mb-6 max-w-xs">
             Crie sua primeira fatura para controlar os gastos do cartão
           </p>
-          <Link href="/invoices/new">
-            <Button>
+          <Button asChild>
+            <Link href="/invoices/new">
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeira Fatura
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       )}
 
@@ -73,12 +73,12 @@ export function InvoicesSection({ invoices, cards, onUpdateInvoice, onDeleteInvo
             onDeleteInvoice={onDeleteInvoice ?? (async () => {})}
           />
           <div className="mt-4 flex justify-center">
-            <Link href="/invoices">
-              <Button variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/invoices">
                 Gerenciar todas as faturas
                 <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </>
       )}

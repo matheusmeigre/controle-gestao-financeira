@@ -1,5 +1,7 @@
 # ✅ Checklist de Implementação - Mobile-First Refactor
 
+> **Documento histórico:** desde julho de 2026, os itens sobre `MobileLayout` foram substituídos pelo `AppShell` compartilhado e pela navegação orientada por rotas.
+
 ## 📋 Status Geral
 
 ```

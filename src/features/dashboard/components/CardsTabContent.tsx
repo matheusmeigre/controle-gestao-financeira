@@ -24,6 +24,7 @@ import { Receipt, CreditCard, AlertCircle, Filter } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { CardBill } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
+import type { CreditCard as CreditCardType } from '@/features/cards/types'
 
 type CardsTabContentProps = {
   categoryFilter: string
@@ -31,6 +32,7 @@ type CardsTabContentProps = {
   currentMonthCardBills: CardBill[]
   filteredCardBills: CardBill[]
   invoices?: Invoice[] // Adicionado suporte para Invoices
+  cards?: CreditCardType[]
   onAddCardBill: (cardBill: Omit<CardBill, 'id' | 'date' | 'userId'>) => void
   onUpdateCardBill: (id: string, updates: Partial<CardBill>) => void
   onDeleteCardBill: (id: string) => void
@@ -42,6 +44,7 @@ export function CardsTabContent({
   currentMonthCardBills,
   filteredCardBills,
   invoices = [],
+  cards = [],
   onAddCardBill,
   onUpdateCardBill,
   onDeleteCardBill,
@@ -93,44 +96,55 @@ export function CardsTabContent({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os cartões</SelectItem>
-                    {availableCards.map(cardId => (
+                    {availableCards.map((cardId, index) => {
+                      const card = cards.find((item) => item.id === cardId)
+                      return (
                       <SelectItem key={cardId} value={cardId}>
-                        Cartão {cardId.slice(-4)}
+                        {card ? `${card.nickname} | final ${card.last4Digits}` : `Cartão cadastrado ${index + 1}`}
                       </SelectItem>
-                    ))}
+                      )
+                    })}
                   </SelectContent>
                 </Select>
               )}
               
-              <Link href="/invoices">
-                <Button variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm">
+                <Link href="/invoices">
                   <Receipt className="h-4 w-4 mr-2" />
                   Gerenciar Faturas
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
 
           {filteredInvoices.length > 0 ? (
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {filteredInvoices.map((invoice) => (
-                <Link key={invoice.id} href="/invoices">
+                <Link key={invoice.id} href={`/invoices/${invoice.id}`}>
                   <div className="bg-card border rounded-lg p-4 hover:border-primary/50 transition-colors cursor-pointer">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <p className="font-medium text-sm text-muted-foreground">
                           {['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'][invoice.month - 1]} {invoice.year}
                         </p>
+                        {(() => {
+                          const card = cards.find((item) => item.id === invoice.cardId)
+                          return card ? (
+                            <p className="mt-1 text-xs text-foreground/75">
+                              {card.nickname} | final {card.last4Digits}
+                            </p>
+                          ) : null
+                        })()}
                         <p className="text-xs text-muted-foreground mt-1">
                           {invoice.items.length} {invoice.items.length === 1 ? 'item' : 'itens'}
                         </p>
                       </div>
                       {invoice.isPaid ? (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium rounded">
-                          ✓ Paga
+                        <span className="rounded bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                          Paga
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-medium rounded">
+                        <span className="rounded bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
                           Pendente
                         </span>
                       )}
@@ -144,7 +158,7 @@ export function CardsTabContent({
                     {invoice.paidAmount > 0 && (
                       <div className="flex items-baseline justify-between mt-1">
                         <span className="text-xs text-muted-foreground">Pago</span>
-                        <span className="text-sm font-medium text-green-600 dark:text-green-500">
+                        <span className="text-sm font-medium text-success">
                           {formatCurrency(invoice.paidAmount)}
                         </span>
                       </div>
@@ -186,7 +200,7 @@ export function CardsTabContent({
           </div>
           
           <div className="bg-muted/50 border border-dashed rounded-lg p-4 text-sm text-muted-foreground">
-            💡 <strong>Dica:</strong> Use o botão <strong>+</strong> no canto inferior direito para adicionar novas faturas de cartão.
+            <strong>Dica:</strong> Use o botão <strong>+</strong> no canto inferior direito para adicionar novas faturas de cartão.
           </div>
 
           <CardBillsListV2
@@ -206,18 +220,18 @@ export function CardsTabContent({
             Crie uma fatura para um cartão cadastrado ou gerencie seus cartões
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link href="/invoices/new">
-              <Button>
+            <Button asChild>
+              <Link href="/invoices/new">
                 <Receipt className="mr-2 h-4 w-4" />
                 Nova Fatura
-              </Button>
-            </Link>
-            <Link href="/cards">
-              <Button variant="outline">
+              </Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/cards">
                 <CreditCard className="mr-2 h-4 w-4" />
                 Gerenciar Cartões
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       )}

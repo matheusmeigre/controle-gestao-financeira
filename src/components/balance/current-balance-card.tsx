@@ -23,7 +23,7 @@ export function CurrentBalanceCard({ summary, className }: CurrentBalanceCardPro
     : TrendingDown
 
   return (
-    <Card className={className}>
+    <Card className={`overflow-hidden border-primary/20 bg-[linear-gradient(145deg,var(--card),color-mix(in_oklab,var(--primary)_7%,var(--card)))] ${className ?? ''}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-sm font-semibold md:text-base">
@@ -32,7 +32,9 @@ export function CurrentBalanceCard({ summary, className }: CurrentBalanceCardPro
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                <button type="button" className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Como o saldo em conta é calculado">
+                  <Info className="size-4" aria-hidden="true" />
+                </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-[280px]">
                 <p className="text-xs">
@@ -43,13 +45,15 @@ export function CurrentBalanceCard({ summary, className }: CurrentBalanceCardPro
             </Tooltip>
           </TooltipProvider>
         </div>
-        <Wallet className={`h-4 w-4 ${balanceState.color} flex-shrink-0`} />
+        <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Wallet className="size-4" aria-hidden="true" />
+        </span>
       </CardHeader>
 
       <CardContent>
-        <div className={`text-2xl font-bold tracking-tight ${balanceState.color} flex items-center gap-2 mb-4 md:text-3xl`}>
+        <div className={`mb-4 flex items-center gap-2 font-mono text-2xl font-bold tracking-tight tabular-nums ${balanceState.color} md:text-3xl`}>
           <BalanceIcon className="h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
-          <span>{formatCurrency(Math.abs(currentBalance))}</span>
+           <span>{formatCurrency(currentBalance)}</span>
         </div>
 
         <div className="space-y-2 text-sm">

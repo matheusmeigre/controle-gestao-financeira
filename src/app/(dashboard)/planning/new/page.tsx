@@ -1,12 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { UserHeader } from '@/components/user-header'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
 import { IntelligentPlanningForm, usePlannings } from '@/features/planning'
 import type { Planning } from '@/features/planning'
-import { ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
 
 export default function NewPlanningPage() {
   const router = useRouter()
@@ -22,31 +19,19 @@ export default function NewPlanningPage() {
   }
 
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 space-y-8 px-4">
-        {/* Navegação */}
-        <Link href="/planning" prefetch={true}>
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
-          </Button>
-        </Link>
-
-        {/* Header Minimalista */}
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-semibold">Novo Planejamento</h1>
-          <p className="text-muted-foreground mt-1">
-            Defina seu objetivo e veja simulações em tempo real
-          </p>
-        </div>
+    <div className="mx-auto max-w-5xl space-y-7">
+        <PageHeader
+          backHref="/planning"
+          eyebrow="Novo objetivo"
+          title="Criar planejamento"
+          description="Defina sua meta e acompanhe a simulação de impacto no orçamento em tempo real."
+        />
 
         {/* Formulário Inteligente */}
         <IntelligentPlanningForm 
           onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
-      </div>
-    </>
+    </div>
   )
 }

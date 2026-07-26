@@ -33,10 +33,10 @@ export function FloatingActionButton({
         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         
         // Mobile-first positioning (thumb zone)
-        "bottom-20 right-4 w-14 h-14",
+        "bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 w-14 h-14",
         
         // Tablet/Desktop - optional repositioning
-        "md:bottom-6 md:right-6 md:w-16 md:h-16",
+        "md:bottom-6 md:right-6 md:w-14 md:h-14",
         
         className
       )}
@@ -67,8 +67,8 @@ export function ExtendedFAB({ onClick, label, icon }: ExtendedFABProps) {
         "rounded-full shadow-lg hover:shadow-xl",
         "transition-all duration-200 active:scale-95",
         "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-        "bottom-20 right-4 h-14",
-        "md:bottom-6 md:right-6 md:h-16"
+        "bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 h-14",
+        "md:bottom-6 md:right-6 md:h-14"
       )}
       aria-label={label}
     >

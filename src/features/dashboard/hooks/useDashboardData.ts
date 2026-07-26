@@ -38,6 +38,7 @@ export type DashboardInitialData = {
   incomes: Income[]
   invoices: Invoice[]
   cards: CreditCard[]
+  allCards: CreditCard[]
   plannings: Planning[]
   loadedAt: string
   yearMonth: string
@@ -66,6 +67,7 @@ export function useDashboardData(initialData: DashboardInitialData) {
   const [incomes, setIncomes] = useState<Income[]>(initialData.incomes)
   const [invoices, setInvoices] = useState<Invoice[]>(initialData.invoices)
   const [cards] = useState<CreditCard[]>(initialData.cards)
+  const [allCards] = useState<CreditCard[]>(initialData.allCards)
   const [planningAlerts] = useState(() =>
     DashboardService.getPlanningAlerts(initialData.plannings)
   )
@@ -84,7 +86,7 @@ export function useDashboardData(initialData: DashboardInitialData) {
   })
 
   // ─── Actions para despesas ───────────────────────────────────────────
-  const addExpense = (expense: Omit<Expense, 'id' | 'date' | 'userId'>) => {
+  const addExpense = (expense: Omit<Expense, 'id' | 'userId'>) => {
     if (!user?.id) return
     setError(null)
     const optimisticId = crypto.randomUUID()
@@ -92,7 +94,7 @@ export function useDashboardData(initialData: DashboardInitialData) {
       ...expense as Expense,
       id: optimisticId,
       userId: user.id,
-      date: new Date().toISOString().split('T')[0],
+      date: expense.date,
     }
     setExpenses((prev) => [optimistic, ...prev])
     serverCreateExpense(expense).then((result) => {
@@ -116,6 +118,10 @@ export function useDashboardData(initialData: DashboardInitialData) {
       if (!result.success) {
         setExpenses(prev)
         setError(result.error ?? 'Erro ao atualizar despesa')
+      } else if (result.data) {
+        setExpenses((items) =>
+          items.map((expense) => expense.id === id ? (result.data as Expense) : expense)
+        )
       }
     })
   }
@@ -285,7 +291,7 @@ export function useDashboardData(initialData: DashboardInitialData) {
   )
 
   return {
-    cards,
+    cards, allCards,
     planningAlerts,
     summaryInvoices,
     expenses, cardBills, incomes, invoices, currentMonthData,

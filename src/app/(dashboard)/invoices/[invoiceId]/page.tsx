@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Calendar, CreditCard as CreditCardIcon, DollarSign, Receipt, Home, Check, AlertCircle } from 'lucide-react'
-import Link from 'next/link'
+import { Calendar, DollarSign, Receipt, Check, AlertCircle } from 'lucide-react'
 import { useUser } from '@clerk/nextjs'
 import { getInvoice, updateInvoice } from '@/server/actions/invoices'
 import { Button } from '@/components/ui/button'
@@ -11,9 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { getCards } from '@/server/actions/cards'
+import { getCard } from '@/server/actions/cards'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
+import { PageHeader } from '@/components/ui/page-header'
+import { Progress } from '@/components/ui/progress'
+import { useToast } from '@/hooks/use-toast'
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -27,11 +29,13 @@ export default function InvoiceDetailPage({
 }) {
   const { user } = useUser()
   const router = useRouter()
+  const { toast } = useToast()
   const [invoice, setInvoice] = useState<Invoice | null>(null)
   const [card, setCard] = useState<CardType | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [paidAmount, setPaidAmount] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
   
   // Calcula o status da fatura
   const getInvoiceStatus = () => {
@@ -61,14 +65,13 @@ export default function InvoiceDetailPage({
     const amount = parseFloat(paidAmount.replace(/[^\d,]/g, '').replace(',', '.'))
     
     if (isNaN(amount) || amount < 0) {
-      alert('Digite um valor válido')
+      setPaymentError('Digite um valor válido para o pagamento.')
       return
     }
     
     if (amount > invoice.totalAmount) {
-      if (!confirm('O valor informado é maior que o total da fatura. Deseja continuar?')) {
-        return
-      }
+      setPaymentError('O valor pago não pode ser maior que o total da fatura.')
+      return
     }
     
     try {
@@ -82,9 +85,11 @@ export default function InvoiceDetailPage({
       if (!result.success) throw new Error(result.error)
       setInvoice({ ...invoice, paidAmount: amount, isPaid: amount >= invoice.totalAmount })
       setPaidAmount('')
+      setPaymentError(null)
+      toast({ title: 'Pagamento atualizado', description: 'O status da fatura foi recalculado.' })
     } catch (error) {
       console.error('Erro ao atualizar pagamento:', error)
-      alert('Erro ao salvar pagamento')
+      setPaymentError('Não foi possível salvar o pagamento. Tente novamente.')
     } finally {
       setIsSaving(false)
     }
@@ -103,9 +108,11 @@ export default function InvoiceDetailPage({
       
       if (!result.success) throw new Error(result.error)
       setInvoice({ ...invoice, paidAmount: invoice.totalAmount, isPaid: true })
+      setPaymentError(null)
+      toast({ title: 'Fatura paga', description: 'O pagamento total foi registrado.' })
     } catch (error) {
       console.error('Erro ao marcar como paga:', error)
-      alert('Erro ao marcar fatura como paga')
+      setPaymentError('Não foi possível marcar a fatura como paga.')
     } finally {
       setIsSaving(false)
     }
@@ -127,11 +134,9 @@ export default function InvoiceDetailPage({
         
         setInvoice(result.data)
         
-        const cardResult = await getCards()
+        const cardResult = await getCard(result.data.cardId)
         if (cardResult.success) {
-          const allCards = cardResult.data as CardType[]
-          const foundCard = allCards.find(c => c.id === result.data!.cardId)
-          setCard(foundCard || null)
+          setCard(cardResult.data as CardType)
         }
       } catch (error) {
         console.error('Erro ao carregar fatura:', error)
@@ -146,10 +151,8 @@ export default function InvoiceDetailPage({
   
   if (isLoading || !invoice) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-label="Carregando fatura">
           <div className="text-muted-foreground">Carregando fatura...</div>
-        </div>
       </div>
     )
   }
@@ -175,49 +178,21 @@ export default function InvoiceDetailPage({
   })).sort((a, b) => b.total - a.total)
   
   return (
-    <div className="container mx-auto py-8 max-w-6xl space-y-6">
-      {/* Navegação */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <Home className="mr-2 h-4 w-4" />
-            Início
-          </Button>
-        </Link>
-        <Link href="/invoices">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para Faturas
-          </Button>
-        </Link>
-        <Link href="/cards">
-          <Button variant="ghost" size="sm">
-            <CreditCardIcon className="mr-2 h-4 w-4" />
-            Gerenciar Cartões
-          </Button>
-        </Link>
-      </div>
-      
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">
-            {MONTHS[invoice.month - 1]} {invoice.year}
-          </h1>
-          {card && (
-            <p className="text-muted-foreground">
-              {card.nickname} • {card.bankName} • •••• {card.last4Digits}
-            </p>
-          )}
-        </div>
-        {status === 'Paga' ? (
-          <Badge className="bg-green-500 text-lg px-4 py-2">Paga</Badge>
+    <div className="mx-auto max-w-6xl space-y-7">
+      <PageHeader
+        backHref="/invoices"
+        backLabel="Voltar para faturas"
+        eyebrow="Detalhes da fatura"
+        title={`${MONTHS[invoice.month - 1]} ${invoice.year}`}
+        description={card ? `${card.nickname} | ${card.bankName} | final ${card.last4Digits}` : undefined}
+        actions={status === 'Paga' ? (
+          <Badge className="bg-success px-4 py-2 text-success-foreground">Paga</Badge>
         ) : status === 'Atrasada' ? (
-          <Badge className="bg-red-500 text-lg px-4 py-2">Atrasada</Badge>
+          <Badge variant="destructive" className="px-4 py-2">Atrasada</Badge>
         ) : (
-          <Badge variant="outline" className="text-lg px-4 py-2">Pendente</Badge>
+          <Badge variant="outline" className="px-4 py-2">Pendente</Badge>
         )}
-      </div>
+      />
       
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -314,12 +289,7 @@ export default function InvoiceDetailPage({
             <CardTitle>Progresso de Pagamento</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="w-full bg-muted rounded-full h-4">
-              <div
-                className="bg-green-500 h-4 rounded-full transition-all"
-                style={{ width: `${Math.min(percentage, 100)}%` }}
-              />
-            </div>
+            <Progress value={percentage} className="h-3" indicatorClassName="bg-success" aria-label="Percentual pago da fatura" />
             <p className="text-sm text-muted-foreground mt-2">
               Restante: {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
@@ -340,7 +310,7 @@ export default function InvoiceDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-end gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="flex-1">
                 <Label htmlFor="paidAmount">Valor Pago</Label>
                 <Input
@@ -359,6 +329,12 @@ export default function InvoiceDetailPage({
                 {isSaving ? 'Salvando...' : 'Atualizar Pagamento'}
               </Button>
             </div>
+
+            {paymentError && (
+              <div className="rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+                {paymentError}
+              </div>
+            )}
             
             <div className="flex items-center gap-2 pt-2 border-t">
               <Button
@@ -373,13 +349,13 @@ export default function InvoiceDetailPage({
             </div>
             
             {status === 'Atrasada' && (
-              <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+              <div className="flex items-start gap-2 rounded-lg border border-destructive/25 bg-destructive/10 p-3">
+                <AlertCircle className="mt-0.5 h-5 w-5 text-destructive" />
                 <div>
-                  <p className="text-sm font-medium text-red-900 dark:text-red-100">
+                  <p className="text-sm font-medium text-destructive">
                     Fatura em Atraso
                   </p>
-                  <p className="text-sm text-red-700 dark:text-red-300">
+                  <p className="text-sm text-muted-foreground">
                     O vencimento desta fatura já passou. Realize o pagamento o quanto antes para evitar juros e multas.
                   </p>
                 </div>

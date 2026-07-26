@@ -1,5 +1,7 @@
 # 📱 Refatoração Mobile-First - Índice de Documentação
 
+> **Documento histórico:** a arquitetura atual usa `AppShell`, `DesktopNavigation` e `BottomNavigation`. Referências a `MobileLayout` e ao App Shell como melhoria futura descrevem a implementação anterior.
+
 ## 🎯 Início Rápido
 
 **Quer começar já?** → [QUICKSTART_MOBILE_REFACTOR.md](./QUICKSTART_MOBILE_REFACTOR.md)
