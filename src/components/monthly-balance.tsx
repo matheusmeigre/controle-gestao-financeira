@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, TrendingDown, Minus, Wallet } from "lucide-react"
 import type { Income, Expense, CardBill } from "@/types/expense"
+import { BalanceValue } from "@/components/balance/balance-visibility"
 
 interface MonthlyBalanceProps {
   incomes: Income[]
@@ -51,7 +52,7 @@ export function MonthlyBalance({ incomes, expenses, cardBills }: MonthlyBalanceP
       <CardContent>
         <div className={`text-xl sm:text-2xl md:text-3xl font-bold ${balanceColor} flex items-center gap-1.5 sm:gap-2 flex-wrap`}>
           <BalanceIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 flex-shrink-0" />
-          <span className="break-words">{formatCurrency(Math.abs(balance))}</span>
+          <span className="break-words"><BalanceValue>{formatCurrency(Math.abs(balance))}</BalanceValue></span>
         </div>
         <div className="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2 text-sm">
           <div className="flex justify-between items-center gap-2">

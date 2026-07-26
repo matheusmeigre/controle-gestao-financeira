@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { AnimatedNumber } from '@/components/ui/animated-number'
 import type { PlanningSimulation } from '../types'
 import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
+import { BalanceValue, useBalanceVisibility } from '@/components/balance/balance-visibility'
 
 interface PlanningSimulationDisplayProps {
   simulation: PlanningSimulation
@@ -16,6 +17,7 @@ export function PlanningSimulationDisplay({
   targetAmount,
   currentAmount 
 }: PlanningSimulationDisplayProps) {
+  const { balancesVisible } = useBalanceVisibility()
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -60,7 +62,7 @@ export function PlanningSimulationDisplay({
           />
         </p>
         <p className="text-sm text-muted-foreground">
-          Para economizar {formatCurrency(remaining)}
+          Para economizar <BalanceValue>{formatCurrency(remaining)}</BalanceValue>
         </p>
       </div>
 
@@ -129,7 +131,11 @@ export function PlanningSimulationDisplay({
       {!simulation.isViable && simulation.viabilityReason && (
         <div className="flex items-start gap-3 p-4 bg-background border-l-4 border-red-500 rounded">
           <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-foreground/80">{simulation.viabilityReason}</p>
+          <p className="text-sm text-foreground/80">
+            {balancesVisible
+              ? simulation.viabilityReason
+              : 'O valor mensal necessário excede sua renda livre.'}
+          </p>
         </div>
       )}
     </div>

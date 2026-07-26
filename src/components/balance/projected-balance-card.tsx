@@ -18,6 +18,7 @@ import { Progress } from '@/components/ui/progress'
 import { formatCurrency, calculateExpensePercentage } from '@/lib/financial-calculations'
 import { useBalanceState } from '@/hooks/use-financial-summary'
 import type { FinancialSummary } from '@/lib/financial-calculations'
+import { BalanceValue } from './balance-visibility'
 
 interface ProjectedBalanceCardProps {
   summary: FinancialSummary
@@ -83,7 +84,7 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
           
           <div className={`flex items-center gap-2 font-mono text-xl font-bold tabular-nums ${balanceState.color} md:text-2xl`}>
             <BalanceIcon className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
-            <span>{formatCurrency(projectedBalance)}</span>
+            <span><BalanceValue>{formatCurrency(projectedBalance)}</BalanceValue></span>
           </div>
         </div>
         
@@ -107,14 +108,14 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Receitas previstas:</span>
             <span className="font-medium text-success">
-              {formatCurrency(totalExpectedIncomes)}
+              <BalanceValue>{formatCurrency(totalExpectedIncomes)}</BalanceValue>
             </span>
           </div>
           
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Despesas previstas:</span>
             <span className="font-medium text-destructive">
-              -{formatCurrency(totalExpectedExpenses)}
+              <BalanceValue>-{formatCurrency(totalExpectedExpenses)}</BalanceValue>
             </span>
           </div>
 
@@ -124,13 +125,13 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
               <div className="flex justify-between items-center text-[11px]">
                 <span className="text-muted-foreground">Faturas (minha parte):</span>
                 <span className="font-medium text-destructive/80">
-                  -{formatCurrency(details.invoices.expected)}
+                  <BalanceValue>-{formatCurrency(details.invoices.expected)}</BalanceValue>
                 </span>
               </div>
               <div className="flex justify-between items-center text-[11px]">
                 <span className="text-muted-foreground">Total bruto faturas:</span>
                 <span className="text-muted-foreground/70">
-                  {formatCurrency(details.invoices.totalBeforeSplit)}
+                  <BalanceValue>{formatCurrency(details.invoices.totalBeforeSplit)}</BalanceValue>
                 </span>
               </div>
             </div>
@@ -143,7 +144,7 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-muted-foreground">A receber:</span>
                    <span className="text-success/80">
-                    +{formatCurrency(details.pendingIncomes)}
+                    <BalanceValue>+{formatCurrency(details.pendingIncomes)}</BalanceValue>
                   </span>
                 </div>
               )}
@@ -152,7 +153,7 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-muted-foreground">A pagar:</span>
                    <span className="text-destructive/80">
-                    -{formatCurrency(details.pendingExpenses)}
+                    <BalanceValue>-{formatCurrency(details.pendingExpenses)}</BalanceValue>
                   </span>
                 </div>
               )}

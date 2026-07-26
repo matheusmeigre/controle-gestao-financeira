@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { Label } from '@/components/ui/label'
 import { PageHeader } from '@/components/ui/page-header'
+import { BalanceValue } from '@/components/balance/balance-visibility'
 import { useToast } from '@/hooks/use-toast'
 import { 
   usePlanning, 
@@ -240,7 +241,7 @@ export default function PlanningDetailPage() {
                       Orçamento Estourado
                     </p>
                     <p className="text-sm text-red-700 dark:text-red-300">
-                      Você já gastou {formatCurrency(planning.currentAmount - planning.targetAmount)} a 
+                      Você já gastou <BalanceValue>{formatCurrency(planning.currentAmount - planning.targetAmount)}</BalanceValue> a
                       mais do que o planejado.
                     </p>
                   </div>
@@ -298,7 +299,7 @@ export default function PlanningDetailPage() {
                   <DollarSign className="w-4 h-4" />
                   <span>Valor Atual</span>
                 </div>
-                <p className="text-2xl font-bold">{formatCurrency(planning.currentAmount)}</p>
+                <p className="text-2xl font-bold"><BalanceValue>{formatCurrency(planning.currentAmount)}</BalanceValue></p>
               </div>
 
               <div className="space-y-1">
@@ -314,7 +315,7 @@ export default function PlanningDetailPage() {
                   <TrendingUp className="w-4 h-4" />
                   <span>Restante</span>
                 </div>
-                <p className="text-2xl font-bold">{formatCurrency(indicators.amountRemaining)}</p>
+                <p className="text-2xl font-bold"><BalanceValue>{formatCurrency(indicators.amountRemaining)}</BalanceValue></p>
               </div>
             </div>
           </div>
