@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
 import { SupabaseIncomeRepository } from '@/features/incomes/services/income.supabase.repository'
 import type { Income, CreateIncomeInput, UpdateIncomeInput } from '@/features/incomes/types'
+import { isValidDateString } from '@/lib/date-utils'
 
 const repo = new SupabaseIncomeRepository()
 
@@ -24,8 +25,18 @@ export async function createIncome(input: CreateIncomeInput) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
+    if (!input.description?.trim()) {
+      return { success: false as const, error: 'Descrição é obrigatória' }
+    }
+    if (!Number.isFinite(input.amount) || input.amount <= 0) {
+      return { success: false as const, error: 'Valor deve ser maior que zero' }
+    }
+    if (!isValidDateString(input.date)) {
+      return { success: false as const, error: 'Data inválida' }
+    }
     const income: Income = {
       ...input,
+      description: input.description.trim(),
       id: crypto.randomUUID(),
       userId,
       date: input.date ?? new Date().toISOString().split('T')[0],

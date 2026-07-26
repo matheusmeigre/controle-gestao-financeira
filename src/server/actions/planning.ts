@@ -80,6 +80,25 @@ export async function updatePlanning(input: UpdatePlanningInput) {
   }
 }
 
+export async function addAmountToPlanning(planningId: string, amount: number) {
+  try {
+    const { userId } = await auth()
+    if (!userId) return { success: false, error: 'Não autenticado' }
+    if (!planningId) return { success: false, error: 'ID é obrigatório' }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { success: false, error: 'Valor deve ser maior que zero' }
+    }
+
+    const data = await repo.incrementAmount(userId, planningId, amount)
+    if (!data) return { success: false, error: 'Planejamento não encontrado' }
+    revalidatePath('/planning')
+    return { success: true, data }
+  } catch (error) {
+    console.error('[addAmountToPlanning] Error:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Erro ao adicionar valor' }
+  }
+}
+
 export async function deletePlanning(planningId: string) {
   try {
     const { userId } = await auth()

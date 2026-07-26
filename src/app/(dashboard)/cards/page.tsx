@@ -1,55 +1,29 @@
-import { CreditCard as CreditCardIcon, Plus, Home, Receipt, Target } from 'lucide-react'
+import type { Metadata } from 'next'
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
 import { CardsList } from '@/features/cards'
-import { UserHeader } from '@/components/user-header'
+
+export const metadata: Metadata = { title: 'Cartões' }
 
 export default function CardsPage() {
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 space-y-6">
-      {/* Navegação */}
-      <div className="flex items-center gap-2">
-        <Link href="/">
-          <Button variant="ghost" size="sm">
-            <Home className="mr-2 h-4 w-4" />
-            Início
-          </Button>
-        </Link>
-        <Link href="/planning">
-          <Button variant="ghost" size="sm">
-            <Target className="mr-2 h-4 w-4" />
-            Planejamento
-          </Button>
-        </Link>
-        <Link href="/invoices">
-          <Button variant="ghost" size="sm">
-            <Receipt className="mr-2 h-4 w-4" />
-            Ver Faturas
-          </Button>
-        </Link>
-      </div>
-      
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Meus Cartões</h1>
-          <p className="text-muted-foreground">
-            Gerencie seus cartões de crédito cadastrados
-          </p>
-        </div>
-        <Link href="/cards/new">
-          <Button>
+    <div className="space-y-7">
+      <PageHeader
+        eyebrow="Carteira"
+        title="Meus cartões"
+        description="Gerencie limites, vencimentos e os cartões usados nas suas faturas."
+        actions={
+          <Button asChild>
+            <Link href="/cards/new">
             <Plus className="mr-2 h-4 w-4" />
-            Novo Cartão
+              Novo cartão
+            </Link>
           </Button>
-        </Link>
-      </div>
-      
-      {/* Cards List */}
+        }
+      />
       <CardsList />
-      </div>
-    </>
+    </div>
   )
 }

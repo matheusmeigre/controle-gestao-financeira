@@ -1,5 +1,7 @@
 # 🎯 Guia de Implementação Rápida - Mobile-First
 
+> **Documento histórico:** não execute os comandos de cópia abaixo. A aplicação atual já usa `AppShell`, `DesktopNavigation` e `BottomNavigation`; `MobileLayout` e `page-mobile-first.tsx` não fazem mais parte da arquitetura.
+
 ## ⚡ Quick Start (5 minutos)
 
 ### 1. Ativar o Novo Layout

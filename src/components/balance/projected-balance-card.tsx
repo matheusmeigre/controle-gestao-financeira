@@ -44,16 +44,18 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
   const hasPending = details.pendingIncomes > 0 || details.pendingExpenses > 0
   
   return (
-    <Card className={`border-2 ${className}`}>
+    <Card className={`border-border/80 ${className ?? ''}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-sm font-semibold text-foreground md:text-base">
-            📊 Projeção do Mês
+            Projeção do mês
           </CardTitle>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                <button type="button" className="inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Como a projeção do mês é calculada">
+                  <Info className="size-4" aria-hidden="true" />
+                </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-[280px]">
                 <p className="text-xs">
@@ -79,9 +81,9 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
             )}
           </div>
           
-          <div className={`text-xl font-bold ${balanceState.color} flex items-center gap-2 md:text-2xl`}>
+          <div className={`flex items-center gap-2 font-mono text-xl font-bold tabular-nums ${balanceState.color} md:text-2xl`}>
             <BalanceIcon className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
-            <span>{formatCurrency(Math.abs(projectedBalance))}</span>
+            <span>{formatCurrency(projectedBalance)}</span>
           </div>
         </div>
         
@@ -89,14 +91,14 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
         <div className="mb-3">
           <div className="flex justify-between text-xs mb-1.5">
             <span className="text-muted-foreground">Gasto previsto</span>
-            <span className={`font-semibold ${expensePercentage > 100 ? 'text-red-600' : 'text-muted-foreground'}`}>
+            <span className={`font-semibold ${expensePercentage > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
               {expensePercentage}%
             </span>
           </div>
           <Progress 
             value={expensePercentage} 
             className="h-2"
-            indicatorClassName={expensePercentage > 100 ? 'bg-red-600' : 'bg-primary'}
+            indicatorClassName={expensePercentage > 100 ? 'bg-destructive' : 'bg-primary'}
           />
         </div>
         
@@ -104,14 +106,14 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
         <div className="space-y-1.5 text-xs border-t pt-2">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Receitas previstas:</span>
-            <span className="font-medium text-green-600 dark:text-green-500">
+            <span className="font-medium text-success">
               {formatCurrency(totalExpectedIncomes)}
             </span>
           </div>
           
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Despesas previstas:</span>
-            <span className="font-medium text-red-600 dark:text-red-500">
+            <span className="font-medium text-destructive">
               -{formatCurrency(totalExpectedExpenses)}
             </span>
           </div>
@@ -121,7 +123,7 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
             <div className="border-t pt-1.5 mt-1 space-y-1">
               <div className="flex justify-between items-center text-[11px]">
                 <span className="text-muted-foreground">Faturas (minha parte):</span>
-                <span className="font-medium text-red-600/80 dark:text-red-500/80">
+                <span className="font-medium text-destructive/80">
                   -{formatCurrency(details.invoices.expected)}
                 </span>
               </div>
@@ -140,7 +142,7 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
               {details.pendingIncomes > 0 && (
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-muted-foreground">A receber:</span>
-                  <span className="text-green-600/80 dark:text-green-500/80">
+                   <span className="text-success/80">
                     +{formatCurrency(details.pendingIncomes)}
                   </span>
                 </div>
@@ -149,7 +151,7 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
               {details.pendingExpenses > 0 && (
                 <div className="flex justify-between items-center text-[11px]">
                   <span className="text-muted-foreground">A pagar:</span>
-                  <span className="text-red-600/80 dark:text-red-500/80">
+                   <span className="text-destructive/80">
                     -{formatCurrency(details.pendingExpenses)}
                   </span>
                 </div>
@@ -160,16 +162,16 @@ export function ProjectedBalanceCard({ summary, className }: ProjectedBalanceCar
         
         {/* Alert Messages */}
         {balanceState.isNegative && (
-          <div className="mt-3 p-2 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800/30">
-            <p className="text-[11px] text-red-700 dark:text-red-400 font-medium">
-              ⚠️ Atenção: Despesas superam receitas previstas
+          <div className="mt-3 rounded-lg border border-destructive/20 bg-destructive/10 p-2.5">
+            <p className="text-xs font-medium text-destructive">
+              Atenção: despesas superam as receitas previstas.
             </p>
           </div>
         )}
         
         {balanceState.isPositive && expensePercentage < 80 && (
-          <p className="text-[11px] text-green-600 dark:text-green-500 mt-2 font-medium">
-            ✓ Gastos controlados! Continue assim.
+          <p className="mt-2 text-xs font-medium text-success">
+            Gastos dentro de uma faixa saudável para o mês.
           </p>
         )}
       </CardContent>

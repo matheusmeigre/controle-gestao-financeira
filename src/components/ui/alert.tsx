@@ -25,7 +25,7 @@ const Alert = React.forwardRef<
 >(({ className, variant, ...props }, ref) => (
   <div
     ref={ref}
-    role="alert"
+    role={variant === 'destructive' ? 'alert' : undefined}
     className={cn(alertVariants({ variant }), className)}
     {...props}
   />

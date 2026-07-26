@@ -1,25 +1,35 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Receipt, Home, CreditCard, Target, Plus } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { Receipt, CreditCard, Plus, CircleAlert } from 'lucide-react'
 import Link from 'next/link'
 import { useUser } from '@clerk/nextjs'
 import { InvoicesList } from '@/features/invoices'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { UserHeader } from '@/components/user-header'
+import { PageHeader } from '@/components/ui/page-header'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import { getCards } from '@/server/actions/cards'
+import { getAllCards } from '@/server/actions/cards'
 import { getInvoices, deleteInvoice as deleteInvoiceAction, updateInvoice as updateInvoiceAction } from '@/server/actions/invoices'
 import type { Invoice } from '@/features/invoices/types'
 import type { CreditCard as CardType } from '@/features/cards/types'
 
 export default function InvoicesPage() {
   const { user } = useUser()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [cards, setCards] = useState<CardType[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [cardsError, setCardsError] = useState<string | null>(null)
+  const selectedCardId = searchParams.get('cardId')
+  const visibleInvoices = selectedCardId
+    ? invoices.filter((invoice) => invoice.cardId === selectedCardId)
+    : invoices
+  const selectedCard = cards.find((card) => card.id === selectedCardId)
   
   useEffect(() => {
     if (!user?.id) return
@@ -42,9 +52,11 @@ export default function InvoicesPage() {
         setInvoices(sortedInvoices)
         
         // Carrega cartões do Supabase
-        const cardResult = await getCards()
+        const cardResult = await getAllCards()
         if (cardResult.success) {
           setCards(cardResult.data as CardType[])
+        } else {
+          setCardsError('Os cartões não puderam ser carregados. As faturas existentes continuam disponíveis.')
         }
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
@@ -120,64 +132,53 @@ export default function InvoicesPage() {
   
   if (isLoading) {
     return (
-      <>
-        <UserHeader />
-        <div className="container mx-auto py-8">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-muted-foreground">Carregando faturas...</div>
-          </div>
+      <div className="space-y-6" role="status" aria-label="Carregando faturas">
+        <Skeleton className="h-20 w-full max-w-xl" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-52 rounded-xl" />
+          <Skeleton className="h-52 rounded-xl" />
         </div>
-      </>
+      </div>
     )
   }
   
   return (
-    <>
-      <UserHeader />
-      <div className="container mx-auto py-8 space-y-6 px-4">
-        {/* Navegação */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <Home className="mr-2 h-4 w-4" />
-              Início
-            </Button>
-          </Link>
-          <Link href="/planning">
-            <Button variant="ghost" size="sm">
-              <Target className="mr-2 h-4 w-4" />
-              Planejamento
-            </Button>
-          </Link>
-          <Link href="/cards">
-            <Button variant="ghost" size="sm">
-              <CreditCard className="mr-2 h-4 w-4" />
-              Gerenciar Cartões
-            </Button>
-          </Link>
-        </div>
-        
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Receipt className="h-8 w-8" />
-              Faturas de Cartão
-            </h1>
-            <p className="text-muted-foreground">
-              Visualize e gerencie as faturas dos seus cartões cadastrados
-            </p>
-          </div>
-          <Link href="/invoices/new">
-            <Button className="gap-2 shrink-0">
+    <div className="space-y-7">
+        <PageHeader
+          eyebrow="Crédito"
+          title="Faturas de cartão"
+          description="Acompanhe vencimentos, pagamentos e a divisão dos gastos de cada fatura."
+          actions={
+            <Button asChild>
+              <Link href="/invoices/new">
               <Plus className="h-4 w-4" />
-              Nova Fatura
+                Nova fatura
+              </Link>
             </Button>
-          </Link>
-        </div>
+          }
+        />
+
+        {cardsError && (
+          <Alert>
+            <CircleAlert aria-hidden="true" />
+            <AlertTitle>Dados de cartões indisponíveis</AlertTitle>
+            <AlertDescription>{cardsError}</AlertDescription>
+          </Alert>
+        )}
+
+        {selectedCardId && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 text-sm shadow-sm">
+            <span>
+              Exibindo faturas de <strong>{selectedCard?.nickname ?? 'um cartão selecionado'}</strong>
+            </span>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/invoices">Limpar filtro</Link>
+            </Button>
+          </div>
+        )}
 
         {/* Sem cartões — precisa cadastrar antes */}
-        {cards.length === 0 && (
+        {cards.length === 0 && invoices.length === 0 && !cardsError && (
           <Card className="border-dashed border-2">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <CreditCard className="h-12 w-12 text-muted-foreground mb-4" />
@@ -185,12 +186,12 @@ export default function InvoicesPage() {
               <p className="text-muted-foreground text-center mb-6 max-w-md">
                 Para criar uma fatura é necessário ter pelo menos um cartão cadastrado.
               </p>
-              <Link href="/cards/new">
-                <Button>
+              <Button asChild>
+                <Link href="/cards/new">
                   <CreditCard className="mr-2 h-4 w-4" />
-                  Cadastrar Cartão
-                </Button>
-              </Link>
+                  Cadastrar cartão
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -204,26 +205,35 @@ export default function InvoicesPage() {
               <p className="text-muted-foreground text-center mb-6 max-w-md">
                 Crie sua primeira fatura para registrar os gastos do cartão.
               </p>
-              <Link href="/invoices/new">
-                <Button>
+              <Button asChild>
+                <Link href="/invoices/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Criar Primeira Fatura
-                </Button>
-              </Link>
+                  Criar primeira fatura
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         )}
 
         {/* Lista de faturas */}
-        {cards.length > 0 && invoices.length > 0 && (
+        {visibleInvoices.length > 0 && (
           <InvoicesList
-            invoices={invoices}
+            invoices={visibleInvoices}
             cards={cards}
             onUpdateInvoice={handleUpdateInvoice}
             onDeleteInvoice={handleDeleteInvoice}
           />
         )}
-      </div>
-    </>
+
+        {selectedCardId && invoices.length > 0 && visibleInvoices.length === 0 && (
+          <Card className="border-dashed">
+            <CardContent className="py-10 text-center">
+              <Receipt className="mx-auto mb-3 size-9 text-muted-foreground" aria-hidden="true" />
+              <h2 className="font-semibold">Nenhuma fatura para este cartão</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Remova o filtro ou crie uma nova fatura.</p>
+            </CardContent>
+          </Card>
+        )}
+    </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   getPlanning as serverGetPlanning,
   createPlanning as serverCreatePlanning,
   updatePlanning as serverUpdatePlanning,
+  addAmountToPlanning,
   deletePlanning as serverDeletePlanning,
   linkExpenseToPlan,
   unlinkExpenseFromPlan,
@@ -33,6 +34,7 @@ export function usePlannings(filters?: PlanningFilters) {
   const statusFilter = filters?.status
   const categoryFilter = filters?.category
   const riskLevelFilter = filters?.riskLevel
+  const searchFilter = filters?.search?.trim().toLocaleLowerCase('pt-BR')
 
   const loadPlannings = useCallback(async () => {
     if (!user?.id) { setLoading(false); return }
@@ -48,6 +50,9 @@ export function usePlannings(filters?: PlanningFilters) {
       if (statusFilter) data = data.filter((p) => p.status === statusFilter)
       if (categoryFilter) data = data.filter((p) => p.category === categoryFilter)
       if (riskLevelFilter) data = data.filter((p) => p.riskLevel === riskLevelFilter)
+      if (searchFilter) {
+        data = data.filter((p) => p.name.toLocaleLowerCase('pt-BR').includes(searchFilter))
+      }
 
       setPlannings(data)
     } catch (err) {
@@ -56,7 +61,7 @@ export function usePlannings(filters?: PlanningFilters) {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, statusFilter, categoryFilter, riskLevelFilter])
+  }, [user?.id, statusFilter, categoryFilter, riskLevelFilter, searchFilter])
 
   useEffect(() => { loadPlannings() }, [loadPlannings])
 
@@ -84,7 +89,7 @@ export function usePlannings(filters?: PlanningFilters) {
   }, [])
 
   const addAmount = useCallback(async (planningId: string, amount: number) => {
-    const res = await serverUpdatePlanning({ id: planningId, currentAmount: amount })
+    const res = await addAmountToPlanning(planningId, amount)
     if (!res.success) throw new Error(res.error)
     setPlannings(prev => prev.map(p => p.id === planningId ? (res.data as Planning) : p))
     return res.data as Planning
@@ -141,8 +146,7 @@ export function usePlanning(planningId: string | null) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const load = async () => {
+  const loadPlanning = useCallback(async () => {
       if (!user?.id || !planningId) { setLoading(false); return }
       try {
         setLoading(true)
@@ -154,11 +158,11 @@ export function usePlanning(planningId: string | null) {
       } finally {
         setLoading(false)
       }
-    }
-    load()
   }, [user?.id, planningId])
 
-  return { planning, loading, error }
+  useEffect(() => { loadPlanning() }, [loadPlanning])
+
+  return { planning, loading, error, refresh: loadPlanning }
 }
 
 export function usePlanningIndicators(planning: Planning | null): PlanningIndicators | null {

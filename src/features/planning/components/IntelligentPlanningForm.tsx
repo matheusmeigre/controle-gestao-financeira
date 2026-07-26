@@ -1,11 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { Card } from '@/components/ui/card'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -20,7 +18,7 @@ import { generateSimulation } from '../rules/calculations'
 import { generateFinancialAlerts, hasBlockingAlerts } from '../rules/alerts'
 import { generateRecommendations } from '../rules/recommendations'
 import type { PlanningCategory, Planning } from '../types'
-import { Save, AlertCircle } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 
 interface IntelligentPlanningFormProps {
   initialData?: Planning
@@ -48,9 +46,10 @@ export function IntelligentPlanningForm({
   const [targetDate, setTargetDate] = useState(initialData?.targetDate || '')
   const [categoryData, setCategoryData] = useState<any>(initialData?.categoryData || {})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Contexto Financeiro
-  const context = useFinancialContext()
+  const { context, loading: contextLoading, error: contextError, retry } = useFinancialContext()
 
   // Simulação em Tempo Real
   const simulation = useMemo(() => {
@@ -100,10 +99,12 @@ export function IntelligentPlanningForm({
     return true
   }, [name, category, targetAmount, targetDate, simulation, alerts])
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     if (!canSubmit) return
 
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
       await onSubmit({
         name,
@@ -125,12 +126,13 @@ export function IntelligentPlanningForm({
       })
     } catch (error) {
       console.error('Erro ao salvar planejamento:', error)
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar o planejamento.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  if (!context) {
+  if (contextLoading) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
         <Skeleton className="h-32 w-full" />
@@ -140,13 +142,27 @@ export function IntelligentPlanningForm({
     )
   }
 
+  if (contextError || !context) {
+    return (
+      <div className="mx-auto max-w-2xl rounded-xl border border-destructive/25 bg-destructive/10 p-6 text-center" role="alert">
+        <AlertCircle className="mx-auto mb-3 size-7 text-destructive" aria-hidden="true" />
+        <h2 className="font-semibold">Contexto financeiro indisponível</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{contextError ?? 'Tente carregar os dados novamente.'}</p>
+        <Button type="button" variant="outline" className="mt-4" onClick={retry}>Tentar novamente</Button>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-6xl mx-auto">
       {/* BLOCO 1: Seleção de Categoria */}
       {!isEditing && (
         <CategorySelector
           selectedCategory={category}
-          onSelectCategory={setCategory}
+          onSelectCategory={(nextCategory) => {
+            setCategory(nextCategory)
+            setCategoryData({})
+          }}
         />
       )}
 
@@ -173,7 +189,7 @@ export function IntelligentPlanningForm({
 
           <div className="space-y-2">
             <Label htmlFor="targetAmount" className="text-xs uppercase tracking-wide text-muted-foreground">
-              Quanto você precisa economizar por mês?
+              Qual é o valor total da sua meta?
             </Label>
             <CurrencyInput
               id="targetAmount"
@@ -225,7 +241,7 @@ export function IntelligentPlanningForm({
       )}
 
       {/* BLOCO 3.5: Campos Dinâmicos por Categoria */}
-      {category && categoryData && Object.keys(categoryData).length > 0 && (
+      {category && (
         <div className="space-y-4 max-w-2xl">
           <div className="border-t border-border pt-6">
             <h4 className="text-sm font-semibold mb-4">
@@ -267,10 +283,17 @@ export function IntelligentPlanningForm({
         <IntelligentAlertsDisplay alerts={alerts} />
       )}
 
+      {submitError && (
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>{submitError}</span>
+        </div>
+      )}
+
       {/* BLOCO 7: Confirmação (Sticky Footer) */}
       {simulation && (
-        <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border p-6 -mx-4 mt-12">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 -mx-4 mt-12 border-t border-border bg-background/95 p-4 backdrop-blur-sm md:bottom-0 sm:p-6">
+          <div className="mx-auto flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1">
               <p className="text-sm text-muted-foreground">Pronto para criar</p>
               <p className="text-lg font-semibold">{name || 'Novo planejamento'}</p>
@@ -290,24 +313,23 @@ export function IntelligentPlanningForm({
               </div>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex w-full gap-2 sm:w-auto sm:gap-3">
               <Button 
                 type="button" 
                 variant="ghost" 
                 onClick={onCancel}
-                className="min-w-[100px]"
+                className="flex-1 sm:min-w-[100px]"
               >
                 Cancelar
               </Button>
               <Button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
                 disabled={!canSubmit || isSubmitting}
-                className="min-w-[160px] h-12 text-base transition-all duration-150"
+                className="h-12 flex-1 text-base transition-all duration-150 sm:min-w-[160px]"
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                    <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                     Salvando...
                   </div>
                 ) : (
@@ -318,6 +340,6 @@ export function IntelligentPlanningForm({
           </div>
         </div>
       )}
-    </div>
+    </form>
   )
 }

@@ -52,27 +52,29 @@ export function MainNavigation({ activeTab, onTabChange }: MainNavigationProps) 
 
       {/* Botões de Ações Rápidas */}
       <div className="flex gap-2 w-full sm:w-auto">
-        <Link href="/planning" className="flex-1 sm:flex-initial">
-          <Button
+        <Button
+            asChild
             variant="outline"
             className="w-full flex items-center justify-center gap-2 h-10"
           >
+          <Link href="/planning" className="flex-1 sm:flex-initial">
             <Target className="h-4 w-4" />
             <span className="hidden sm:inline">Planejamento</span>
             <span className="sm:hidden">Planos</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
 
-        <Link href="/cards" className="flex-1 sm:flex-initial">
-          <Button
+        <Button
+            asChild
             variant="outline"
             className="w-full flex items-center justify-center gap-2 h-10"
           >
+          <Link href="/cards" className="flex-1 sm:flex-initial">
             <Wallet className="h-4 w-4" />
             <span className="hidden sm:inline">Gestão de Cartões</span>
             <span className="sm:hidden">Cartões</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </div>
   )

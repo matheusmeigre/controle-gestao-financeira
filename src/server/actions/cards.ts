@@ -18,6 +18,17 @@ export async function getCards() {
   }
 }
 
+export async function getAllCards() {
+  const { userId } = await auth()
+  if (!userId) return { success: false as const, error: 'Não autenticado' }
+  try {
+    const data = await repo.findAll(userId)
+    return { success: true as const, data }
+  } catch (e) {
+    return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao buscar cartões' }
+  }
+}
+
 export async function getCard(cardId: string) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { PlanningCard } from './PlanningCard'
 import { PlanningService } from '../services/planning.service'
 import { usePlannings } from '../hooks/use-plannings'
@@ -13,15 +13,11 @@ import { Search, Filter, Loader2 } from 'lucide-react'
 
 const planningService = new PlanningService()
 
-interface PlanningListProps {
-  onPlanningClick?: (planningId: string) => void
-}
-
 // Debounce helper
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
-  useState(() => {
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedValue(value)
     }, delay)
@@ -29,12 +25,12 @@ function useDebounce<T>(value: T, delay: number): T {
     return () => {
       clearTimeout(handler)
     }
-  })
+  }, [delay, value])
 
   return debouncedValue
 }
 
-export function PlanningList({ onPlanningClick }: PlanningListProps) {
+export function PlanningList() {
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebounce(searchInput, 300)
   const [filters, setFilters] = useState<PlanningFilters>({})
@@ -78,7 +74,7 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-label="Carregando planejamentos">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -87,7 +83,7 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-500">{error}</p>
+        <p className="text-destructive" role="alert">{error}</p>
       </div>
     )
   }
@@ -101,6 +97,7 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar planejamentos..."
+              aria-label="Buscar planejamentos"
               className="pl-9"
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
@@ -111,6 +108,8 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             className={hasActiveFilters ? 'border-primary' : ''}
+            aria-expanded={showFilters}
+            aria-controls="planning-filters"
           >
             <Filter className="w-4 h-4 mr-2" />
             Filtros
@@ -119,14 +118,14 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
 
         {/* Filtros expandidos */}
         {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
+          <div id="planning-filters" className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label htmlFor="planning-status" className="text-sm font-medium">Status</label>
               <Select
                 value={filters.status || 'all'}
                 onValueChange={handleStatusFilter}
               >
-                <SelectTrigger>
+                <SelectTrigger id="planning-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -140,12 +139,12 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Categoria</label>
+              <label htmlFor="planning-category" className="text-sm font-medium">Categoria</label>
               <Select
                 value={filters.category || 'all'}
                 onValueChange={handleCategoryFilter}
               >
-                <SelectTrigger>
+                <SelectTrigger id="planning-category">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -191,7 +190,7 @@ export function PlanningList({ onPlanningClick }: PlanningListProps) {
                   key={planning.id}
                   planning={planning}
                   indicators={indicators}
-                  onClick={() => onPlanningClick?.(planning.id)}
+                  href={`/planning/${planning.id}`}
                 />
               )
             })}

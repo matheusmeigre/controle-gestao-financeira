@@ -1,5 +1,7 @@
 # 🔄 Guia de Migração Gradual - Mobile-First
 
+> **Documento histórico:** desde julho de 2026, `MobileLayout` e `MobileContainer` foram substituídos por `AppShell`, aplicado no layout das rotas protegidas. Os exemplos abaixo registram a migração anterior e não devem ser usados em código novo.
+
 ## 🎯 Objetivo
 
 Este guia mostra como **migrar gradualmente** do layout Desktop-First para Mobile-First, permitindo que você teste cada etapa antes de prosseguir.

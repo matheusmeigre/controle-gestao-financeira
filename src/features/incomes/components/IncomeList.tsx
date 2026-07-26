@@ -98,7 +98,7 @@ export function IncomeList({ incomes, onDeleteIncome, onMarkAsReceived }: Income
                       {income.status === "pending" ? (
                         <Badge
                           variant="outline"
-                          className="text-yellow-600 border-yellow-600 bg-yellow-50 w-fit whitespace-nowrap"
+                          className="w-fit whitespace-nowrap border-warning/30 bg-warning/10 text-warning"
                         >
                           <Clock className="h-3 w-3 mr-1" />
                           Pendente
@@ -106,7 +106,7 @@ export function IncomeList({ incomes, onDeleteIncome, onMarkAsReceived }: Income
                       ) : (
                         <Badge
                           variant="outline"
-                          className="text-green-600 border-green-600 bg-green-50 w-fit whitespace-nowrap"
+                          className="w-fit whitespace-nowrap border-success/30 bg-success/10 text-success"
                         >
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Recebido
@@ -119,12 +119,13 @@ export function IncomeList({ incomes, onDeleteIncome, onMarkAsReceived }: Income
                   </div>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-3 flex-shrink-0">
-                  <span className="font-semibold text-green-600 text-base">{formatCurrency(income.amount)}</span>
+                   <span className="font-mono text-base font-semibold tabular-nums text-success">{formatCurrency(income.amount)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => onDeleteIncome(income.id)}
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                     className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                     aria-label={`Excluir receita ${income.description}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

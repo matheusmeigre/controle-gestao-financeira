@@ -1,44 +1,39 @@
 'use client'
 
-import { Home, Wallet, Receipt, User } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import type { NavigationTab } from './bottom-navigation'
+import { appNavigationItems, isNavigationItemActive } from './navigation-items'
 
-interface DesktopNavigationProps {
-  activeTab: NavigationTab
-  onTabChange: (tab: NavigationTab) => void
-}
-
-export function DesktopNavigation({ activeTab, onTabChange }: DesktopNavigationProps) {
-  const navItems = [
-    { id: 'home' as NavigationTab, label: 'Início', icon: Home },
-    { id: 'transactions' as NavigationTab, label: 'Transações', icon: Wallet },
-    { id: 'invoices' as NavigationTab, label: 'Faturas', icon: Receipt },
-    { id: 'profile' as NavigationTab, label: 'Perfil', icon: User },
-  ]
+export function DesktopNavigation() {
+  const pathname = usePathname()
+  const view = useSearchParams().get('view')
 
   return (
-    <nav className="hidden md:flex items-center gap-1 bg-card border rounded-lg p-0.5 mb-6">
-      {navItems.map((item) => {
+    <nav className="sticky top-16 z-40 hidden border-b bg-background/92 backdrop-blur-lg md:block" aria-label="Navegacao principal">
+      <div className="mx-auto flex h-12 max-w-7xl items-center gap-1 px-6 lg:px-8">
+      {appNavigationItems.map((item) => {
         const Icon = item.icon
-        const isActive = activeTab === item.id
+        const isActive = isNavigationItemActive(item, pathname, view)
 
         return (
-          <button
+          <Link
             key={item.id}
-            onClick={() => onTabChange(item.id)}
+            href={item.href}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all flex-1 justify-center',
+              'relative flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors',
               isActive
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             )}
+            aria-current={isActive ? 'page' : undefined}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="size-4" aria-hidden="true" />
             <span>{item.label}</span>
-          </button>
+          </Link>
         )
       })}
+      </div>
     </nav>
   )
 }

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Input } from "@/components/ui/input"
+import { cn } from '@/lib/utils'
 
 interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value?: number
@@ -14,6 +15,8 @@ export function CurrencyInput({
   onChange,
   maxValue = 9999999.99, // Limite de 9 milhões
   className,
+  placeholder,
+  onFocus,
   ...props 
 }: CurrencyInputProps) {
   const [displayValue, setDisplayValue] = React.useState('')
@@ -61,6 +64,7 @@ export function CurrencyInput({
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     // Seleciona todo o texto ao focar
     e.target.select()
+    onFocus?.(e)
   }
 
   return (
@@ -71,12 +75,12 @@ export function CurrencyInput({
       <Input
         {...props}
         type="text"
-        inputMode="numeric"
+        inputMode="decimal"
         value={displayValue}
         onChange={handleChange}
         onFocus={handleFocus}
-        className={`pl-10 ${className}`}
-        placeholder="0,00"
+        className={cn('pl-10 font-mono tabular-nums', className)}
+        placeholder={placeholder ?? '0,00'}
       />
     </div>
   )
