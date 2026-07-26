@@ -16,6 +16,7 @@ import type { CreditCard as CardType } from '@/features/cards/types'
 import { PageHeader } from '@/components/ui/page-header'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
+import { BalanceValue } from '@/components/balance/balance-visibility'
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -291,10 +292,10 @@ export default function InvoiceDetailPage({
           <CardContent>
             <Progress value={percentage} className="h-3" indicatorClassName="bg-success" aria-label="Percentual pago da fatura" />
             <p className="text-sm text-muted-foreground mt-2">
-              Restante: {new Intl.NumberFormat('pt-BR', {
+              Restante: <BalanceValue>{new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
-              }).format(invoice.totalAmount - invoice.paidAmount)}
+              }).format(invoice.totalAmount - invoice.paidAmount)}</BalanceValue>
             </p>
           </CardContent>
         </Card>

@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { formatCurrency } from '@/lib/financial-calculations'
 import { useBalanceState } from '@/hooks/use-financial-summary'
 import type { FinancialSummary } from '@/lib/financial-calculations'
+import { BalanceValue } from './balance-visibility'
 
 interface CurrentBalanceCardProps {
   summary: FinancialSummary
@@ -53,21 +54,21 @@ export function CurrentBalanceCard({ summary, className }: CurrentBalanceCardPro
       <CardContent>
         <div className={`mb-4 flex items-center gap-2 font-mono text-2xl font-bold tracking-tight tabular-nums ${balanceState.color} md:text-3xl`}>
           <BalanceIcon className="h-5 w-5 md:h-6 md:w-6 flex-shrink-0" />
-           <span>{formatCurrency(currentBalance)}</span>
+          <span><BalanceValue>{formatCurrency(currentBalance)}</BalanceValue></span>
         </div>
 
         <div className="space-y-2 text-sm">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Recebido:</span>
             <span className="font-medium text-success">
-              {formatCurrency(receivedIncomes)}
+              <BalanceValue>{formatCurrency(receivedIncomes)}</BalanceValue>
             </span>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Pago:</span>
             <span className="font-medium text-destructive">
-              -{formatCurrency(paidExpenses)}
+              <BalanceValue>-{formatCurrency(paidExpenses)}</BalanceValue>
             </span>
           </div>
         </div>

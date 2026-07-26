@@ -24,6 +24,7 @@ import {
   Bar
 } from 'recharts'
 import { TrendingUp, TrendingDown, DollarSign, Calendar } from 'lucide-react'
+import { BALANCE_MASK, BalanceValue, useBalanceVisibility } from '@/components/balance/balance-visibility'
 import type { Expense, Income, CardBill } from '@/types/expense'
 import type { Invoice } from '@/features/invoices/types'
 
@@ -47,6 +48,7 @@ export function FinancialReportsView({
   cardBills,
   invoices = [] // Valor padrão: array vazio
 }: FinancialReportsViewProps) {
+  const { balancesVisible } = useBalanceVisibility()
   
   // Processa dados para os últimos 6 meses
   const monthlyData = useMemo<MonthlyData[]>(() => {
@@ -210,7 +212,7 @@ export function FinancialReportsView({
           <CardHeader className="pb-2">
             <CardDescription>Saldo Atual</CardDescription>
             <CardTitle className={`font-mono text-2xl tabular-nums ${stats.currentMonth.saldo >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(stats.currentMonth.saldo)}
+              <BalanceValue>{formatCurrency(stats.currentMonth.saldo)}</BalanceValue>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -224,7 +226,7 @@ export function FinancialReportsView({
           <CardHeader className="pb-2">
             <CardDescription>Saldo Acumulado</CardDescription>
             <CardTitle className={`font-mono text-2xl tabular-nums ${cumulativeData[cumulativeData.length - 1].acumulado >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(cumulativeData[cumulativeData.length - 1].acumulado)}
+              <BalanceValue>{formatCurrency(cumulativeData[cumulativeData.length - 1].acumulado)}</BalanceValue>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -256,7 +258,11 @@ export function FinancialReportsView({
                 tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
               />
               <Tooltip 
-                formatter={(value) => formatCurrency(Number(value) || 0)}
+                formatter={(value, name) => (
+                  !balancesVisible && String(name) === 'Saldo Acumulado'
+                    ? BALANCE_MASK
+                    : formatCurrency(Number(value) || 0)
+                )}
                 contentStyle={{ 
                   backgroundColor: 'var(--card)',
                   border: '1px solid var(--border)',
@@ -280,14 +286,16 @@ export function FinancialReportsView({
                 name="Saídas"
                 dot={{ fill: 'var(--chart-4)', r: 4 }}
               />
-              <Line 
-                type="monotone" 
-                dataKey="acumulado" 
-                stroke="var(--chart-1)"
-                strokeWidth={2}
-                name="Saldo Acumulado"
-                dot={{ fill: 'var(--chart-1)', r: 4 }}
-              />
+              {balancesVisible && (
+                <Line
+                  type="monotone"
+                  dataKey="acumulado"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2}
+                  name="Saldo Acumulado"
+                  dot={{ fill: 'var(--chart-1)', r: 4 }}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -360,7 +368,7 @@ export function FinancialReportsView({
                       {formatCurrency(item.saidas)}
                     </td>
                     <td className={`text-right py-3 px-2 font-mono font-semibold tabular-nums ${item.saldo >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {formatCurrency(item.saldo)}
+                      <BalanceValue>{formatCurrency(item.saldo)}</BalanceValue>
                     </td>
                   </tr>
                 ))}
@@ -375,7 +383,7 @@ export function FinancialReportsView({
                     {formatCurrency(stats.totalSaidas)}
                   </td>
                   <td className={`text-right py-3 px-2 font-mono tabular-nums ${(stats.totalEntradas - stats.totalSaidas) >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {formatCurrency(stats.totalEntradas - stats.totalSaidas)}
+                    <BalanceValue>{formatCurrency(stats.totalEntradas - stats.totalSaidas)}</BalanceValue>
                   </td>
                 </tr>
               </tfoot>

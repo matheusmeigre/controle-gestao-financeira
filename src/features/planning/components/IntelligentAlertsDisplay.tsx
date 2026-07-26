@@ -2,6 +2,7 @@
 
 import type { FinancialAlert } from '../types'
 import { AlertTriangle, AlertCircle, Info, XCircle, TrendingUp } from 'lucide-react'
+import { useBalanceVisibility } from '@/components/balance/balance-visibility'
 
 interface IntelligentAlertsDisplayProps {
   alerts: FinancialAlert[]
@@ -12,6 +13,7 @@ export function IntelligentAlertsDisplay({
   alerts, 
   showRecommendations = true 
 }: IntelligentAlertsDisplayProps) {
+  const { balancesVisible } = useBalanceVisibility()
   if (alerts.length === 0) {
     return (
       <div className="flex items-center gap-3 p-6 bg-background border-l-4 border-green-500 rounded">
@@ -102,7 +104,9 @@ export function IntelligentAlertsDisplay({
                 {/* Explicação (colapsável visualmente) */}
                 {alert.explanation && (
                   <div className="text-sm text-muted-foreground">
-                    {alert.explanation}
+                    {!balancesVisible && alert.id === 'unviable'
+                      ? 'O valor mensal necessário excede sua renda livre.'
+                      : alert.explanation}
                   </div>
                 )}
                 
