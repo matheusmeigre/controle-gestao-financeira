@@ -30,6 +30,9 @@ export function usePlannings(filters?: PlanningFilters) {
   const [plannings, setPlannings] = useState<Planning[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const statusFilter = filters?.status
+  const categoryFilter = filters?.category
+  const riskLevelFilter = filters?.riskLevel
 
   const loadPlannings = useCallback(async () => {
     if (!user?.id) { setLoading(false); return }
@@ -42,11 +45,9 @@ export function usePlannings(filters?: PlanningFilters) {
 
       let data = (res.data as Planning[]) ?? []
 
-      if (filters) {
-        if (filters.status) data = data.filter((p) => p.status === filters.status)
-        if (filters.category) data = data.filter((p) => p.category === filters.category)
-        if (filters.riskLevel) data = data.filter((p) => p.riskLevel === filters.riskLevel)
-      }
+      if (statusFilter) data = data.filter((p) => p.status === statusFilter)
+      if (categoryFilter) data = data.filter((p) => p.category === categoryFilter)
+      if (riskLevelFilter) data = data.filter((p) => p.riskLevel === riskLevelFilter)
 
       setPlannings(data)
     } catch (err) {
@@ -55,7 +56,7 @@ export function usePlannings(filters?: PlanningFilters) {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, filters])
+  }, [user?.id, statusFilter, categoryFilter, riskLevelFilter])
 
   useEffect(() => { loadPlannings() }, [loadPlannings])
 

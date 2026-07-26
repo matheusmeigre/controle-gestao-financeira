@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "screens/add-transaction.html",
+  "entry": "screens/add-transaction.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-28T21:13:24.208Z",
+  "updatedAt": "2026-06-28T21:13:24.208Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

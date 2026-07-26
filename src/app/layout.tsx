@@ -43,8 +43,8 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/sign-in" appearance={{
       variables: { colorPrimary: '#000' },
       elements: {
-        formButtonPrimary: 'bg-black hover:bg-gray-800',
-        card: 'shadow-lg'
+        formButtonPrimary: 'bg-[#0071e3] hover:bg-[#0066cc]',
+        card: 'shadow-sm rounded-xl'
       }
     }}>
       <html lang="pt-BR" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
