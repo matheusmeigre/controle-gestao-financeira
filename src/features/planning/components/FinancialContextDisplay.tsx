@@ -1,12 +1,14 @@
 'use client'
 
 import type { FinancialContext } from '../types'
+import { BALANCE_MASK, BalanceValue, useBalanceVisibility } from '@/components/balance/balance-visibility'
 
 interface FinancialContextDisplayProps {
   context: FinancialContext
 }
 
 export function FinancialContextDisplay({ context }: FinancialContextDisplayProps) {
+  const { balancesVisible } = useBalanceVisibility()
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -37,7 +39,7 @@ export function FinancialContextDisplay({ context }: FinancialContextDisplayProp
             </span>
           )}
         </div>
-        <p className="text-3xl font-medium font-mono">{formatCurrency(context.freeIncome)}</p>
+        <p className="text-3xl font-medium font-mono"><BalanceValue>{formatCurrency(context.freeIncome)}</BalanceValue></p>
         <p className="text-sm text-muted-foreground">
           {calculatePercentage(context.freeIncome, context.monthlyIncome)} da renda total
         </p>
@@ -61,7 +63,7 @@ export function FinancialContextDisplay({ context }: FinancialContextDisplayProp
           <div
             className="bg-foreground/20 transition-all duration-800 ease-out"
             style={{ width: `${calculatePercentage(context.freeIncome, context.monthlyIncome)}` }}
-            title={`Livre: ${formatCurrency(context.freeIncome)}`}
+            title={`Livre: ${balancesVisible ? formatCurrency(context.freeIncome) : BALANCE_MASK}`}
           />
         </div>
       </div>

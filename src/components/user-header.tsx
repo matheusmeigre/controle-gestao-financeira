@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { UserButton, useUser } from "@clerk/nextjs"
 import { Landmark, Plus } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { BalanceVisibilityToggle } from '@/components/balance/balance-visibility-toggle'
 import { Button } from '@/components/ui/button'
 
 export function UserHeader() {
@@ -29,6 +30,7 @@ export function UserHeader() {
                 Nova transação
               </Link>
             </Button>
+            <BalanceVisibilityToggle />
             <ThemeToggle />
             <div className="hidden max-w-36 text-right lg:block">
               <p className="truncate text-sm font-semibold">

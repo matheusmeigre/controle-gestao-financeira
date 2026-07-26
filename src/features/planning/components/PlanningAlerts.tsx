@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, Calendar, DollarSign, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { BalanceValue } from '@/components/balance/balance-visibility'
 import type { PlanningAlertsData } from '@/features/dashboard/services/dashboard.service'
 
 export function PlanningAlerts({ alerts }: { alerts: PlanningAlertsData }) {
@@ -53,7 +54,7 @@ export function PlanningAlerts({ alerts }: { alerts: PlanningAlertsData }) {
                   >
                     <span>• {planning.name}</span>
                     <span className="text-xs">
-                      Faltam {formatCurrency(planning.targetAmount - planning.currentAmount)}
+                      Faltam <BalanceValue>{formatCurrency(planning.targetAmount - planning.currentAmount)}</BalanceValue>
                     </span>
                   </div>
                 ))}
@@ -81,7 +82,7 @@ export function PlanningAlerts({ alerts }: { alerts: PlanningAlertsData }) {
                   >
                     <span>• {planning.name}</span>
                     <span className="text-xs">
-                      +{formatCurrency(planning.currentAmount - planning.targetAmount)}
+                      <BalanceValue>+{formatCurrency(planning.currentAmount - planning.targetAmount)}</BalanceValue>
                     </span>
                   </div>
                 ))}
