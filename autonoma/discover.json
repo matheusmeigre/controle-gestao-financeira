@@ -1,0 +1,133 @@
+{
+  "models": [
+    {
+      "name": "User",
+      "tableName": "user",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "email", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "firstName", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "lastName", "type": "string", "isRequired": false, "isId": false, "hasDefault": true }
+      ]
+    },
+    {
+      "name": "Expense",
+      "tableName": "expense",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "userId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "description", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "amount", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "category", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "date", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "status", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "isRecurring", "type": "boolean", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "recurringFrequency", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "dueDate", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "isActive", "type": "boolean", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "notes", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "cardName", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "personName", "type": "string", "isRequired": false, "isId": false, "hasDefault": false }
+      ]
+    },
+    {
+      "name": "Income",
+      "tableName": "income",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "userId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "description", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "amount", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "type", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "category", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "date", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "status", "type": "string", "isRequired": false, "isId": false, "hasDefault": true }
+      ]
+    },
+    {
+      "name": "CreditCard",
+      "tableName": "credit_card",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "userId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "nickname", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "bankName", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "brand", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "last4Digits", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "closingDay", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "dueDay", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "creditLimit", "type": "number", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "isActive", "type": "boolean", "isRequired": false, "isId": false, "hasDefault": true }
+      ]
+    },
+    {
+      "name": "CardBill",
+      "tableName": "card_bill",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "userId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "cardName", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "totalAmount", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "date", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "description", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "divisions", "type": "json", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "items", "type": "json", "isRequired": false, "isId": false, "hasDefault": true }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "tableName": "invoice",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "userId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "cardId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "month", "type": "number", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "year", "type": "number", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "closingDate", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "dueDate", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "totalAmount", "type": "number", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "paidAmount", "type": "number", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "isPaid", "type": "boolean", "isRequired": false, "isId": false, "hasDefault": true }
+      ]
+    },
+    {
+      "name": "InvoiceItem",
+      "tableName": "invoice_item",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "invoiceId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "date", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "description", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "amount", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "category", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "installment", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "notes", "type": "string", "isRequired": false, "isId": false, "hasDefault": false }
+      ]
+    },
+    {
+      "name": "Planning",
+      "tableName": "planning",
+      "fields": [
+        { "name": "id", "type": "string", "isRequired": false, "isId": true, "hasDefault": true },
+        { "name": "userId", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "name", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "category", "type": "string", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "targetAmount", "type": "number", "isRequired": true, "isId": false, "hasDefault": false },
+        { "name": "currentAmount", "type": "number", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "startDate", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "targetDate", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "status", "type": "string", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "notes", "type": "string", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "linkedExpenseIds", "type": "json", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "categoryData", "type": "json", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "creationContext", "type": "json", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "simulation", "type": "json", "isRequired": false, "isId": false, "hasDefault": false },
+        { "name": "alerts", "type": "json", "isRequired": false, "isId": false, "hasDefault": true },
+        { "name": "riskLevel", "type": "string", "isRequired": false, "isId": false, "hasDefault": true }
+      ]
+    }
+  ],
+  "edges": [],
+  "relations": [],
+  "scopeField": "userId"
+}

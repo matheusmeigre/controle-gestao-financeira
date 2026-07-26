@@ -4,6 +4,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
+  // The Autonoma endpoint authenticates requests with its own HMAC signature.
+  '/api/autonoma(.*)',
 ])
 
 export default clerkMiddleware(async (auth, request) => {

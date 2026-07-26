@@ -47,6 +47,27 @@ npm test -- features/expenses
 npm test -- --coverage
 ```
 
+## Autonoma E2E
+
+The Environment Factory is available at `POST /api/autonoma`. It creates real temporary users in Clerk and scenario data in Supabase.
+
+Required application variables are documented in `.env.example`. Configure two different 32-byte values for `AUTONOMA_SHARED_SECRET` and `AUTONOMA_SIGNING_SECRET`, then set `AUTONOMA_ENABLED=true` only in the environment Autonoma should access.
+
+```bash
+# Validate empty, standard and large through a real up/down lifecycle
+npm run autonoma:dry-run
+
+# Generate Planner artifacts and upload them using the dashboard credentials
+npm run autonoma:plan
+
+# Retry an existing Planner upload
+npm run autonoma:upload
+```
+
+The dry run refuses Clerk production keys and also requires the explicit `AUTONOMA_DRY_RUN=true` opt-in. Use only isolated Clerk and Supabase test projects because this command creates and deletes real data.
+
+The Planner commands require Node.js 22.13 or newer, `AUTONOMA_API_TOKEN` and `AUTONOMA_GENERATION_ID`. The Clerk instance used by Autonoma must allow email/password sign-in so the generated test user can authenticate through the real UI.
+
 ## Testing Stack (Recomendado)
 
 - **Vitest**: Test runner (compatível com Jest)

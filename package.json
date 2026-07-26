@@ -12,11 +12,16 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "autonoma:dry-run": "vitest run --config vitest.autonoma.config.ts",
+    "autonoma:plan": "npx @autonoma-ai/planner@0.1.21 --project . --non-interactive",
+    "autonoma:upload": "npx @autonoma-ai/planner@0.1.21 upload --project .",
     "clean": "Remove-Item -Recurse -Force .next, node_modules -ErrorAction SilentlyContinue",
     "setup": "npm install && echo '✅ Dependências instaladas! Agora configure o .env.local (veja QUICKSTART.md)'",
     "check-auth": "echo '🔍 Verificando configuração de autenticação...' && node -e \"console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? '✅ Chave pública configurada' : '❌ Configure NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY em .env.local')\" && node -e \"console.log(process.env.CLERK_SECRET_KEY ? '✅ Chave secreta configurada' : '❌ Configure CLERK_SECRET_KEY em .env.local')\""
   },
   "dependencies": {
+    "@autonoma-ai/sdk": "^0.2.9",
+    "@autonoma-ai/server-web": "^0.2.9",
     "@clerk/localizations": "^4.13.6",
     "@clerk/nextjs": "^7.5.22",
     "@hookform/resolvers": "^5.4.0",

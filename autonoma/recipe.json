@@ -1,0 +1,193 @@
+{
+  "version": 1,
+  "source": {
+    "discoverPath": "autonoma/discover.json",
+    "scenariosPath": "autonoma/scenarios.md"
+  },
+  "validationMode": "endpoint-lifecycle",
+  "recipes": [
+    {
+      "name": "empty",
+      "description": "Authenticated finance user with no financial records.",
+      "create": {
+        "User": [
+          {
+            "_alias": "empty-user",
+            "email": "empty+clerk_test_{{testRunId}}@example.com"
+          }
+        ]
+      },
+      "validation": {
+        "status": "validated",
+        "method": "endpoint-up-down",
+        "phase": "ok"
+      }
+    },
+    {
+      "name": "standard",
+      "description": "Realistic current-month income, expenses, cards, invoices and planning data.",
+      "create": {
+        "User": [
+          {
+            "_alias": "standard-user",
+            "email": "std+clerk_test_{{testRunId}}@example.com"
+          }
+        ],
+        "Income": [
+          {
+            "description": "Salario mensal",
+            "amount": 8500,
+            "type": "salary",
+            "category": "Salario",
+            "status": "received",
+            "userId": { "_ref": "standard-user" }
+          },
+          {
+            "description": "Projeto freelance",
+            "amount": 1200,
+            "type": "extra",
+            "category": "Freelance",
+            "status": "pending",
+            "userId": { "_ref": "standard-user" }
+          }
+        ],
+        "Expense": [
+          {
+            "description": "Aluguel",
+            "amount": 2200,
+            "category": "Moradia",
+            "status": "paid",
+            "userId": { "_ref": "standard-user" }
+          },
+          {
+            "description": "Supermercado",
+            "amount": 640.5,
+            "category": "Alimentacao",
+            "status": "pending",
+            "userId": { "_ref": "standard-user" }
+          },
+          {
+            "description": "Streaming",
+            "amount": 55.9,
+            "category": "Assinaturas",
+            "status": "paid",
+            "isRecurring": true,
+            "recurringFrequency": "monthly",
+            "userId": { "_ref": "standard-user" }
+          }
+        ],
+        "CreditCard": [
+          {
+            "_alias": "standard-card",
+            "nickname": "Cartao principal",
+            "bankName": "Banco Autonoma",
+            "brand": "Visa",
+            "last4Digits": "4242",
+            "closingDay": 20,
+            "dueDay": 27,
+            "creditLimit": 12000,
+            "userId": { "_ref": "standard-user" }
+          }
+        ],
+        "Invoice": [
+          {
+            "_alias": "standard-invoice",
+            "cardId": { "_ref": "standard-card" },
+            "totalAmount": 389.8,
+            "paidAmount": 0,
+            "isPaid": false,
+            "userId": { "_ref": "standard-user" }
+          }
+        ],
+        "InvoiceItem": [
+          {
+            "invoiceId": { "_ref": "standard-invoice" },
+            "description": "Restaurante",
+            "amount": 189.9,
+            "category": "Alimentacao"
+          },
+          {
+            "invoiceId": { "_ref": "standard-invoice" },
+            "description": "Combustivel",
+            "amount": 199.9,
+            "category": "Transporte"
+          }
+        ],
+        "CardBill": [
+          {
+            "cardName": "Cartao legado",
+            "totalAmount": 310,
+            "description": "Fatura compartilhada",
+            "divisions": [
+              { "personName": "Eu", "amount": 210 },
+              { "personName": "Familia", "amount": 100 }
+            ],
+            "userId": { "_ref": "standard-user" }
+          }
+        ],
+        "Planning": [
+          {
+            "name": "Reserva de emergencia",
+            "category": "emergency_reserve",
+            "targetAmount": 30000,
+            "currentAmount": 7500,
+            "status": "in_progress",
+            "riskLevel": "low",
+            "userId": { "_ref": "standard-user" }
+          }
+        ]
+      },
+      "validation": {
+        "status": "validated",
+        "method": "endpoint-up-down",
+        "phase": "ok"
+      }
+    },
+    {
+      "name": "large",
+      "description": "Higher-volume current-month dataset for filters, reports and list rendering.",
+      "create": {
+        "User": [
+          {
+            "_alias": "large-user",
+            "email": "large+clerk_test_{{testRunId}}@example.com"
+          }
+        ],
+        "Income": [
+          { "description": "Salario principal", "amount": 9500, "type": "salary", "status": "received", "userId": { "_ref": "large-user" } },
+          { "description": "Consultoria 1", "amount": 800, "type": "extra", "status": "received", "userId": { "_ref": "large-user" } },
+          { "description": "Consultoria 2", "amount": 1100, "type": "extra", "status": "pending", "userId": { "_ref": "large-user" } },
+          { "description": "Venda eventual", "amount": 450, "type": "extra", "status": "received", "userId": { "_ref": "large-user" } }
+        ],
+        "Expense": [
+          { "description": "Despesa 01", "amount": 75, "category": "Alimentacao", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 02", "amount": 120, "category": "Transporte", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 03", "amount": 89.9, "category": "Lazer", "status": "pending", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 04", "amount": 230, "category": "Contas", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 05", "amount": 55, "category": "Saude", "status": "pending", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 06", "amount": 310, "category": "Compras", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 07", "amount": 140, "category": "Estudos", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 08", "amount": 45.5, "category": "Outros", "status": "pending", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 09", "amount": 98, "category": "Alimentacao", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 10", "amount": 160, "category": "Transporte", "status": "pending", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 11", "amount": 65, "category": "Lazer", "status": "paid", "userId": { "_ref": "large-user" } },
+          { "description": "Despesa 12", "amount": 480, "category": "Contas", "status": "pending", "userId": { "_ref": "large-user" } }
+        ],
+        "CreditCard": [
+          { "_alias": "large-card-1", "nickname": "Cartao viagens", "bankName": "Banco Autonoma", "brand": "Mastercard", "last4Digits": "1111", "closingDay": 10, "dueDay": 17, "creditLimit": 18000, "userId": { "_ref": "large-user" } },
+          { "_alias": "large-card-2", "nickname": "Cartao diario", "bankName": "Banco Autonoma", "brand": "Visa", "last4Digits": "2222", "closingDay": 20, "dueDay": 27, "creditLimit": 8000, "userId": { "_ref": "large-user" } }
+        ],
+        "Planning": [
+          { "name": "Viagem internacional", "category": "travel", "targetAmount": 15000, "currentAmount": 3500, "status": "in_progress", "riskLevel": "medium", "userId": { "_ref": "large-user" } },
+          { "name": "Novo computador", "category": "purchase", "targetAmount": 9000, "currentAmount": 2000, "status": "planned", "riskLevel": "low", "userId": { "_ref": "large-user" } },
+          { "name": "Curso de especializacao", "category": "education", "targetAmount": 6000, "currentAmount": 6000, "status": "completed", "riskLevel": "low", "userId": { "_ref": "large-user" } }
+        ]
+      },
+      "validation": {
+        "status": "validated",
+        "method": "endpoint-up-down",
+        "phase": "ok"
+      }
+    }
+  ]
+}
