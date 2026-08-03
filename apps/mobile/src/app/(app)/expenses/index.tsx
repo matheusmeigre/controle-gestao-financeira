@@ -1,16 +1,26 @@
 import { router } from 'expo-router'
+import { Pressable, StyleSheet } from 'react-native'
 import { MobileScreen, InfoCard } from '../../../components/mobile-screen'
-import { useMobileBootstrap } from '../../../providers/mobile-bootstrap-provider'
+import { useExpensesQuery } from '../../../hooks/use-mobile-queries'
+import { formatMoney } from '../../../lib/mobile-ui'
 
 export default function ExpensesScreen() {
-  const { state } = useMobileBootstrap()
+  const query = useExpensesQuery()
+  const expenses = query.data ?? []
 
   return (
     <MobileScreen eyebrow="Area principal" title="Despesas" description="Lista inicial de despesas sincronizadas no bootstrap." actionLabel="Novo formulario" onActionPress={() => router.push('/(app)/expenses/new')}>
-      {(state.data?.expenses ?? []).slice(0, 10).map((expense) => (
-        <InfoCard key={expense.id} label={expense.description} value={`${expense.category} • ${expense.date} • R$ ${expense.amount.toFixed(2)}`} />
+      {expenses.map((expense) => (
+        <Pressable key={expense.id} onPress={() => router.push(`/(app)/expenses/${expense.id}`)} style={styles.cardButton}>
+          <InfoCard label={expense.description} value={`${expense.category} • ${expense.date} • ${formatMoney(expense.amount)}`} />
+        </Pressable>
       ))}
-      {state.data?.expenses[0] ? <InfoCard label="Detalhe rapido" value="Abra um item em /expenses/[id] ao tocar em uma futura lista interativa." /> : null}
     </MobileScreen>
   )
 }
+
+const styles = StyleSheet.create({
+  cardButton: {
+    borderRadius: 16,
+  },
+})

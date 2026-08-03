@@ -2,6 +2,7 @@ import {
   addMobileInvoiceItemSchema,
   createMobileCardSchema,
   createMobileExpenseSchema,
+  createMobileInvoiceSchema,
   createMobileIncomeSchema,
   createMobilePlanningContributionSchema,
   createMobilePlanningSchema,
@@ -26,6 +27,7 @@ import {
   updateMobileInvoicePaymentSchema,
   updateMobilePlanningSchema,
   type CreateMobileExpense,
+  type CreateMobileInvoice,
   type CreateMobileIncome,
   type CreateMobilePlanning,
   type CreateMobilePlanningContribution,
@@ -205,6 +207,17 @@ export function createMobileApiClient(options: MobileApiClientOptions = {}) {
     async getInvoice(id: string): Promise<MobileInvoice> {
       const response = await http.request<MobileInvoiceResponse>(`/invoices/${id}`, { schema: mobileInvoiceResponseSchema })
       return response.data
+    },
+    async createInvoice(input: CreateMobileInvoice): Promise<MobileInvoice> {
+      const response = await http.request<MobileInvoiceResponse>('/invoices', {
+        method: 'POST',
+        body: createMobileInvoiceSchema.parse(input),
+        schema: mobileInvoiceResponseSchema,
+      })
+      return response.data
+    },
+    async deleteInvoice(id: string): Promise<void> {
+      await http.request(`/invoices/${id}`, { method: 'DELETE' })
     },
     async addInvoiceItem(id: string, input: AddMobileInvoiceItem): Promise<MobileInvoiceItem> {
       const response = await http.request<MobileInvoiceItemResponse>(`/invoices/${id}/items`, {

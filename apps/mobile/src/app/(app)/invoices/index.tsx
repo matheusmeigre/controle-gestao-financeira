@@ -1,15 +1,22 @@
 import { router } from 'expo-router'
+import { Pressable, StyleSheet } from 'react-native'
 import { MobileScreen, InfoCard } from '../../../components/mobile-screen'
-import { useMobileBootstrap } from '../../../providers/mobile-bootstrap-provider'
+import { useInvoicesQuery } from '../../../hooks/use-mobile-queries'
+import { formatMoney } from '../../../lib/mobile-ui'
 
 export default function InvoicesScreen() {
-  const { state } = useMobileBootstrap()
+  const query = useInvoicesQuery()
+  const invoices = query.data ?? []
 
   return (
     <MobileScreen eyebrow="Area principal" title="Faturas" description="Lista inicial de faturas para navegacao mobile." actionLabel="Nova fatura" onActionPress={() => router.push('/(app)/invoices/new')}>
-      {(state.data?.invoices ?? []).slice(0, 10).map((invoice) => (
-        <InfoCard key={invoice.id} label={`${invoice.month}/${invoice.year}`} value={`Total R$ ${invoice.totalAmount.toFixed(2)} • Pago ${invoice.isPaid ? 'Sim' : 'Nao'}`} />
+      {invoices.map((invoice) => (
+        <Pressable key={invoice.id} onPress={() => router.push(`/(app)/invoices/${invoice.id}`)} style={styles.cardButton}>
+          <InfoCard label={`${invoice.month}/${invoice.year}`} value={`Total ${formatMoney(invoice.totalAmount)} • Pago ${invoice.isPaid ? 'Sim' : 'Nao'} • Itens ${invoice.items.length}`} />
+        </Pressable>
       ))}
     </MobileScreen>
   )
 }
+
+const styles = StyleSheet.create({ cardButton: { borderRadius: 16 } })
