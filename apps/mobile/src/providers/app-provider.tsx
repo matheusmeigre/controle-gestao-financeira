@@ -1,19 +1,33 @@
 import type { PropsWithChildren } from 'react'
 import { ClerkLoaded, ClerkLoading, ClerkProvider } from '@clerk/clerk-expo'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import { resolveExpoPublicClerkPublishableKey } from '../lib/env'
 import { tokenCache } from '../lib/auth/token-cache'
+import { createMobileQueryClient } from '../data/query-client'
+import { registerMobileOnlineManager } from '../data/connectivity'
+import { mobilePersistMaxAge, mobileQueryPersister } from '../data/persist'
 
 const publishableKey = resolveExpoPublicClerkPublishableKey()
+const mobileQueryClient = createMobileQueryClient()
+registerMobileOnlineManager()
 
 export function AppProvider({ children }: PropsWithChildren) {
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <ClerkLoading>
-        <FullScreenState title="Carregando sessao" description="Restaurando suas credenciais com armazenamento seguro." />
-      </ClerkLoading>
-      <ClerkLoaded>{children}</ClerkLoaded>
-    </ClerkProvider>
+    <PersistQueryClientProvider
+      client={mobileQueryClient}
+      persistOptions={{
+        persister: mobileQueryPersister,
+        maxAge: mobilePersistMaxAge,
+      }}
+    >
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <ClerkLoading>
+          <FullScreenState title="Carregando sessao" description="Restaurando suas credenciais com armazenamento seguro." />
+        </ClerkLoading>
+        <ClerkLoaded>{children}</ClerkLoaded>
+      </ClerkProvider>
+    </PersistQueryClientProvider>
   )
 }
 

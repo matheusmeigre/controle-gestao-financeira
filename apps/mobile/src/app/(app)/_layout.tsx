@@ -3,6 +3,7 @@ import { Redirect, Tabs, type ErrorBoundaryProps } from 'expo-router'
 import { FullScreenState } from '../../providers/app-provider'
 import { MobileBootstrapProvider } from '../../providers/mobile-bootstrap-provider'
 import { MobileErrorFallback } from '../../components/mobile-error-fallback'
+import { MobileConnectivityBanner } from '../../components/mobile-connectivity-banner'
 
 export default function ProtectedLayout() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -17,6 +18,7 @@ export default function ProtectedLayout() {
 
   return (
     <MobileBootstrapProvider>
+      <MobileConnectivityBanner />
       <Tabs
         screenOptions={{
           headerShown: false,

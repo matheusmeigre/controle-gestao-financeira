@@ -1,8 +1,8 @@
 import type { PropsWithChildren } from 'react'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo } from 'react'
 import { MobileApiClientError, type MobileBootstrapSession } from '@api-client'
 import { FullScreenState } from './app-provider'
-import { useMobileApi } from '../hooks/use-mobile-api'
+import { useBootstrapQuery } from '../hooks/use-mobile-queries'
 
 type MobileBootstrapState = {
   data?: MobileBootstrapSession
@@ -18,27 +18,25 @@ type MobileBootstrapContextValue = {
 const MobileBootstrapContext = createContext<MobileBootstrapContextValue | null>(null)
 
 export function MobileBootstrapProvider({ children }: PropsWithChildren) {
-  const api = useMobileApi()
-  const [state, setState] = useState<MobileBootstrapState>({ loading: true })
+  const query = useBootstrapQuery()
 
   const retry = useCallback(async () => {
-    setState({ loading: true })
+    await query.refetch()
+  }, [query])
 
-    try {
-      const data = await api.bootstrapSession()
-      setState({ data, loading: false })
-    } catch (error: unknown) {
-      const message = error instanceof MobileApiClientError
-        ? error.problem?.detail ?? error.message
-        : 'Nao foi possivel concluir o bootstrap do app.'
+  const state = useMemo<MobileBootstrapState>(() => {
+    const error = query.error instanceof MobileApiClientError
+      ? query.error.problem?.detail ?? query.error.message
+      : query.error instanceof Error
+        ? query.error.message
+        : undefined
 
-      setState({ error: message, loading: false })
+    return {
+      data: query.data,
+      error,
+      loading: query.isLoading || query.isFetching,
     }
-  }, [api])
-
-  useEffect(() => {
-    void retry()
-  }, [retry])
+  }, [query.data, query.error, query.isFetching, query.isLoading])
 
   const value = useMemo(() => ({ state, retry }), [retry, state])
 

@@ -19,6 +19,13 @@ Defina `EXPO_PUBLIC_API_BASE_URL` para o host base da aplicacao web/API. O clien
 
 Defina `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` para inicializar o Clerk no app mobile.
 
+## Cache e offline
+
+- React Query centraliza queries e invalidacao.
+- O cache persistido usa `AsyncStorage` apenas para dados nao sensiveis.
+- Tokens continuam exclusivamente em `SecureStore`.
+- O app detecta offline, exibe banner e reaproveita cache local enquanto aguarda reconexao.
+
 ## Arquivos principais
 
 - `src/app/_layout.tsx`
