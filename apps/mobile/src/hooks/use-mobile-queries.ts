@@ -36,12 +36,32 @@ export function useExpensesQuery(yearMonth?: string) {
   })
 }
 
+export function useExpenseQuery(id?: string) {
+  const api = useMobileApi()
+
+  return useQuery({
+    queryKey: ['mobile', 'expense', id],
+    queryFn: () => api.getExpense(id!),
+    enabled: Boolean(id),
+  })
+}
+
 export function useIncomesQuery(yearMonth?: string) {
   const api = useMobileApi()
 
   return useQuery({
     queryKey: mobileQueryKeys.incomes(yearMonth),
     queryFn: () => api.listIncomes({ yearMonth }),
+  })
+}
+
+export function useIncomeQuery(id?: string) {
+  const api = useMobileApi()
+
+  return useQuery({
+    queryKey: ['mobile', 'income', id],
+    queryFn: () => api.getIncome(id!),
+    enabled: Boolean(id),
   })
 }
 

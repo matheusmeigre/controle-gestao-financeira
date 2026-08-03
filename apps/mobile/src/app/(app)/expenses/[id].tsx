@@ -1,16 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import { MobileScreen, InfoCard } from '../../../components/mobile-screen'
 import { FeedbackText, SubmitButton } from '../../../components/mobile-form'
-import { useExpenseMutations, useExpensesQuery } from '../../../hooks/use-mobile-queries'
+import { useExpenseMutations, useExpenseQuery } from '../../../hooks/use-mobile-queries'
 import { formatMoney, getErrorMessage } from '../../../lib/mobile-ui'
 import { useState } from 'react'
 
 export default function ExpenseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const query = useExpensesQuery()
+  const query = useExpenseQuery(id)
   const { deleteExpense } = useExpenseMutations()
   const [feedback, setFeedback] = useState<string | null>(null)
-  const expense = (query.data ?? []).find((item) => item.id === id)
+  const expense = query.data
 
   async function handleDelete() {
     try {

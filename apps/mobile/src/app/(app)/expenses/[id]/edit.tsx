@@ -2,13 +2,13 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { FeedbackText, FormField, FormSection, SubmitButton } from '../../../../components/mobile-form'
 import { MobileScreen } from '../../../../components/mobile-screen'
-import { useExpenseMutations, useExpensesQuery } from '../../../../hooks/use-mobile-queries'
+import { useExpenseMutations, useExpenseQuery } from '../../../../hooks/use-mobile-queries'
 import { getErrorMessage, parseCurrencyInput } from '../../../../lib/mobile-ui'
 
 export default function ExpenseEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const query = useExpensesQuery()
-  const expense = useMemo(() => (query.data ?? []).find((item) => item.id === id), [id, query.data])
+  const query = useExpenseQuery(id)
+  const expense = useMemo(() => query.data, [query.data])
   const { updateExpense } = useExpenseMutations()
   const [description, setDescription] = useState(expense?.description ?? '')
   const [amount, setAmount] = useState(String(expense?.amount ?? 0))

@@ -131,6 +131,10 @@ export function createMobileApiClient(options: MobileApiClientOptions = {}) {
       })
       return response.data
     },
+    async getExpense(id: string): Promise<MobileExpense> {
+      const response = await http.request<MobileExpenseResponse>(`/expenses/${id}`, { schema: mobileExpenseResponseSchema })
+      return response.data
+    },
     async updateExpense(id: string, input: UpdateMobileExpense): Promise<MobileExpense> {
       const response = await http.request<MobileExpenseResponse>(`/expenses/${id}`, {
         method: 'PATCH',
@@ -152,6 +156,10 @@ export function createMobileApiClient(options: MobileApiClientOptions = {}) {
         body: createMobileIncomeSchema.parse(input),
         schema: mobileIncomeResponseSchema,
       })
+      return response.data
+    },
+    async getIncome(id: string): Promise<MobileIncome> {
+      const response = await http.request<MobileIncomeResponse>(`/incomes/${id}`, { schema: mobileIncomeResponseSchema })
       return response.data
     },
     async updateIncome(id: string, input: UpdateMobileIncome): Promise<MobileIncome> {

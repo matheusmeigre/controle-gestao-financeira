@@ -2,13 +2,13 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { FeedbackText, FormField, FormSection, SubmitButton } from '../../../../components/mobile-form'
 import { MobileScreen } from '../../../../components/mobile-screen'
-import { useIncomeMutations, useIncomesQuery } from '../../../../hooks/use-mobile-queries'
+import { useIncomeMutations, useIncomeQuery } from '../../../../hooks/use-mobile-queries'
 import { getErrorMessage, parseCurrencyInput } from '../../../../lib/mobile-ui'
 
 export default function IncomeEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const query = useIncomesQuery()
-  const income = useMemo(() => (query.data ?? []).find((item) => item.id === id), [id, query.data])
+  const query = useIncomeQuery(id)
+  const income = useMemo(() => query.data, [query.data])
   const { updateIncome } = useIncomeMutations()
   const [description, setDescription] = useState(income?.description ?? '')
   const [amount, setAmount] = useState(String(income?.amount ?? 0))

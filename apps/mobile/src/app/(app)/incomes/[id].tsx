@@ -2,13 +2,13 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { FeedbackText, SubmitButton } from '../../../components/mobile-form'
 import { MobileScreen, InfoCard } from '../../../components/mobile-screen'
-import { useIncomeMutations, useIncomesQuery } from '../../../hooks/use-mobile-queries'
+import { useIncomeMutations, useIncomeQuery } from '../../../hooks/use-mobile-queries'
 import { formatMoney, getErrorMessage } from '../../../lib/mobile-ui'
 
 export default function IncomeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const query = useIncomesQuery()
-  const income = (query.data ?? []).find((item) => item.id === id)
+  const query = useIncomeQuery(id)
+  const income = query.data
   const { deleteIncome, receiveIncome } = useIncomeMutations()
   const [feedback, setFeedback] = useState<string | null>(null)
 
