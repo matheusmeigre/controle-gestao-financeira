@@ -1,0 +1,35 @@
+name: Mobile CI
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - 'feature/**'
+  pull_request:
+
+jobs:
+  mobile-quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Root type-check
+        run: npm run type-check
+
+      - name: Root tests
+        run: npm test
+
+      - name: Mobile quality gates
+        run: npm run mobile:ci

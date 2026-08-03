@@ -24,6 +24,7 @@
     "mobile:test": "npm run test --workspace @controle/mobile",
     "mobile:type-check": "npm run type-check --workspace @controle/mobile",
     "mobile:export": "npm run export --workspace @controle/mobile",
+    "mobile:ci": "npm run mobile:lint && npm run mobile:type-check && npm run mobile:test && npm run mobile:export",
     "clean": "Remove-Item -Recurse -Force .next, node_modules -ErrorAction SilentlyContinue",
     "setup": "npm install && echo '✅ Dependências instaladas! Agora configure o .env.local (veja QUICKSTART.md)'",
     "check-auth": "echo '🔍 Verificando configuração de autenticação...' && node -e \"console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? '✅ Chave pública configurada' : '❌ Configure NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY em .env.local')\" && node -e \"console.log(process.env.CLERK_SECRET_KEY ? '✅ Chave secreta configurada' : '❌ Configure CLERK_SECRET_KEY em .env.local')\""

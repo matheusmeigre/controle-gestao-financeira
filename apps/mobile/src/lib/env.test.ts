@@ -22,4 +22,13 @@ describe('mobile environment', () => {
   it('keeps https base URLs for secure mobile environments', () => {
     expect(assertSecureMobileApiBaseUrl('https://example.com')).toBe('https://example.com')
   })
+
+  it('rejects non-https api base URLs in production', () => {
+    const previousNodeEnv = process.env.NODE_ENV
+    process.env.NODE_ENV = 'production'
+
+    expect(() => assertSecureMobileApiBaseUrl('http://example.com')).toThrow('Production mobile builds require an HTTPS API base URL.')
+
+    process.env.NODE_ENV = previousNodeEnv
+  })
 })

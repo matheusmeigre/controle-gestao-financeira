@@ -6,13 +6,17 @@ describe('mobile observability core', () => {
     const sanitized = sanitizeObservabilityValue({
       authorization: 'Bearer secret-token-value',
       paidAmount: 100,
-      nested: { token: 'another-secret' },
+      cardId: 'card-1',
+      file: 'statement.pdf',
+      nested: { token: 'another-secret', uri: 'file://private/path' },
     })
 
     expect(sanitized).toEqual({
       authorization: '[REDACTED]',
       paidAmount: '[REDACTED]',
-      nested: { token: '[REDACTED]' },
+      cardId: '[REDACTED]',
+      file: '[REDACTED]',
+      nested: { token: '[REDACTED]', uri: '[REDACTED]' },
     })
   })
 
