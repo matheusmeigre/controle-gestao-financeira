@@ -17,6 +17,8 @@ App Expo/React Native da migracao mobile, consumindo `@api-client` e `@contracts
 
 Defina `EXPO_PUBLIC_API_BASE_URL` para o host base da aplicacao web/API. O cliente mobile resolve automaticamente `/api/v1` a partir desse valor.
 
+Defina `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` para inicializar o Clerk no app mobile.
+
 ## Arquivos principais
 
 - `src/app/_layout.tsx`
@@ -24,3 +26,5 @@ Defina `EXPO_PUBLIC_API_BASE_URL` para o host base da aplicacao web/API. O clien
 - `src/lib/env.ts`
 - `src/lib/api.ts`
 - `src/lib/session.ts`
+- `src/lib/auth/token-cache.ts`
+- `src/providers/app-provider.tsx`

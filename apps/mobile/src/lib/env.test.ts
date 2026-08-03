@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getMobileEnvironment, resolveExpoPublicApiBaseUrl } from './env'
+import { getMobileEnvironment, resolveExpoPublicApiBaseUrl, resolveExpoPublicClerkPublishableKey } from './env'
 import { resolveMobileApiBaseUrl } from './api'
 
 describe('mobile environment', () => {
@@ -13,5 +13,9 @@ describe('mobile environment', () => {
 
   it('resolves the API v1 base URL for the shared client', () => {
     expect(resolveMobileApiBaseUrl(getMobileEnvironment())).toBe('http://localhost:3000/api/v1')
+  })
+
+  it('requires a Clerk publishable key', () => {
+    expect(resolveExpoPublicClerkPublishableKey('pk_test_123')).toBe('pk_test_123')
   })
 })

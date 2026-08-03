@@ -15,6 +15,7 @@
     "export": "expo export --platform all --output-dir dist"
   },
   "dependencies": {
+    "@clerk/clerk-expo": "^2.19.5",
     "@controle/api-client": "file:../../packages/api-client",
     "@controle/contracts": "file:../../packages/contracts",
     "@expo/metro-runtime": "~6.1.2",
@@ -22,6 +23,7 @@
     "expo-constants": "~57.0.8",
     "expo-linking": "~57.0.4",
     "expo-router": "~57.0.9",
+    "expo-secure-store": "~15.0.7",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",

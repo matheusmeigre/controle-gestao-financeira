@@ -21,3 +21,13 @@ export function getMobileEnvironment(): MobileEnvironment {
     apiBaseUrl: resolveExpoPublicApiBaseUrl(),
   }
 }
+
+export function resolveExpoPublicClerkPublishableKey(value = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+  const normalizedValue = value?.trim()
+
+  if (normalizedValue) {
+    return normalizedValue
+  }
+
+  throw new Error('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY must be configured for the mobile app.')
+}
