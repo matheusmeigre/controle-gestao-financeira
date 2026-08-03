@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { createMobileAppApiClient } from '../lib/api'
 import { getMobileEnvironment } from '../lib/env'
 import { getCurrentConnectivity } from './use-connectivity'
+import { captureMobileApiFailure, trackMobilePerformance } from '../lib/observability'
 
 const MOBILE_REQUEST_TIMEOUT_MS = 10000
 
@@ -18,10 +19,13 @@ export function useMobileApi() {
       return { accessToken: accessToken ?? undefined }
     }, {
       fetchImpl: async (input, init) => {
+        const startedAt = Date.now()
         const isOnline = await getCurrentConnectivity()
 
         if (!isOnline) {
-          throw new Error('Device is offline.')
+          const offlineError = new Error('Device is offline.')
+          captureMobileApiFailure(offlineError, { endpoint: String(input), reason: 'offline' })
+          throw offlineError
         }
 
         const controller = new AbortController()
@@ -36,13 +40,22 @@ export function useMobileApi() {
           })
         } catch (error) {
           if (error instanceof Error && error.name === 'AbortError') {
-            throw new Error('Request timeout reached before the server responded.')
+            const timeoutError = new Error('Request timeout reached before the server responded.')
+            captureMobileApiFailure(timeoutError, { endpoint: String(input), reason: 'timeout' })
+            throw timeoutError
           }
 
+          captureMobileApiFailure(error, { endpoint: String(input), reason: 'network' })
           throw error
         } finally {
           clearTimeout(timeout)
         }
+
+        trackMobilePerformance('api_request', Date.now() - startedAt, {
+          endpoint: String(input),
+          method: init?.method ?? 'GET',
+          status: response.status,
+        })
 
         if (response.status === 401) {
           await signOut()

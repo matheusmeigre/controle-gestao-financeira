@@ -1,6 +1,12 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { useEffect } from 'react'
+import { captureMobileException } from '../lib/observability'
 
 export function MobileErrorFallback({ error, retry }: { error: Error; retry: () => void }) {
+  useEffect(() => {
+    captureMobileException(error, { source: 'ui-error-boundary' })
+  }, [error])
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.content}>

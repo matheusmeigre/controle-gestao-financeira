@@ -7,12 +7,16 @@ import { tokenCache } from '../lib/auth/token-cache'
 import { createMobileQueryClient } from '../data/query-client'
 import { registerMobileOnlineManager } from '../data/connectivity'
 import { mobilePersistMaxAge, mobileQueryPersister } from '../data/persist'
+import { registerMobileGlobalErrorHandler, trackMobileColdStartCompleted } from '../lib/observability'
 
 const publishableKey = resolveExpoPublicClerkPublishableKey()
 const mobileQueryClient = createMobileQueryClient()
 registerMobileOnlineManager()
+registerMobileGlobalErrorHandler()
 
 export function AppProvider({ children }: PropsWithChildren) {
+  trackMobileColdStartCompleted()
+
   return (
     <PersistQueryClientProvider
       client={mobileQueryClient}
