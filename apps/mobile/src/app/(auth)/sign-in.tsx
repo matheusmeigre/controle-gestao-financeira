@@ -1,7 +1,7 @@
 import { useSignIn } from '@clerk/clerk-expo'
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { ActivityIndicator, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 
 export default function SignInScreen() {
   const { isLoaded, setActive, signIn } = useSignIn()
@@ -41,22 +41,24 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.content}>
-        <Text style={styles.eyebrow}>Login seguro</Text>
-        <Text style={styles.title}>Entre na sua conta</Text>
-        <Text style={styles.description}>A sessao sera restaurada automaticamente com armazenamento seguro no dispositivo.</Text>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardArea}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <Text style={styles.eyebrow}>Login seguro</Text>
+          <Text accessibilityRole="header" style={styles.title}>Entre na sua conta</Text>
+          <Text style={styles.description}>A sessao sera restaurada automaticamente com armazenamento seguro no dispositivo.</Text>
 
-        <View style={styles.form}>
-          <Field label="E-mail" value={identifier} onChangeText={setIdentifier} autoCapitalize="none" keyboardType="email-address" />
-          <Field label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
+          <View style={styles.form}>
+            <Field label="E-mail" value={identifier} onChangeText={setIdentifier} autoCapitalize="none" keyboardType="email-address" />
+            <Field label="Senha" value={password} onChangeText={setPassword} secureTextEntry />
 
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
 
-          <Pressable disabled={submitting || !isLoaded} onPress={() => void handleSubmit()} style={[styles.button, submitting ? styles.buttonDisabled : null]}>
-            {submitting ? <ActivityIndicator color="#eff6ff" /> : <Text style={styles.buttonText}>Entrar</Text>}
-          </Pressable>
-        </View>
-      </View>
+            <Pressable accessibilityRole="button" accessibilityLabel="Entrar" disabled={submitting || !isLoaded} onPress={() => void handleSubmit()} style={[styles.button, submitting ? styles.buttonDisabled : null]}>
+              {submitting ? <ActivityIndicator color="#eff6ff" /> : <Text style={styles.buttonText}>Entrar</Text>}
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
@@ -66,6 +68,7 @@ function Field(props: { label: string; value: string; onChangeText: (value: stri
     <View style={styles.fieldWrapper}>
       <Text style={styles.fieldLabel}>{props.label}</Text>
       <TextInput
+        accessibilityLabel={props.label}
         autoCapitalize={props.autoCapitalize}
         keyboardType={props.keyboardType}
         onChangeText={props.onChangeText}
@@ -83,10 +86,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#020617',
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     gap: 16,
     justifyContent: 'center',
     padding: 24,
+    paddingBottom: 32,
+  },
+  keyboardArea: {
+    flex: 1,
   },
   eyebrow: {
     color: '#93c5fd',
@@ -123,6 +130,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     color: '#f8fafc',
     fontSize: 16,
+    minHeight: 52,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },

@@ -6,6 +6,7 @@ export function FormField({ label, value, onChangeText, placeholder, secureTextE
     <View style={styles.fieldWrapper}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <TextInput
+        accessibilityLabel={label}
         keyboardType={keyboardType}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -29,7 +30,7 @@ export function FormSection({ title, children }: { title: string; children: Reac
 
 export function SubmitButton({ label, onPress, loading = false, tone = 'primary' }: { label: string; onPress: () => void; loading?: boolean; tone?: 'primary' | 'danger' }) {
   return (
-    <Pressable onPress={onPress} style={[styles.button, tone === 'danger' ? styles.buttonDanger : null]}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={[styles.button, tone === 'danger' ? styles.buttonDanger : null]}>
       {loading ? <ActivityIndicator color="#eff6ff" /> : <Text style={styles.buttonText}>{label}</Text>}
     </Pressable>
   )
@@ -59,6 +60,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     color: '#f8fafc',
     fontSize: 16,
+    minHeight: 52,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },

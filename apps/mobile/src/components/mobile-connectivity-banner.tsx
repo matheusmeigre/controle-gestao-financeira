@@ -9,7 +9,7 @@ export function MobileConnectivityBanner() {
   }
 
   return (
-    <View style={styles.banner}>
+    <View accessibilityRole="alert" style={styles.banner}>
       <Text style={styles.text}>Voce esta offline. O app exibira cache local e tentara sincronizar quando a conexao voltar.</Text>
     </View>
   )

@@ -1,6 +1,7 @@
 import { useAuth, useUser } from '@clerk/clerk-expo'
 import { router } from 'expo-router'
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { EmptyState } from '../../components/mobile-screen'
 import { useMobileBootstrap } from '../../providers/mobile-bootstrap-provider'
 
 export default function AppHomeScreen() {
@@ -18,7 +19,7 @@ export default function AppHomeScreen() {
         </Text>
 
         {state.loading ? (
-          <Card label="Bootstrap" value="Carregando areas principais do app..." />
+          <Card label="Bootstrap" value="Carregando areas principais do app..." tone="muted" />
         ) : state.error ? (
           <>
             <Card label="Falha no bootstrap" value={state.error} tone="danger" />
@@ -27,15 +28,15 @@ export default function AppHomeScreen() {
             </Pressable>
           </>
         ) : (
-          <>
+          state.data ? <>
             <Card label="Usuario API" value={state.data?.me.id ?? '-'} />
             <Card label="Periodo atual" value={state.data?.bootstrap.currentPeriod.yearMonth ?? '-'} />
             <Card label="Resumo" value={`Despesas ${state.data?.expenses.length ?? 0} • Receitas ${state.data?.incomes.length ?? 0} • Cartoes ${state.data?.cards.length ?? 0}`} />
             <QuickActions />
-          </>
+          </> : <EmptyState title="Nenhum dado carregado" description="Puxe para atualizar ou tente novamente em alguns instantes." />
         )}
 
-        <Pressable onPress={() => void signOut()} style={styles.button}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Sair da conta" onPress={() => void signOut()} style={styles.button}>
           <Text style={styles.buttonText}>Sair</Text>
         </Pressable>
       </ScrollView>
@@ -57,15 +58,15 @@ function QuickActions() {
 
 function QuickAction({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={styles.quickAction}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={styles.quickAction}>
       <Text style={styles.quickActionText}>{label}</Text>
     </Pressable>
   )
 }
 
-function Card({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'danger' }) {
+function Card({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'danger' | 'muted' }) {
   return (
-    <View style={[styles.card, tone === 'danger' ? styles.cardDanger : null]}>
+    <View accessibilityRole="summary" style={[styles.card, tone === 'danger' ? styles.cardDanger : null, tone === 'muted' ? styles.cardMuted : null]}>
       <Text style={styles.cardLabel}>{label}</Text>
       <Text style={styles.cardValue}>{value}</Text>
     </View>
@@ -109,6 +110,9 @@ const styles = StyleSheet.create({
   cardDanger: {
     borderColor: '#7f1d1d',
   },
+  cardMuted: {
+    opacity: 0.85,
+  },
   cardLabel: {
     color: '#94a3b8',
     fontSize: 13,
@@ -124,6 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#0b6fe8',
     borderRadius: 14,
+    minHeight: 52,
     paddingHorizontal: 18,
     paddingVertical: 14,
   },
@@ -155,6 +160,8 @@ const styles = StyleSheet.create({
     borderColor: '#1e293b',
     borderRadius: 14,
     borderWidth: 1,
+    minHeight: 48,
+    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
