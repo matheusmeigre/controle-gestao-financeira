@@ -229,6 +229,7 @@ export class SupabaseInvoiceRepository {
       }))
 
       const { error: rpcError } = await (supabase.rpc as any)('replace_invoice_items', {
+        p_user_id: userId,
         p_invoice_id: id,
         p_items: JSON.stringify(itemsJson),
       })

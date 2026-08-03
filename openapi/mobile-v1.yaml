@@ -1,0 +1,1704 @@
+openapi: 3.1.0
+info:
+  title: Controle Gestao Financeira Mobile API
+  version: 1.0.0
+  description: Contrato inicial versionado para consumidores mobile.
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: /api/v1
+tags:
+  - name: Mobile
+    description: Endpoints base para bootstrap do app mobile.
+  - name: Expenses
+    description: Despesas do usuário autenticado.
+  - name: Incomes
+    description: Receitas do usuário autenticado.
+  - name: Cards
+    description: Cartões de crédito do usuário autenticado.
+  - name: Invoices
+    description: Faturas do usuário autenticado.
+  - name: Plannings
+    description: Planejamentos financeiros do usuário autenticado.
+paths:
+  /me:
+    get:
+      tags:
+        - Mobile
+      operationId: getCurrentMobileUser
+      summary: Retorna o contexto mínimo do usuário autenticado.
+      responses:
+        '200':
+          description: Usuário autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          description: Requisição sem autenticação válida.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Erro inesperado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /bootstrap:
+    get:
+      tags:
+        - Mobile
+      operationId: getMobileBootstrap
+      summary: Retorna dados mínimos para inicialização do cliente mobile.
+      responses:
+        '200':
+          description: Payload inicial do app.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapResponse'
+        '401':
+          description: Requisição sem autenticação válida.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '500':
+          description: Erro inesperado.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+  /expenses:
+    get:
+      tags:
+        - Expenses
+      operationId: listMobileExpenses
+      summary: Lista despesas do usuário autenticado.
+      responses:
+        '200':
+          description: Lista de despesas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    post:
+      tags:
+        - Expenses
+      operationId: createMobileExpense
+      summary: Cria uma despesa.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCreateInput'
+      responses:
+        '201':
+          description: Despesa criada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /expenses/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    patch:
+      tags:
+        - Expenses
+      operationId: updateMobileExpense
+      summary: Atualiza uma despesa.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseUpdateInput'
+      responses:
+        '200':
+          description: Despesa atualizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    delete:
+      tags:
+        - Expenses
+      operationId: deleteMobileExpense
+      summary: Remove uma despesa.
+      responses:
+        '204':
+          description: Despesa removida.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /incomes:
+    get:
+      tags:
+        - Incomes
+      operationId: listMobileIncomes
+      summary: Lista receitas do usuário autenticado.
+      responses:
+        '200':
+          description: Lista de receitas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    post:
+      tags:
+        - Incomes
+      operationId: createMobileIncome
+      summary: Cria uma receita.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeCreateInput'
+      responses:
+        '201':
+          description: Receita criada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /incomes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    patch:
+      tags:
+        - Incomes
+      operationId: updateMobileIncome
+      summary: Atualiza uma receita.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeUpdateInput'
+      responses:
+        '200':
+          description: Receita atualizada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    delete:
+      tags:
+        - Incomes
+      operationId: deleteMobileIncome
+      summary: Remove uma receita.
+      responses:
+        '204':
+          description: Receita removida.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /incomes/{id}/receive:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    post:
+      tags:
+        - Incomes
+      operationId: receiveMobileIncome
+      summary: Marca uma receita como recebida.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncomeReceiveInput'
+      responses:
+        '200':
+          description: Receita recebida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /cards:
+    get:
+      tags:
+        - Cards
+      operationId: listMobileCards
+      summary: Lista cartões do usuário autenticado.
+      responses:
+        '200':
+          description: Lista de cartões.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    post:
+      tags:
+        - Cards
+      operationId: createMobileCard
+      summary: Cria um cartão.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreateInput'
+      responses:
+        '201':
+          description: Cartão criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /cards/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags:
+        - Cards
+      operationId: getMobileCard
+      summary: Retorna um cartão.
+      responses:
+        '200':
+          description: Cartão encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    patch:
+      tags:
+        - Cards
+      operationId: updateMobileCard
+      summary: Atualiza um cartão.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardUpdateInput'
+      responses:
+        '200':
+          description: Cartão atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    delete:
+      tags:
+        - Cards
+      operationId: deleteMobileCard
+      summary: Remove um cartão.
+      responses:
+        '204':
+          description: Cartão removido.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /invoices:
+    get:
+      tags:
+        - Invoices
+      operationId: listMobileInvoices
+      summary: Lista faturas do usuário autenticado.
+      parameters:
+        - name: cardId
+          in: query
+          schema:
+            $ref: '#/components/schemas/ResourceId'
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: year
+          in: query
+          schema:
+            type: integer
+            minimum: 2020
+            maximum: 2100
+      responses:
+        '200':
+          description: Lista de faturas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    post:
+      tags:
+        - Invoices
+      operationId: createMobileInvoice
+      summary: Cria uma fatura.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceCreateInput'
+      responses:
+        '201':
+          description: Fatura criada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /invoices/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags:
+        - Invoices
+      operationId: getMobileInvoice
+      summary: Retorna uma fatura.
+      responses:
+        '200':
+          description: Fatura encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    delete:
+      tags:
+        - Invoices
+      operationId: deleteMobileInvoice
+      summary: Remove uma fatura.
+      responses:
+        '204':
+          description: Fatura removida.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /invoices/{id}/payments:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    post:
+      tags:
+        - Invoices
+      operationId: updateMobileInvoicePayment
+      summary: Atualiza o valor pago da fatura.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoicePaymentUpdateInput'
+      responses:
+        '200':
+          description: Fatura atualizada com o valor pago.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /invoices/{id}/items:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    post:
+      tags:
+        - Invoices
+      operationId: createMobileInvoiceItem
+      summary: Adiciona um item a uma fatura.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceItemCreateRequest'
+      responses:
+        '201':
+          description: Item adicionado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceItemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /invoices/{id}/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ResourceId'
+    delete:
+      tags:
+        - Invoices
+      operationId: deleteMobileInvoiceItem
+      summary: Remove um item de uma fatura.
+      responses:
+        '204':
+          description: Item removido.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /invoices/imports/preview:
+    post:
+      tags:
+        - Invoices
+      operationId: previewMobileInvoiceImport
+      summary: Processa um arquivo de fatura e retorna uma prévia dos itens extraídos.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, cardId, month, year]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                cardId:
+                  $ref: '#/components/schemas/ResourceId'
+                month:
+                  type: integer
+                  minimum: 1
+                  maximum: 12
+                year:
+                  type: integer
+                  minimum: 2020
+                  maximum: 2100
+      responses:
+        '200':
+          description: Prévia processada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceImportPreviewResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /plannings:
+    get:
+      tags:
+        - Plannings
+      operationId: listMobilePlannings
+      summary: Lista planejamentos do usuário autenticado.
+      responses:
+        '200':
+          description: Lista de planejamentos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    post:
+      tags:
+        - Plannings
+      operationId: createMobilePlanning
+      summary: Cria um planejamento.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanningCreateInput'
+      responses:
+        '201':
+          description: Planejamento criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /plannings/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags:
+        - Plannings
+      operationId: getMobilePlanning
+      summary: Retorna um planejamento.
+      responses:
+        '200':
+          description: Planejamento encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    patch:
+      tags:
+        - Plannings
+      operationId: updateMobilePlanning
+      summary: Atualiza um planejamento.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanningUpdateInput'
+      responses:
+        '200':
+          description: Planejamento atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+    delete:
+      tags:
+        - Plannings
+      operationId: deleteMobilePlanning
+      summary: Remove um planejamento.
+      responses:
+        '204':
+          description: Planejamento removido.
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+  /plannings/{id}/contributions:
+    parameters:
+      - $ref: '#/components/parameters/ResourceId'
+    post:
+      tags:
+        - Plannings
+      operationId: createMobilePlanningContribution
+      summary: Adiciona um aporte ao saldo atual do planejamento.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanningContributionCreateInput'
+      responses:
+        '200':
+          description: Planejamento atualizado com o novo aporte.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanningResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
+components:
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    BadRequestProblem:
+      description: Requisição inválida.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnauthorizedProblem:
+      description: Requisição sem autenticação válida.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFoundProblem:
+      description: Recurso não encontrado.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalServerProblem:
+      description: Erro inesperado.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    ResourceId:
+      type: string
+      minLength: 1
+    LocalDate:
+      type: string
+      pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+      examples:
+        - '2026-08-03'
+    Amount:
+      type: number
+      minimum: 0
+    Me:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          minLength: 1
+    MeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Me'
+    CurrentPeriod:
+      type: object
+      additionalProperties: false
+      required:
+        - year
+        - month
+        - yearMonth
+      properties:
+        year:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        yearMonth:
+          type: string
+          pattern: '^\\d{4}-\\d{2}$'
+    BootstrapSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - expensesCount
+        - incomesCount
+        - invoicesCount
+        - cardsCount
+        - planningsCount
+      properties:
+        expensesCount:
+          type: integer
+          minimum: 0
+        incomesCount:
+          type: integer
+          minimum: 0
+        invoicesCount:
+          type: integer
+          minimum: 0
+        cardsCount:
+          type: integer
+          minimum: 0
+        planningsCount:
+          type: integer
+          minimum: 0
+    BootstrapCapabilities:
+      type: object
+      additionalProperties: false
+      required:
+        - me
+        - bootstrap
+      properties:
+        me:
+          type: string
+          const: /api/v1/me
+        bootstrap:
+          type: string
+          const: /api/v1/bootstrap
+    Bootstrap:
+      type: object
+      additionalProperties: false
+      required:
+        - apiVersion
+        - serverTime
+        - currentPeriod
+        - summary
+        - capabilities
+      properties:
+        apiVersion:
+          type: string
+          const: v1
+        serverTime:
+          type: string
+          format: date-time
+        currentPeriod:
+          $ref: '#/components/schemas/CurrentPeriod'
+        summary:
+          $ref: '#/components/schemas/BootstrapSummary'
+        capabilities:
+          $ref: '#/components/schemas/BootstrapCapabilities'
+    BootstrapResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Bootstrap'
+    DeleteResult:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - deleted
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        deleted:
+          type: boolean
+          const: true
+    DeleteResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/DeleteResult'
+    Expense:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - description
+        - amount
+        - category
+        - date
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        category:
+          type: string
+          minLength: 1
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [paid, pending]
+        isRecurring:
+          type: boolean
+        recurringFrequency:
+          type: string
+          enum: [monthly, yearly]
+        dueDate:
+          $ref: '#/components/schemas/LocalDate'
+        notes:
+          type: string
+          minLength: 1
+        cardName:
+          type: string
+          minLength: 1
+        personName:
+          type: string
+          minLength: 1
+    ExpenseCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - description
+        - amount
+        - category
+        - date
+      properties:
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        category:
+          type: string
+          minLength: 1
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [paid, pending]
+        isRecurring:
+          type: boolean
+        recurringFrequency:
+          type: string
+          enum: [monthly, yearly]
+        dueDate:
+          $ref: '#/components/schemas/LocalDate'
+        notes:
+          type: string
+          minLength: 1
+        cardName:
+          type: string
+          minLength: 1
+        personName:
+          type: string
+          minLength: 1
+    ExpenseUpdateInput:
+      type: object
+      additionalProperties: false
+      properties:
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        category:
+          type: string
+          minLength: 1
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [paid, pending]
+        isRecurring:
+          type: boolean
+        recurringFrequency:
+          type: string
+          enum: [monthly, yearly]
+        dueDate:
+          $ref: '#/components/schemas/LocalDate'
+        notes:
+          type: string
+          minLength: 1
+        cardName:
+          type: string
+          minLength: 1
+        personName:
+          type: string
+          minLength: 1
+    ExpenseResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Expense'
+    ExpenseListResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expense'
+    Income:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - description
+        - amount
+        - type
+        - date
+        - status
+        - registrationDate
+        - receivedDate
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        type:
+          type: string
+          enum: [salary, extra]
+        category:
+          type: string
+          minLength: 1
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [pending, received]
+        registrationDate:
+          type: string
+          format: date-time
+        receivedDate:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: 'null'
+    IncomeCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - description
+        - amount
+        - type
+        - date
+        - status
+      properties:
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        type:
+          type: string
+          enum: [salary, extra]
+        category:
+          type: string
+          minLength: 1
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [pending, received]
+    IncomeUpdateInput:
+      type: object
+      additionalProperties: false
+      properties:
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        type:
+          type: string
+          enum: [salary, extra]
+        category:
+          type: string
+          minLength: 1
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [pending, received]
+    IncomeReceiveInput:
+      type: object
+      additionalProperties: false
+      properties:
+        receivedDate:
+          type: string
+          format: date-time
+    IncomeResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Income'
+    IncomeListResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Income'
+    Card:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - nickname
+        - bankName
+        - brand
+        - last4Digits
+        - closingDay
+        - dueDay
+        - isActive
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        nickname:
+          type: string
+          minLength: 1
+        bankName:
+          type: string
+          minLength: 1
+        brand:
+          type: string
+          enum: [Visa, Mastercard, Elo, American Express, Hipercard, Outros]
+        last4Digits:
+          type: string
+          pattern: '^\\d{4}$'
+        closingDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        dueDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        creditLimit:
+          $ref: '#/components/schemas/Amount'
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CardCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - nickname
+        - bankName
+        - brand
+        - last4Digits
+        - closingDay
+        - dueDay
+        - isActive
+      properties:
+        nickname:
+          type: string
+          minLength: 1
+        bankName:
+          type: string
+          minLength: 1
+        brand:
+          type: string
+          enum: [Visa, Mastercard, Elo, American Express, Hipercard, Outros]
+        last4Digits:
+          type: string
+          pattern: '^\\d{4}$'
+        closingDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        dueDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        creditLimit:
+          $ref: '#/components/schemas/Amount'
+        isActive:
+          type: boolean
+    CardUpdateInput:
+      type: object
+      additionalProperties: false
+      properties:
+        nickname:
+          type: string
+          minLength: 1
+        bankName:
+          type: string
+          minLength: 1
+        brand:
+          type: string
+          enum: [Visa, Mastercard, Elo, American Express, Hipercard, Outros]
+        last4Digits:
+          type: string
+          pattern: '^\\d{4}$'
+        closingDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        dueDay:
+          type: integer
+          minimum: 1
+          maximum: 31
+        creditLimit:
+          $ref: '#/components/schemas/Amount'
+        isActive:
+          type: boolean
+    CardResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Card'
+    CardListResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+    InvoiceItem:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - date
+        - description
+        - amount
+        - category
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        category:
+          type: string
+          minLength: 1
+        installment:
+          type: string
+          minLength: 1
+        notes:
+          type: string
+          minLength: 1
+        createdAt:
+          type: string
+          format: date-time
+    InvoiceItemCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - date
+        - description
+        - amount
+        - category
+      properties:
+        date:
+          $ref: '#/components/schemas/LocalDate'
+        description:
+          type: string
+          minLength: 1
+        amount:
+          $ref: '#/components/schemas/Amount'
+        category:
+          type: string
+          minLength: 1
+        installment:
+          type: string
+          minLength: 1
+        notes:
+          type: string
+          minLength: 1
+    InvoiceItemCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item:
+          $ref: '#/components/schemas/InvoiceItemCreateInput'
+    InvoiceItemResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/InvoiceItem'
+    Invoice:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - cardId
+        - month
+        - year
+        - closingDate
+        - dueDate
+        - totalAmount
+        - paidAmount
+        - isPaid
+        - items
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        cardId:
+          $ref: '#/components/schemas/ResourceId'
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+          minimum: 2020
+          maximum: 2100
+        closingDate:
+          $ref: '#/components/schemas/LocalDate'
+        dueDate:
+          $ref: '#/components/schemas/LocalDate'
+        totalAmount:
+          $ref: '#/components/schemas/Amount'
+        paidAmount:
+          $ref: '#/components/schemas/Amount'
+        isPaid:
+          type: boolean
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    InvoiceCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - cardId
+        - month
+        - year
+        - closingDate
+        - dueDate
+      properties:
+        cardId:
+          $ref: '#/components/schemas/ResourceId'
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+          minimum: 2020
+          maximum: 2100
+        closingDate:
+          $ref: '#/components/schemas/LocalDate'
+        dueDate:
+          $ref: '#/components/schemas/LocalDate'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItemCreateInput'
+    InvoiceResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Invoice'
+    InvoiceListResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+    InvoicePaymentUpdateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - paidAmount
+      properties:
+        paidAmount:
+          $ref: '#/components/schemas/Amount'
+    InvoiceImportMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - fileName
+        - fileSize
+        - processedAt
+        - itemCount
+        - cardId
+        - month
+        - year
+      properties:
+        bankName:
+          type: string
+          minLength: 1
+        cardLast4:
+          type: string
+          minLength: 1
+        totalAmount:
+          $ref: '#/components/schemas/Amount'
+        statementPeriod:
+          type: string
+          minLength: 1
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        fileName:
+          type: string
+          minLength: 1
+        fileSize:
+          type: integer
+          minimum: 0
+        fileType:
+          type: string
+          minLength: 1
+        processedAt:
+          type: string
+          format: date-time
+        itemCount:
+          type: integer
+          minimum: 0
+        cardId:
+          $ref: '#/components/schemas/ResourceId'
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        year:
+          type: integer
+          minimum: 2020
+          maximum: 2100
+        hasExtractedDates:
+          type: boolean
+    InvoiceImportPreview:
+      type: object
+      additionalProperties: false
+      required: [items, metadata]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItem'
+        metadata:
+          $ref: '#/components/schemas/InvoiceImportMetadata'
+        warnings:
+          type: array
+          items:
+            type: string
+            minLength: 1
+    InvoiceImportPreviewResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/InvoiceImportPreview'
+    Planning:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - category
+        - targetAmount
+        - currentAmount
+        - startDate
+        - status
+        - linkedExpenseIds
+        - riskLevel
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/ResourceId'
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        targetAmount:
+          $ref: '#/components/schemas/Amount'
+        currentAmount:
+          $ref: '#/components/schemas/Amount'
+        startDate:
+          $ref: '#/components/schemas/LocalDate'
+        targetDate:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [planned, in_progress, completed, cancelled, delayed, at_risk]
+        notes:
+          type: string
+          minLength: 1
+        linkedExpenseIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceId'
+        categoryData:
+          type: object
+          additionalProperties: true
+        creationContext:
+          type: object
+          additionalProperties: true
+        simulation:
+          type: object
+          additionalProperties: true
+        alerts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        riskLevel:
+          type: string
+          enum: [low, medium, high, critical]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PlanningCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - category
+        - targetAmount
+        - startDate
+      properties:
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        targetAmount:
+          $ref: '#/components/schemas/Amount'
+        currentAmount:
+          $ref: '#/components/schemas/Amount'
+        startDate:
+          $ref: '#/components/schemas/LocalDate'
+        targetDate:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [planned, in_progress, completed, cancelled, delayed, at_risk]
+        notes:
+          type: string
+          minLength: 1
+        linkedExpenseIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceId'
+        categoryData:
+          type: object
+          additionalProperties: true
+        creationContext:
+          type: object
+          additionalProperties: true
+        simulation:
+          type: object
+          additionalProperties: true
+        alerts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        riskLevel:
+          type: string
+          enum: [low, medium, high, critical]
+    PlanningUpdateInput:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        targetAmount:
+          $ref: '#/components/schemas/Amount'
+        currentAmount:
+          $ref: '#/components/schemas/Amount'
+        startDate:
+          $ref: '#/components/schemas/LocalDate'
+        targetDate:
+          $ref: '#/components/schemas/LocalDate'
+        status:
+          type: string
+          enum: [planned, in_progress, completed, cancelled, delayed, at_risk]
+        notes:
+          type: string
+          minLength: 1
+        linkedExpenseIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceId'
+        categoryData:
+          type: object
+          additionalProperties: true
+        creationContext:
+          type: object
+          additionalProperties: true
+        simulation:
+          type: object
+          additionalProperties: true
+        alerts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        riskLevel:
+          type: string
+          enum: [low, medium, high, critical]
+    PlanningResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/Planning'
+    PlanningListResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Planning'
+    PlanningContributionCreateInput:
+      type: object
+      additionalProperties: false
+      required:
+        - amount
+      properties:
+        amount:
+          allOf:
+            - $ref: '#/components/schemas/Amount'
+          exclusiveMinimum: 0
+    Problem:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        code:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
