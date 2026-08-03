@@ -13,4 +13,7 @@ export const tokenCache = {
   async saveToken(key: string, value: string) {
     await SecureStore.setItemAsync(`${TOKEN_KEY_PREFIX}${key}`, value)
   },
+  async clearToken(key: string) {
+    await SecureStore.deleteItemAsync(`${TOKEN_KEY_PREFIX}${key}`)
+  },
 }

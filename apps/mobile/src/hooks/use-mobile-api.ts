@@ -4,6 +4,7 @@ import { createMobileAppApiClient } from '../lib/api'
 import { getMobileEnvironment } from '../lib/env'
 import { getCurrentConnectivity } from './use-connectivity'
 import { captureMobileApiFailure, trackMobilePerformance } from '../lib/observability'
+import { tokenCache } from '../lib/auth/token-cache'
 
 const MOBILE_REQUEST_TIMEOUT_MS = 10000
 
@@ -58,6 +59,7 @@ export function useMobileApi() {
         })
 
         if (response.status === 401) {
+          await tokenCache.clearToken('session')
           await signOut()
         }
 

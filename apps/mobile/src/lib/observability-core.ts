@@ -25,7 +25,7 @@ export function sanitizeObservabilityValue(value: unknown): unknown {
   if (value && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value).map(([key, entryValue]) => {
-        if (/token|authorization|password|secret|amount|paidAmount|creditLimit/i.test(key)) {
+        if (/token|authorization|password|secret|amount|paidAmount|creditLimit|file|uri|cardId/i.test(key)) {
           return [key, '[REDACTED]']
         }
 

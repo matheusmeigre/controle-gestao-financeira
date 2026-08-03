@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getMobileEnvironment, resolveExpoPublicApiBaseUrl, resolveExpoPublicClerkPublishableKey } from './env'
+import { assertSecureMobileApiBaseUrl, getMobileEnvironment, resolveExpoPublicApiBaseUrl, resolveExpoPublicClerkPublishableKey } from './env'
 import { resolveMobileApiBaseUrl } from './api'
 
 describe('mobile environment', () => {
@@ -17,5 +17,9 @@ describe('mobile environment', () => {
 
   it('requires a Clerk publishable key', () => {
     expect(resolveExpoPublicClerkPublishableKey('pk_test_123')).toBe('pk_test_123')
+  })
+
+  it('keeps https base URLs for secure mobile environments', () => {
+    expect(assertSecureMobileApiBaseUrl('https://example.com')).toBe('https://example.com')
   })
 })

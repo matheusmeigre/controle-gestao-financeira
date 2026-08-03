@@ -16,9 +16,21 @@ export function resolveExpoPublicApiBaseUrl(value = process.env.EXPO_PUBLIC_API_
   throw new Error('EXPO_PUBLIC_API_BASE_URL must be configured for production builds.')
 }
 
+export function assertSecureMobileApiBaseUrl(apiBaseUrl: string) {
+  if (process.env.NODE_ENV !== 'production') {
+    return apiBaseUrl
+  }
+
+  if (!apiBaseUrl.startsWith('https://')) {
+    throw new Error('Production mobile builds require an HTTPS API base URL.')
+  }
+
+  return apiBaseUrl
+}
+
 export function getMobileEnvironment(): MobileEnvironment {
   return {
-    apiBaseUrl: resolveExpoPublicApiBaseUrl(),
+    apiBaseUrl: assertSecureMobileApiBaseUrl(resolveExpoPublicApiBaseUrl()),
   }
 }
 
