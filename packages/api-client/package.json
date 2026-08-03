@@ -1,0 +1,5 @@
+{
+  "name": "@controle/api-client",
+  "private": true,
+  "type": "module"
+}
