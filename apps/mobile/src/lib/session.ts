@@ -1,6 +1,5 @@
-import type { MobileBootstrapSession } from '@api-client'
+import type { MobileApiClientOptions, MobileBootstrapSession } from '@api-client'
 import { createMobileAppApiClient, type MobileAuthSession, type MobileEnvironment } from './api'
-import type { MobileApiClientOptions } from '@api-client'
 
 export type LoadMobileSessionInput = {
   environment: MobileEnvironment

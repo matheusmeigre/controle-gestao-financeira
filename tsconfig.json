@@ -76,6 +76,7 @@
   ],
   "exclude": [
     "node_modules",
+    "apps/mobile",
     "test-parse.tsx",
     "docs",
     "tests"

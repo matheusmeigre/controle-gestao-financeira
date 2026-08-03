@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Controle Gestao Financeira",
+    "slug": "controle-gestao-financeira-mobile",
+    "scheme": "controle-gestao-financeira",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    }
+  }
+}

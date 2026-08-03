@@ -1,22 +1,26 @@
 # apps/mobile
 
-Fundação inicial do app mobile baseada no `@api-client` tipado da API v1.
+App Expo/React Native da migracao mobile, consumindo `@api-client` e `@contracts` como fonte unica de integracao com a API v1.
 
-## Escopo atual
+## Scripts
 
-- criação padronizada do cliente mobile
-- bootstrap de sessão (`me`, `bootstrap`, `expenses`, `incomes`, `cards`, `plannings`, `invoices`)
-- resolução simples de `baseUrl` e token de acesso
+- `npm run mobile:dev`
+- `npm run mobile:android`
+- `npm run mobile:ios`
+- `npm run mobile:web`
+- `npm run mobile:lint`
+- `npm run mobile:test`
+- `npm run mobile:type-check`
+- `npm run mobile:export`
 
-## Próximos passos naturais
+## Ambiente
 
-1. adicionar runtime Expo/React Native
-2. ligar autenticação mobile ao `getAccessToken`
-3. montar camada de cache/offline e sincronização
-4. construir shells de navegação e telas iniciais
+Defina `EXPO_PUBLIC_API_BASE_URL` para o host base da aplicacao web/API. O cliente mobile resolve automaticamente `/api/v1` a partir desse valor.
 
 ## Arquivos principais
 
+- `src/app/_layout.tsx`
+- `src/app/index.tsx`
+- `src/lib/env.ts`
 - `src/lib/api.ts`
 - `src/lib/session.ts`
-- `src/index.ts`
