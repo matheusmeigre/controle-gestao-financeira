@@ -1,62 +1,37 @@
 import { useAuth, useUser } from '@clerk/clerk-expo'
-import { useEffect, useState } from 'react'
+import { router } from 'expo-router'
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { MobileApiClientError } from '@api-client'
-import type { MobileBootstrapSession } from '@api-client'
-import { useMobileApi } from '../../hooks/use-mobile-api'
+import { useMobileBootstrap } from '../../providers/mobile-bootstrap-provider'
 
 export default function AppHomeScreen() {
   const { signOut } = useAuth()
   const { user } = useUser()
-  const api = useMobileApi()
-  const [state, setState] = useState<{ data?: MobileBootstrapSession; error?: string; loading: boolean }>({ loading: true })
-
-  useEffect(() => {
-    let active = true
-
-    setState({ loading: true })
-
-    api.bootstrapSession()
-      .then((data) => {
-        if (active) {
-          setState({ data, loading: false })
-        }
-      })
-      .catch((error: unknown) => {
-        if (!active) {
-          return
-        }
-
-        const message = error instanceof MobileApiClientError
-          ? error.problem?.detail ?? error.message
-          : 'Nao foi possivel carregar a sessao mobile.'
-
-        setState({ error: message, loading: false })
-      })
-
-    return () => {
-      active = false
-    }
-  }, [api])
+  const { state, retry } = useMobileBootstrap()
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.eyebrow}>TODO 2 • Autenticacao Mobile</Text>
-        <Text style={styles.title}>Sessao autenticada no dispositivo</Text>
+        <Text style={styles.eyebrow}>TODO 3 • Shell e Navegacao</Text>
+        <Text style={styles.title}>Dashboard mobile</Text>
         <Text style={styles.description}>
           {user?.primaryEmailAddress?.emailAddress ?? user?.id ?? 'Usuario autenticado'}
         </Text>
 
         {state.loading ? (
-          <Card label="Bootstrap" value="Carregando dados autenticados da API v1..." />
+          <Card label="Bootstrap" value="Carregando areas principais do app..." />
         ) : state.error ? (
-          <Card label="Erro de autenticacao" value={state.error} tone="danger" />
+          <>
+            <Card label="Falha no bootstrap" value={state.error} tone="danger" />
+            <Pressable onPress={() => void retry()} style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>Tentar novamente</Text>
+            </Pressable>
+          </>
         ) : (
           <>
             <Card label="Usuario API" value={state.data?.me.id ?? '-'} />
             <Card label="Periodo atual" value={state.data?.bootstrap.currentPeriod.yearMonth ?? '-'} />
             <Card label="Resumo" value={`Despesas ${state.data?.expenses.length ?? 0} • Receitas ${state.data?.incomes.length ?? 0} • Cartoes ${state.data?.cards.length ?? 0}`} />
+            <QuickActions />
           </>
         )}
 
@@ -65,6 +40,26 @@ export default function AppHomeScreen() {
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+  )
+}
+
+function QuickActions() {
+  return (
+    <View style={styles.quickActions}>
+      <QuickAction label="Despesas" onPress={() => router.push('/(app)/expenses')} />
+      <QuickAction label="Receitas" onPress={() => router.push('/(app)/incomes')} />
+      <QuickAction label="Cartoes" onPress={() => router.push('/(app)/cards')} />
+      <QuickAction label="Faturas" onPress={() => router.push('/(app)/invoices')} />
+      <QuickAction label="Planos" onPress={() => router.push('/(app)/plannings')} />
+    </View>
+  )
+}
+
+function QuickAction({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.quickAction}>
+      <Text style={styles.quickActionText}>{label}</Text>
+    </Pressable>
   )
 }
 
@@ -136,5 +131,36 @@ const styles = StyleSheet.create({
     color: '#eff6ff',
     fontSize: 16,
     fontWeight: '700',
+  },
+  secondaryButton: {
+    alignItems: 'center',
+    borderColor: '#334155',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  secondaryButtonText: {
+    color: '#e2e8f0',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  quickActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  quickAction: {
+    backgroundColor: '#111827',
+    borderColor: '#1e293b',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  quickActionText: {
+    color: '#e2e8f0',
+    fontSize: 14,
+    fontWeight: '600',
   },
 })
