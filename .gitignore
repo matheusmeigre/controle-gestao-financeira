@@ -11,6 +11,7 @@
 # production
 /build
 /apps/mobile/dist
+/apps/mobile/.expo/
 
 # debug
 npm-debug.log*
@@ -26,6 +27,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+/apps/mobile/tsconfig.json.*
 next-env.d.ts
 
 # clerk configuration (can include secrets)
