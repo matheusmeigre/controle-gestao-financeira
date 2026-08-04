@@ -2,6 +2,7 @@ import {
   addMobileInvoiceItemSchema,
   createMobileCardSchema,
   createMobileExpenseSchema,
+  createMobileInvoiceSchema,
   createMobileIncomeSchema,
   createMobilePlanningContributionSchema,
   createMobilePlanningSchema,
@@ -26,6 +27,7 @@ import {
   updateMobileInvoicePaymentSchema,
   updateMobilePlanningSchema,
   type CreateMobileExpense,
+  type CreateMobileInvoice,
   type CreateMobileIncome,
   type CreateMobilePlanning,
   type CreateMobilePlanningContribution,
@@ -129,6 +131,10 @@ export function createMobileApiClient(options: MobileApiClientOptions = {}) {
       })
       return response.data
     },
+    async getExpense(id: string): Promise<MobileExpense> {
+      const response = await http.request<MobileExpenseResponse>(`/expenses/${id}`, { schema: mobileExpenseResponseSchema })
+      return response.data
+    },
     async updateExpense(id: string, input: UpdateMobileExpense): Promise<MobileExpense> {
       const response = await http.request<MobileExpenseResponse>(`/expenses/${id}`, {
         method: 'PATCH',
@@ -150,6 +156,10 @@ export function createMobileApiClient(options: MobileApiClientOptions = {}) {
         body: createMobileIncomeSchema.parse(input),
         schema: mobileIncomeResponseSchema,
       })
+      return response.data
+    },
+    async getIncome(id: string): Promise<MobileIncome> {
+      const response = await http.request<MobileIncomeResponse>(`/incomes/${id}`, { schema: mobileIncomeResponseSchema })
       return response.data
     },
     async updateIncome(id: string, input: UpdateMobileIncome): Promise<MobileIncome> {
@@ -205,6 +215,17 @@ export function createMobileApiClient(options: MobileApiClientOptions = {}) {
     async getInvoice(id: string): Promise<MobileInvoice> {
       const response = await http.request<MobileInvoiceResponse>(`/invoices/${id}`, { schema: mobileInvoiceResponseSchema })
       return response.data
+    },
+    async createInvoice(input: CreateMobileInvoice): Promise<MobileInvoice> {
+      const response = await http.request<MobileInvoiceResponse>('/invoices', {
+        method: 'POST',
+        body: createMobileInvoiceSchema.parse(input),
+        schema: mobileInvoiceResponseSchema,
+      })
+      return response.data
+    },
+    async deleteInvoice(id: string): Promise<void> {
+      await http.request(`/invoices/${id}`, { method: 'DELETE' })
     },
     async addInvoiceItem(id: string, input: AddMobileInvoiceItem): Promise<MobileInvoiceItem> {
       const response = await http.request<MobileInvoiceItemResponse>(`/invoices/${id}/items`, {

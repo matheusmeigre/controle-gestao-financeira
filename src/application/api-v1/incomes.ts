@@ -46,6 +46,11 @@ export async function listIncomes(userId: string, yearMonth?: string): Promise<M
   return incomes.map(toIncomeDto)
 }
 
+export async function getIncome(userId: string, id: string): Promise<MobileIncome | null> {
+  const income = await repository.findById(userId, id)
+  return income ? toIncomeDto(income) : null
+}
+
 export async function createIncome(userId: string, input: CreateMobileIncome): Promise<MobileIncome> {
   validateIncomePayload(input)
 

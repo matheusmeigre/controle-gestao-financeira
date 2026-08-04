@@ -75,6 +75,11 @@ export async function listExpenses(userId: string, yearMonth?: string): Promise<
   return expenses.map(toExpenseDto)
 }
 
+export async function getExpense(userId: string, id: string): Promise<MobileExpense | null> {
+  const expense = await repository.findById(userId, id)
+  return expense ? toExpenseDto(expense) : null
+}
+
 export async function createExpense(userId: string, input: CreateMobileExpense): Promise<MobileExpense> {
   const expense = await repository.create(userId, {
     ...(buildExpensePayload(input) as Expense),

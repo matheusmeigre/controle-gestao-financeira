@@ -1,9 +1,33 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "rootDir": "./src"
+    "strict": true,
+    "baseUrl": ".",
+    "types": [
+      "vitest/globals"
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@api-client": [
+        "../../packages/api-client/src/index.ts"
+      ],
+      "@api-client/*": [
+        "../../packages/api-client/src/*"
+      ],
+      "@contracts": [
+        "../../packages/contracts/src/index.ts"
+      ],
+      "@contracts/*": [
+        "../../packages/contracts/src/*"
+      ]
+    }
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "expo-env.d.ts",
+    "vitest.config.ts"
   ]
 }

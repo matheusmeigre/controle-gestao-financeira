@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createMobileAppApiClient, loadMobileBootstrapSession, resolveMobileApiBaseUrl } from '../apps/mobile/src'
+import { createMobileAppApiClient, resolveMobileApiBaseUrl } from '../apps/mobile/src/lib/api'
+import { loadMobileBootstrapSession } from '../apps/mobile/src/lib/session'
 
 describe('mobile app foundation', () => {
   it('resolves the mobile api base url from the environment', () => {

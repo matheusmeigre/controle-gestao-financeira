@@ -76,6 +76,12 @@ paths:
         - Expenses
       operationId: listMobileExpenses
       summary: Lista despesas do usuário autenticado.
+      parameters:
+        - name: yearMonth
+          in: query
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
       responses:
         '200':
           description: Lista de despesas.
@@ -114,6 +120,24 @@ paths:
   /expenses/{id}:
     parameters:
       - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags:
+        - Expenses
+      operationId: getMobileExpense
+      summary: Retorna uma despesa.
+      responses:
+        '200':
+          description: Despesa encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
     patch:
       tags:
         - Expenses
@@ -160,6 +184,12 @@ paths:
         - Incomes
       operationId: listMobileIncomes
       summary: Lista receitas do usuário autenticado.
+      parameters:
+        - name: yearMonth
+          in: query
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
       responses:
         '200':
           description: Lista de receitas.
@@ -198,6 +228,24 @@ paths:
   /incomes/{id}:
     parameters:
       - $ref: '#/components/parameters/ResourceId'
+    get:
+      tags:
+        - Incomes
+      operationId: getMobileIncome
+      summary: Retorna uma receita.
+      responses:
+        '200':
+          description: Receita encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '500':
+          $ref: '#/components/responses/InternalServerProblem'
     patch:
       tags:
         - Incomes
@@ -273,6 +321,11 @@ paths:
         - Cards
       operationId: listMobileCards
       summary: Lista cartões do usuário autenticado.
+      parameters:
+        - name: includeInactive
+          in: query
+          schema:
+            type: boolean
       responses:
         '200':
           description: Lista de cartões.
