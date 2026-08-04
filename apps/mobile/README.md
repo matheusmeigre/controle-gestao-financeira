@@ -16,11 +16,15 @@ App Expo/React Native da migracao mobile, consumindo `@api-client` e `@contracts
 - `npm run mobile:eas:preview`
 - `npm run mobile:eas:production`
 
+Execute esses scripts a partir da raiz do monorepo. Dentro de `apps/mobile`, use os scripts locais equivalentes, como `npm run web`.
+
 ## Ambiente
 
-Defina `EXPO_PUBLIC_API_BASE_URL` para o host base da aplicacao web/API. O cliente mobile resolve automaticamente `/api/v1` a partir desse valor.
+Crie `apps/mobile/.env.local` para as variaveis lidas pelo Expo.
 
-Defina `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` para inicializar o Clerk no app mobile.
+Defina `EXPO_PUBLIC_API_BASE_URL` para o host base da aplicacao web/API. O cliente mobile resolve automaticamente `/api/v1` a partir desse valor. Em desenvolvimento, o app usa `http://localhost:3000` quando essa variavel nao esta definida.
+
+Defina `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` para inicializar o Clerk no app mobile. Ela pode usar o mesmo valor publico de `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, mas precisa do prefixo `EXPO_PUBLIC_` para ser lida pelo Expo.
 
 ## Cache e offline
 
