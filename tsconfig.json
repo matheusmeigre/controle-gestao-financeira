@@ -49,6 +49,21 @@
       ],
       "@/app/*": [
         "./src/app/*"
+      ],
+      "@domain/*": [
+        "./packages/domain/src/*"
+      ],
+      "@contracts": [
+        "./packages/contracts/src/index.ts"
+      ],
+      "@contracts/*": [
+        "./packages/contracts/src/*"
+      ],
+      "@api-client": [
+        "./packages/api-client/src/index.ts"
+      ],
+      "@api-client/*": [
+        "./packages/api-client/src/*"
       ]
     }
   },
@@ -61,6 +76,7 @@
   ],
   "exclude": [
     "node_modules",
+    "apps/mobile",
     "test-parse.tsx",
     "docs",
     "tests"

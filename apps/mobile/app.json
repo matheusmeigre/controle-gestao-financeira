@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Controle Gestao Financeira",
+    "slug": "controle-gestao-financeira-mobile",
+    "scheme": "controle-gestao-financeira",
+    "version": "0.1.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#020617"
+    },
+    "ios": {
+      "bundleIdentifier": "com.matheusmeigre.controlegestaofinanceira",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        }
+      }
+    },
+    "android": {
+      "package": "com.matheusmeigre.controlegestaofinanceira",
+      "versionCode": 1,
+      "usesCleartextTraffic": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      },
+      "releaseChannel": "development"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    }
+  }
+}

@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/apps/mobile/node_modules
 
 # next.js
 /.next/
@@ -9,6 +10,7 @@
 
 # production
 /build
+/apps/mobile/dist
 
 # debug
 npm-debug.log*
