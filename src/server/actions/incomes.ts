@@ -2,20 +2,28 @@
 
 import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from 'next/cache'
-import { SupabaseIncomeRepository } from '@/features/incomes/services/income.supabase.repository'
 import type { Income, CreateIncomeInput, UpdateIncomeInput } from '@/features/incomes/types'
-import { isValidDateString } from '@/lib/date-utils'
+import {
+  createIncome as createApiIncome,
+  deleteIncome as deleteApiIncome,
+  listIncomes as listApiIncomes,
+  receiveIncome as receiveApiIncome,
+  updateIncome as updateApiIncome,
+} from '@/application/api-v1/incomes'
 
-const repo = new SupabaseIncomeRepository()
+function toLegacyIncome(userId: string, income: Omit<Income, 'userId'>): Income {
+  return {
+    ...income,
+    userId,
+  }
+}
 
 export async function getIncomes(yearMonth?: string) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    const data = yearMonth
-      ? await repo.findByMonth(userId, yearMonth)
-      : await repo.findAll(userId)
-    return { success: true as const, data }
+    const data = await listApiIncomes(userId, yearMonth)
+    return { success: true as const, data: data.map((income) => toLegacyIncome(userId, income)) }
   } catch (e) {
     return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao buscar receitas' }
   }
@@ -25,26 +33,9 @@ export async function createIncome(input: CreateIncomeInput) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    if (!input.description?.trim()) {
-      return { success: false as const, error: 'Descrição é obrigatória' }
-    }
-    if (!Number.isFinite(input.amount) || input.amount <= 0) {
-      return { success: false as const, error: 'Valor deve ser maior que zero' }
-    }
-    if (!isValidDateString(input.date)) {
-      return { success: false as const, error: 'Data inválida' }
-    }
-    const income: Income = {
-      ...input,
-      description: input.description.trim(),
-      id: crypto.randomUUID(),
-      userId,
-      date: input.date ?? new Date().toISOString().split('T')[0],
-      registrationDate: new Date().toISOString(),
-    }
-    const data = await repo.create(userId, income)
+    const data = await createApiIncome(userId, input)
     revalidatePath('/')
-    return { success: true as const, data }
+    return { success: true as const, data: toLegacyIncome(userId, data) }
   } catch (e) {
     return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao criar receita' }
   }
@@ -54,9 +45,10 @@ export async function updateIncome(input: UpdateIncomeInput) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    const data = await repo.update(userId, input.id, input as Partial<Income>)
+    const data = await updateApiIncome(userId, input.id, input)
+    if (!data) return { success: false as const, error: 'Receita não encontrada' }
     revalidatePath('/')
-    return { success: true as const, data }
+    return { success: true as const, data: toLegacyIncome(userId, data) }
   } catch (e) {
     return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao atualizar receita' }
   }
@@ -66,7 +58,7 @@ export async function deleteIncome(id: string) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    await repo.delete(userId, id)
+    await deleteApiIncome(userId, id)
     revalidatePath('/')
     return { success: true as const }
   } catch (e) {
@@ -78,9 +70,10 @@ export async function markIncomeAsReceived(id: string) {
   const { userId } = await auth()
   if (!userId) return { success: false as const, error: 'Não autenticado' }
   try {
-    const data = await repo.markAsReceived(userId, id)
+    const data = await receiveApiIncome(userId, id, {})
+    if (!data) return { success: false as const, error: 'Receita não encontrada' }
     revalidatePath('/')
-    return { success: true as const, data }
+    return { success: true as const, data: toLegacyIncome(userId, data) }
   } catch (e) {
     return { success: false as const, error: e instanceof Error ? e.message : 'Erro ao marcar receita' }
   }
