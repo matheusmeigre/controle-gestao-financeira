@@ -37,7 +37,7 @@ describe('SupabaseInvoiceRepository.update', () => {
     expect(rpcMock).toHaveBeenCalledWith('replace_invoice_items', {
       p_user_id: 'user-123',
       p_invoice_id: 'invoice-456',
-      p_items: expect.any(String),
+      p_items: expect.any(Array),
     })
   })
 })

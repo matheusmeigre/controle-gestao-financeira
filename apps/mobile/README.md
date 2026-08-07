@@ -18,6 +18,14 @@ App Expo/React Native da migracao mobile, consumindo `@api-client` e `@contracts
 
 Execute esses scripts a partir da raiz do monorepo. Dentro de `apps/mobile`, use os scripts locais equivalentes, como `npm run web`.
 
+O app mobile esta alinhado ao Expo SDK 54 para abrir no Expo Go iOS que suporta SDK 54:
+
+```bash
+npm run mobile:dev
+```
+
+Para builds EAS, o projeto ja esta vinculado em `apps/mobile/app.json`. Nao use `npx eas ...`; o pacote correto e `eas-cli`.
+
 ## Ambiente
 
 Crie `apps/mobile/.env.local` para as variaveis lidas pelo Expo.
