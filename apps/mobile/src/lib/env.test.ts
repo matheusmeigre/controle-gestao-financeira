@@ -1,8 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { assertSecureMobileApiBaseUrl, getMobileEnvironment, resolveExpoPublicApiBaseUrl, resolveExpoPublicClerkPublishableKey } from './env'
 import { resolveMobileApiBaseUrl } from './api'
 
 describe('mobile environment', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('normalizes the configured base URL', () => {
     expect(resolveExpoPublicApiBaseUrl('https://example.com/')).toBe('https://example.com')
   })
@@ -24,11 +28,8 @@ describe('mobile environment', () => {
   })
 
   it('rejects non-https api base URLs in production', () => {
-    const previousNodeEnv = process.env.NODE_ENV
-    process.env.NODE_ENV = 'production'
+    vi.stubEnv('NODE_ENV', 'production')
 
     expect(() => assertSecureMobileApiBaseUrl('http://example.com')).toThrow('Production mobile builds require an HTTPS API base URL.')
-
-    process.env.NODE_ENV = previousNodeEnv
   })
 })

@@ -19,7 +19,8 @@
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false
-        }
+        },
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -28,18 +29,24 @@
       "usesCleartextTraffic": false
     },
     "extra": {
+      "releaseChannel": "development",
+      "router": {},
       "eas": {
-        "projectId": "00000000-0000-0000-0000-000000000000"
-      },
-      "releaseChannel": "development"
+        "projectId": "aeb79882-1c63-41af-beec-04862beced7e"
+      }
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
+    },
+    "owner": "uaimeigre",
+    "updates": {
+      "url": "https://u.expo.dev/aeb79882-1c63-41af-beec-04862beced7e"
     }
   }
 }
