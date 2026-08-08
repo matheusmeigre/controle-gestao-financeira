@@ -9,7 +9,14 @@
     },
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/icon.png",
     "splash": {
+      "backgroundColor": "#020617",
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain"
+    },
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/images/icon.png",
       "backgroundColor": "#020617"
     },
     "ios": {

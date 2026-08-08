@@ -31,11 +31,22 @@ export const metadata: Metadata = {
   applicationName: "Minha Gestão Financeira",
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon-16.jpg", sizes: "16x16", type: "image/jpeg" },
-      { url: "/icon-32.jpg", sizes: "32x32", type: "image/jpeg" },
+      { url: "/icon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
-    apple: "/apple-icon.jpg",
+    apple: "/apple-icon-1024x1024.png",
+  },
+  openGraph: {
+    title: "Minha Gestão Financeira",
+    description: "Aplicativo pessoal para controle de gastos mensais e gestão de faturas de cartão",
+    images: [
+      {
+        url: "/minhagestaofinanceira-icon.png",
+        width: 1254,
+        height: 1254,
+        alt: "Minha Gestão Financeira",
+      },
+    ],
   },
 }
 

@@ -25,8 +25,12 @@ function toDateOnly(value: Date): Date {
   return new Date(`${toLocalDateString(value)}T00:00:00.000Z`)
 }
 
+function roundMoney(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
 function calculateInvoiceTotal(items: InvoiceItem[]): number {
-  return items.reduce((sum, item) => sum + item.amount, 0)
+  return roundMoney(items.reduce((sum, item) => sum + item.amount, 0))
 }
 
 export async function listInvoicesApplication(
@@ -113,13 +117,14 @@ export async function payInvoiceApplication(userId: string, invoiceId: string, p
   const invoice = await repository.findById(userId, invoiceId)
   if (!invoice) return null
 
-  if (paidAmount > invoice.totalAmount) {
+  const totalAmount = roundMoney(invoice.totalAmount)
+  if (roundMoney(paidAmount) > totalAmount) {
     throw new Error('Valor pago não pode exceder o valor total da fatura')
   }
 
   return repository.update(userId, invoiceId, {
     paidAmount,
-    isPaid: paidAmount >= invoice.totalAmount,
+    isPaid: roundMoney(paidAmount) >= totalAmount,
     updatedAt: new Date(),
   })
 }
@@ -150,18 +155,21 @@ export async function updateInvoiceApplication(userId: string, invoiceId: string
     normalizedUpdates.items = normalizedItems
     normalizedUpdates.totalAmount = calculateInvoiceTotal(normalizedItems)
 
-    if (normalizedUpdates.paidAmount === undefined && current.paidAmount > normalizedUpdates.totalAmount) {
+    if (normalizedUpdates.paidAmount === undefined && roundMoney(current.paidAmount) > roundMoney(normalizedUpdates.totalAmount)) {
       throw new Error('Valor pago não pode exceder o valor total da fatura')
     }
   }
 
   if (normalizedUpdates.paidAmount !== undefined) {
     ensureNonNegativeAmount(normalizedUpdates.paidAmount, 'Valor pago não pode ser negativo')
-    const totalAmount = normalizedUpdates.totalAmount ?? current.totalAmount
-    if (normalizedUpdates.paidAmount > totalAmount) {
+    const totalAmount = roundMoney(normalizedUpdates.totalAmount ?? current.totalAmount)
+    const paidAmount = roundMoney(normalizedUpdates.paidAmount)
+    if (paidAmount > totalAmount) {
       throw new Error('Valor pago não pode exceder o valor total da fatura')
     }
-    normalizedUpdates.isPaid = normalizedUpdates.paidAmount >= totalAmount
+    if (normalizedUpdates.isPaid === undefined) {
+      normalizedUpdates.isPaid = paidAmount >= totalAmount
+    }
   }
 
   normalizedUpdates.updatedAt = new Date()
